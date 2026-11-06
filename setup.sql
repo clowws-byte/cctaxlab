@@ -204,3 +204,18 @@ create policy "tools read" on public.portal_tools for select to authenticated us
     public.portal_is_approved() and public.portal_hub_open(hub_id)
     and (folder_id is null or public.portal_folder_open(folder_id))
     and (access = 'everyone' or (access = 'selected' and public.portal_has_grant(id)))));
+
+-- 8. Branches ------------------------------------------------------------------------
+create table if not exists public.portal_branches (code text primary key, name text not null, sort int not null default 0);
+insert into public.portal_branches(code, name, sort) values
+ ('KN01','Kuantan',1),('KT01','Kuala Terengganu',2),('PG01','Penang',3),('TP01','Taiping',4),('IP01','Ipoh',5),
+ ('HQ01','Headquarter',6),('HQ02','Headquarter',7),('HQ03','Headquarter',8),('CS01','Cheras Selatan',9),('PI01','Pandan Indah',10),
+ ('KP01','Kepong',11),('NS01','Seremban 1',12),('NS02','Seremban 2',13),('LK01','Lukut',14),('MK01','Melaka',15),
+ ('BP01','Batu Pahat',16),('JB01','Johor Bahru',17),('SB01','Sabah',18),('LB01','Labuan',19)
+on conflict (code) do update set name = excluded.name, sort = excluded.sort;
+alter table public.portal_branches enable row level security;
+create policy "branches read" on public.portal_branches for select to anon, authenticated using (true);
+create policy "branches admin write" on public.portal_branches for all to authenticated using (public.portal_is_admin()) with check (public.portal_is_admin());
+alter table public.portal_profiles add column if not exists branch text references public.portal_branches(code) on update cascade on delete set null;
+create index if not exists portal_profiles_branch_idx on public.portal_profiles(branch);
+-- (portal_handle_new_user updated to store raw_user_meta_data->>'branch')

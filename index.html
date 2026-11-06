@@ -415,6 +415,55 @@ button.cell{cursor:pointer}
 .cell.mini{width:18px;height:18px;border-radius:5px}
 .cell.mini svg{width:12px;height:12px}
 @media(max-width:600px){table.acc th.uwho,table.acc th.corner{min-width:150px;max-width:170px}table.acc th.uwho .ce{display:none}}
+
+/* v4: branches + access grid v2 */
+.brsel .sel{padding:6px 26px 6px 8px;font-size:12px;max-width:190px}
+.crewtop{flex-wrap:wrap}
+.accviews{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.acclegend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:0 0 12px}
+.acclegend span{display:inline-flex;align-items:center;gap:6px}
+table.acc.v2 thead tr:nth-child(2) th{top:37px}
+table.acc.v2 thead tr:nth-child(3) th{top:71px}
+table.acc.v2 th.corner{vertical-align:bottom}
+.grpbtn{display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--c);font:inherit;font-weight:700;font-size:12.5px;padding:0;cursor:pointer;white-space:nowrap}
+.grpbtn svg{width:15px;height:15px}
+.chev{display:inline-grid;transition:transform .2s}.chev svg{width:12px!important;height:12px!important}.chev.down{transform:rotate(90deg)}
+table.acc th.fgrp{height:34px;padding:0 8px;text-align:left;background:#0b1534;border-bottom:1px dashed color-mix(in srgb,var(--c) 45%,transparent)}
+table.acc th.fgrp.nof{background:#0d1838}
+.fpath{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.fpath .sep{color:var(--dim)}
+.fseg{display:inline-flex;align-items:center;gap:4px;background:none;border:0;color:var(--muted);font:inherit;font-size:11.5px;font-weight:600;padding:2px 4px;border-radius:5px;cursor:pointer}
+.fseg:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+.fseg svg{width:12px;height:12px;color:var(--c)}
+table.acc th.app{position:sticky}
+table.acc th.sumh{background:#0f1d44}
+.vt.muted{color:var(--dim);font-weight:500}
+.acc-mode{font-size:9px;font-weight:800;letter-spacing:.4px;margin-top:6px;padding:2px 3px;border-radius:4px;display:inline-block}
+.acc-mode.m-selected{background:rgba(var(--acc-rgb),.18);color:var(--gold2)}
+.acc-mode.m-admins{background:rgba(201,165,76,.18);color:#e4c97e}
+.acc-mode.m-hidden{background:rgba(255,255,255,.08);color:var(--dim)}
+table.acc.v2 td{height:46px;min-width:44px}
+table.acc.v2 .cell{width:30px;height:30px;border-radius:8px}
+table.acc.v2 .cell.on{background:#1fae8f;border-color:#1fae8f;color:#fff}
+table.acc.v2 .cell.off{background:rgba(255,255,255,.03);border-color:rgba(160,180,230,.18)}
+table.acc.v2 .cell.adm{background:rgba(var(--acc-rgb),.28);border-color:transparent;color:#fff}
+table.acc.v2 .cell.blocked,.cell.blocked.mini{background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 3px,transparent 3px 7px);border:1px dashed rgba(160,180,230,.2)}
+.cell.on.mini{background:#1fae8f;border-color:#1fae8f;color:#fff}
+.cell.adm.mini{background:rgba(var(--acc-rgb),.28);border-color:transparent;color:#fff}
+.sumchip{display:inline-grid;place-items:center;min-width:38px;height:24px;padding:0 6px;border-radius:12px;font-size:11.5px;font-weight:800;font-style:normal}
+.sumchip.full{background:#1fae8f;color:#fff}
+.sumchip.part{background:rgba(228,180,80,.22);color:#f2c96d}
+.sumchip.none{background:rgba(255,255,255,.05);color:var(--dim)}
+.sumchip.mini{min-width:30px;height:18px;font-size:10px;padding:0 4px}
+tr.brow th.bhead{position:sticky;left:0;z-index:1;text-align:left;padding:0;background:#112050}
+.bbtn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;color:var(--ink);font:inherit;font-size:12.5px;padding:8px 12px;cursor:pointer;text-align:left}
+.bbtn b{color:var(--gold2);letter-spacing:.5px}
+.bbtn .bcount{margin-left:auto;color:var(--muted);font-weight:600;font-size:11.5px}
+table.acc th.uwho .cn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ubar{display:flex;align-items:center;gap:8px;margin-top:5px}
+.ubar .track{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;max-width:130px}
+.ubar .fill{display:block;height:100%;background:linear-gradient(90deg,#1fae8f,#4fd1c5);border-radius:3px}
+.ubar .cnt{font-size:11px;color:var(--muted);font-weight:700}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -755,19 +804,27 @@ function screenSignIn(prefill = '') {
       el('button', { class: 'btn wide', type: 'button', text: 'View as admin', onclick: () => sb.auth.signInWithPassword({ email: 'demo.admin@chengco.com', password: 'demo' }) }),
       el('button', { class: 'btn ghost wide', type: 'button', text: 'View as staff', onclick: () => sb.auth.signInWithPassword({ email: 'demo.staff@chengco.com', password: 'demo' }) })) : null]);
 }
+function branchSelect(id, value = '') {
+  const s = el('select', { class: 'i sel', id, style: 'width:100%' }, el('option', { value: '', text: branches.length ? 'Select your branch' : 'Loading branches…' }),
+    branches.map(b => el('option', { value: b.code, selected: b.code === value, text: `${b.code} · ${b.name}` })));
+  if (!branches.length) loadBranches().then(() => { if (!document.getElementById(id)) return; s.replaceWith(branchSelect(id, value)); });
+  return s;
+}
 function screenRegister(prefill = '') {
   const btn = el('button', { class: 'btn', type: 'submit', text: 'Submit request' });
   const form = mkForm(e => { e.preventDefault(); busy(btn, async () => {
-    const full_name = properName($('#fn').value), email = $('#em').value.trim().toLowerCase(), p1 = $('#pw').value, p2 = $('#pw2').value;
+    const branch = $('#br').value, full_name = properName($('#fn').value), email = $('#em').value.trim().toLowerCase(), p1 = $('#pw').value, p2 = $('#pw2').value;
     if (!full_name) return showMsg('Please enter your full name.');
+    if (!branch) return showMsg('Please select your branch.');
     if (!/^\S+@\S+\.\S+$/.test(email)) return showMsg('Please enter a valid email address.');
     if (p1.length < 8) return showMsg('Password must be at least 8 characters.');
     if (p1 !== p2) return showMsg('Passwords do not match.');
-    const { data, error } = await sb.auth.signUp({ email, password: p1, options: { data: { full_name }, emailRedirectTo: location.href.split('#')[0] } });
+    const { data, error } = await sb.auth.signUp({ email, password: p1, options: { data: { full_name, branch }, emailRedirectTo: location.href.split('#')[0] } });
     if (error) return showMsg(friendly(error));
     if (!data.session) showMsg('Request submitted. Please confirm your email via the link sent to ' + email + ', then sign in. An administrator will approve your access.', true);
   }); },
     field('Full name', { id: 'fn', autocomplete: 'name', required: true, maxlength: 80 }),
+    el('label', { class: 'f', for: 'br', text: 'Branch' }), branchSelect('br'),
     field('User ID (email address)', { id: 'em', type: 'email', autocomplete: 'username', required: true, value: prefill, placeholder: 'name@company.com' }),
     field('Password (min. 8 characters)', { id: 'pw', type: 'password', autocomplete: 'new-password', required: true, minlength: 8 }),
     field('Confirm password', { id: 'pw2', type: 'password', autocomplete: 'new-password', required: true, minlength: 8 }), btn, msgBox());
@@ -826,7 +883,7 @@ async function afterLogin() {
   isAdmin = !!profile.is_admin;
   setMyName(profile.full_name ? properName(profile.full_name) : profile.email);
   $('#adminTag').hidden = !isAdmin;
-  await loadData();
+  await Promise.all([loadData(), loadBranches()]);
   enterApp();
   if (isAdmin) loadCrew();
 }
@@ -860,6 +917,12 @@ async function loadDataInner() {
   };
 }
 const myId = () => session && session.user.id;
+let branches = [];
+async function loadBranches() { if (branches.length) return; const r = await sb.from('portal_branches').select('*').order('sort'); if (!r.error && r.data) branches = r.data; }
+const branchOf = code => branches.find(b => b.code === code);
+const branchLabel = code => { const b = branchOf(code); return b ? `${b.code} · ${b.name}` : 'No branch'; };
+const branchRank = code => { const i = branches.findIndex(b => b.code === code); return i < 0 ? 9999 : i; };
+const byBranchName = (a, c) => (branchRank(a.branch) - branchRank(c.branch)) || nameOf(a).localeCompare(nameOf(c));
 const canSee = item => isAdmin || item.access === 'everyone' || (item.access === 'selected' && (item.users || []).includes(myId()));
 const STATUS = { hidden: 'Hidden', admins: 'Admins only', selected: 'Selected users' };
 const status = item => STATUS[item.access] || null;
@@ -1145,9 +1208,9 @@ function visibleFor(subj, chain, t) {
 }
 const badge = v => el('span', { class: 'vbadge ' + (v ? 'yes' : 'no'), title: v ? 'Visible' : 'Not visible' }, icon(v ? 'eye' : 'eyeoff'), v ? 'Visible' : 'Hidden');
 function renderVis(b) {
-  const users = staffUsers();
+  const users = staffUsers().sort(byBranchName);
   if (previewAs !== 'any' && !users.find(u => u.id === previewAs)) previewAs = 'any';
-  const opts = Object.assign({ any: 'Any staff member (default view)' }, Object.fromEntries(users.map(u => [u.id, nameOf(u) + ' · ' + u.email])));
+  const opts = Object.assign({ any: 'Any staff member (default view)' }, Object.fromEntries(users.map(u => [u.id, `${u.branch || '—'} · ${nameOf(u)}`])));
   let total = 0, vis = 0; draft.hubs.forEach(h => walkTools(h, (t, chain) => { total++; if (visibleFor(previewAs, chain, t)) vis++; }));
   b.append(el('p', { class: 'tabintro', text: 'Choose who can see each workspace, folder and application. Pick a user to check exactly what they will see.' }),
     el('div', { class: 'previewbar' },
@@ -1254,46 +1317,99 @@ function toggleGrant(t, uid, visibleNow) {
   }
   markDirty(); renderAdmin();
 }
+let accCollapsed = new Set(), accBranchHidden = new Set();
+function accColumns() {
+  const cols = [];
+  draft.hubs.forEach(h => {
+    if (accCollapsed.has(h.id)) { cols.push({ kind: 'sum', node: h, chain: [h], h }); return; }
+    const rec = (node, chain) => {
+      (node.folders || []).forEach(f => { const c2 = chain.concat(f); if (accCollapsed.has(f.id)) cols.push({ kind: 'sum', node: f, chain: c2, h }); else rec(f, c2); });
+      (node.tools || []).forEach(t => cols.push({ kind: 'app', t, chain, h }));
+    };
+    rec(h, [h]);
+    if (!cols.some(c => c.h === h)) cols.push({ kind: 'empty', chain: [h], h });
+  });
+  return cols;
+}
+function accCount(p, node, chain) { let v = 0, n = 0; walkTools(node, (t, ch) => { n++; if (p.is_admin || visibleFor(p.id, chain.slice(0, -1).concat(ch), t)) v++; }); return [v, n]; }
+function accSetAll(mode) {
+  accCollapsed = new Set();
+  if (mode === 'hubs') draft.hubs.forEach(h => accCollapsed.add(h.id));
+  if (mode === 'folders') draft.hubs.forEach(h => (h.folders || []).forEach(f => accCollapsed.add(f.id)));
+  renderAdmin();
+}
 function renderAccess(b) {
-  const cols = []; draft.hubs.forEach(h => walkTools(h, (t, chain) => cols.push({ t, chain, h })));
   const q = accessQ.trim().toLowerCase();
-  const people = crew.filter(p => p.status === 'approved').filter(p => !q || (nameOf(p) + ' ' + p.email).toLowerCase().includes(q))
-    .sort((a, c) => (c.is_admin - a.is_admin) || nameOf(a).localeCompare(nameOf(c)));
-  const search = el('input', { class: 'i', type: 'search', placeholder: 'Filter users by name or email', value: accessQ, 'aria-label': 'Filter users' });
+  const people = crew.filter(p => p.status === 'approved').filter(p => !q || (nameOf(p) + ' ' + p.email + ' ' + branchLabel(p.branch)).toLowerCase().includes(q)).sort(byBranchName);
+  const totalApps = (() => { let n = 0; draft.hubs.forEach(h => walkTools(h, () => n++)); return n; })();
+  const search = el('input', { class: 'i', type: 'search', id: 'accessSearch', placeholder: 'Filter by name, email or branch', value: accessQ, 'aria-label': 'Filter users' });
   search.oninput = e => { accessQ = e.target.value; const pos = e.target.selectionStart; renderAdmin(); const s2 = $('#accessSearch'); if (s2) { s2.focus(); s2.setSelectionRange(pos, pos); } };
-  search.id = 'accessSearch';
-  b.append(el('p', { class: 'tabintro', text: 'One line per user, one column per application. Tap a cell to grant or remove that user\'s access, then Save changes.' }),
+  const viewBtn = (label, mode) => el('button', { class: 'chip', onclick: () => accSetAll(mode) }, label);
+  b.append(el('p', { class: 'tabintro', text: 'Users are grouped by branch. Tap a cell to grant or remove access, then Save changes. Tap a workspace or folder heading to fold it into one summary column.' }),
     el('div', { class: 'accbar' }, search,
-      el('div', { class: 'legend', style: 'margin:0' },
-        el('span', {}, el('i', { class: 'cell on mini' }, icon('check')), 'Has access'),
-        el('span', {}, el('i', { class: 'cell off mini' }), 'No access'),
-        el('span', {}, el('i', { class: 'cell adm mini' }, icon('check')), 'Admin (all)'),
-        el('span', {}, el('i', { class: 'cell blocked mini' }, '–'), 'Folder/workspace closed'))));
-  if (!cols.length) { b.append(el('p', { class: 'hintline', text: 'No applications yet. Add some in the Applications tab.' })); return; }
+      el('div', { class: 'accviews' }, el('span', { class: 'hintline', style: 'margin:0', text: 'View:' }), viewBtn('All applications', 'all'), viewBtn('By folder', 'folders'), viewBtn('By workspace', 'hubs'))),
+    el('div', { class: 'acclegend' },
+      el('span', {}, el('i', { class: 'cell on mini' }, icon('check')), 'Has access'),
+      el('span', {}, el('i', { class: 'cell off mini' }), 'No access'),
+      el('span', {}, el('i', { class: 'cell adm mini' }, icon('check')), 'Admin (sees all)'),
+      el('span', {}, el('i', { class: 'cell blocked mini' }), 'Closed by workspace/folder setting'),
+      el('span', {}, el('i', { class: 'sumchip full mini', text: '3/3' }), el('i', { class: 'sumchip part mini', text: '1/3' }), el('i', { class: 'sumchip none mini', text: '0/3' }), 'Folded summary')));
+  if (!totalApps) { b.append(el('p', { class: 'hintline', text: 'No applications yet. Add some in the Applications tab.' })); return; }
   if (!crew.length) { b.append(el('p', { class: 'hintline', text: 'Loading users…' })); return; }
-  const table = el('table', { class: 'acc' });
-  const groups = []; cols.forEach(c => { const g = groups[groups.length - 1]; if (g && g.h === c.h) g.n++; else groups.push({ h: c.h, n: 1 }); });
-  table.append(el('thead', {},
-    el('tr', {}, el('th', { class: 'corner', rowspan: 2 }, 'User'), groups.map(g => el('th', { class: 'grp', colspan: g.n, style: `--c:${g.h.color}` }, el('span', {}, icon(g.h.emoji), g.h.name)))),
-    el('tr', {}, cols.map(c => el('th', { class: 'app', title: c.chain.map(n => n.name).concat(c.t.name).join(' › ') + ' — ' + ACCESS_APP[c.t.access] }, el('div', { class: 'vt' }, c.t.name),
-      c.chain.length > 1 ? el('div', { class: 'vt sub' }, c.chain.slice(1).map(n => n.name).join(' › ')) : null)))));
+  const cols = accColumns(), ncol = cols.length + 1;
+  // header rows
+  const hubGroups = []; cols.forEach(c => { const g = hubGroups[hubGroups.length - 1]; if (g && g.h === c.h) g.n++; else hubGroups.push({ h: c.h, n: 1 }); });
+  const pathKey = c => c.kind === 'sum' ? (c.node === c.h ? '' : c.chain.slice(1).map(n => n.id).join('/')) : c.kind === 'app' ? c.chain.slice(1).map(n => n.id).join('/') : '';
+  const fGroups = []; cols.forEach(c => { const k = c.h.id + '|' + pathKey(c) + '|' + (c.kind === 'sum'); const g = fGroups[fGroups.length - 1]; if (g && g.k === k) g.n++; else fGroups.push({ k, c, n: 1 }); });
+  const r1 = el('tr', {}, el('th', { class: 'corner', rowspan: 3 }, el('div', {}, 'User'), el('div', { class: 'ce', style: 'font-weight:500;text-transform:none;letter-spacing:0', text: `${people.length} user${people.length === 1 ? '' : 's'} · ${totalApps} apps` })),
+    hubGroups.map(g => el('th', { class: 'grp', colspan: g.n, style: `--c:${g.h.color}` },
+      el('button', { class: 'grpbtn', title: accCollapsed.has(g.h.id) ? 'Show all applications' : 'Fold into one column', onclick: () => { accCollapsed.has(g.h.id) ? accCollapsed.delete(g.h.id) : accCollapsed.add(g.h.id); renderAdmin(); } },
+        el('span', { class: 'chev' + (accCollapsed.has(g.h.id) ? '' : ' down') }, icon('arrow')), icon(g.h.emoji), g.h.name))));
+  const r2 = el('tr', {}, fGroups.map(g => {
+    const c = g.c, segs = c.kind === 'empty' || (c.kind === 'sum' && c.node === c.h) ? [] : c.chain.slice(1);
+    return el('th', { class: 'fgrp' + (segs.length ? '' : ' nof'), colspan: g.n, style: `--c:${c.h.color}` }, segs.length ? el('span', { class: 'fpath' }, segs.flatMap((f, i) => [i ? el('span', { class: 'sep', text: '›' }) : null,
+      el('button', { class: 'fseg', title: accCollapsed.has(f.id) ? 'Show applications in this folder' : 'Fold this folder', onclick: () => { accCollapsed.has(f.id) ? accCollapsed.delete(f.id) : accCollapsed.add(f.id); renderAdmin(); } }, icon('folder'), f.name)])) : '');
+  }));
+  const r3 = el('tr', {}, cols.map(c => {
+    if (c.kind === 'app') return el('th', { class: 'app', title: c.chain.map(n => n.name).concat(c.t.name).join(' › ') + ' — ' + ACCESS_APP[c.t.access] }, el('div', { class: 'vt' }, c.t.name), c.t.access !== 'everyone' ? el('div', { class: 'acc-mode m-' + c.t.access, text: { selected: 'SEL', admins: 'ADM', hidden: 'HID' }[c.t.access] }) : null);
+    if (c.kind === 'sum') return el('th', { class: 'app sumh', title: 'Folded: ' + c.chain.map(n => n.name).join(' › ') }, el('div', { class: 'vt' }, `All in ${c.node.name} (${countAll(c.node)})`));
+    return el('th', { class: 'app' }, el('div', { class: 'vt muted' }, 'No apps yet'));
+  }));
+  const table = el('table', { class: 'acc v2' }, el('thead', {}, r1, r2, r3));
+  // body grouped by branch
   const tb = el('tbody');
-  people.forEach(p => {
-    let n = 0;
-    const cells = cols.map(c => {
-      if (p.is_admin) { n++; return el('td', {}, el('span', { class: 'cell adm', title: 'Admins see everything' }, icon('check'))); }
-      const closed = c.chain.find(x => x.access !== 'everyone');
-      if (closed) return el('td', {}, el('span', { class: 'cell blocked', title: `"${closed.name}" is ${ACCESS_HUB[closed.access]} — change it in the Visibility tab` }, '–'));
-      const v = visibleFor(p.id, c.chain, c.t); if (v) n++;
-      return el('td', {}, el('button', { class: 'cell ' + (v ? 'on' : 'off'), title: `${v ? 'Remove' : 'Grant'} ${c.t.name} for ${nameOf(p)}`, 'aria-pressed': v ? 'true' : 'false', onclick: () => toggleGrant(c.t, p.id, v) }, v ? icon('check') : null));
+  const groups = []; people.forEach(p => { const k = p.branch || ''; const g = groups[groups.length - 1]; if (g && g.k === k) g.list.push(p); else groups.push({ k, list: [p] }); });
+  groups.forEach(g => {
+    const hidden = accBranchHidden.has(g.k);
+    tb.append(el('tr', { class: 'brow' }, el('th', { class: 'bhead', colspan: ncol },
+      el('button', { class: 'bbtn', onclick: () => { hidden ? accBranchHidden.delete(g.k) : accBranchHidden.add(g.k); renderAdmin(); } },
+        el('span', { class: 'chev' + (hidden ? '' : ' down') }, icon('arrow')), el('b', { text: g.k ? g.k : 'No branch' }), g.k ? el('span', { text: (branchOf(g.k) || {}).name || '' }) : null, el('span', { class: 'bcount', text: `${g.list.length} user${g.list.length === 1 ? '' : 's'}` })))));
+    if (hidden) return;
+    g.list.forEach(p => {
+      let v = 0; draft.hubs.forEach(h => walkTools(h, (t, ch) => { if (p.is_admin || visibleFor(p.id, ch, t)) v++; }));
+      const pct = Math.round(100 * v / totalApps);
+      const cells = cols.map(c => {
+        if (c.kind === 'empty') return el('td', {}, '');
+        if (c.kind === 'sum') {
+          const [vv, nn] = accCount(p, c.node, c.chain);
+          return el('td', {}, el('span', { class: 'sumchip ' + (!nn ? 'none' : vv === nn ? 'full' : vv ? 'part' : 'none'), title: `${vv} of ${nn} applications in ${c.node.name}` }, nn ? `${vv}/${nn}` : '–'));
+        }
+        if (p.is_admin) return el('td', {}, el('span', { class: 'cell adm', title: 'Admins see everything' }, icon('check')));
+        const closed = c.chain.find(x => x.access !== 'everyone');
+        if (closed) return el('td', {}, el('span', { class: 'cell blocked', title: `"${closed.name}" is ${ACCESS_HUB[closed.access]} — change it in Visibility` }));
+        const on = visibleFor(p.id, c.chain, c.t);
+        return el('td', {}, el('button', { class: 'cell ' + (on ? 'on' : 'off'), title: `${on ? 'Remove' : 'Grant'} "${c.t.name}" for ${nameOf(p)}`, 'aria-pressed': on ? 'true' : 'false', onclick: () => toggleGrant(c.t, p.id, on) }, on ? icon('check') : null));
+      });
+      tb.append(el('tr', {}, el('th', { class: 'uwho' },
+        el('div', { class: 'cn' }, nameOf(p), p.is_admin ? el('span', { class: 'st approved', text: 'ADMIN' }) : null),
+        el('div', { class: 'ce', text: p.email }),
+        el('div', { class: 'ubar' }, el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${pct}%` })), el('span', { class: 'cnt', text: `${v}/${totalApps}` }))), cells));
     });
-    tb.append(el('tr', {}, el('th', { class: 'uwho' }, el('div', { class: 'cn', text: nameOf(p) }), el('div', { class: 'ce', text: p.email }),
-      el('div', { class: 'cnt' }, p.is_admin ? el('span', { class: 'st approved', text: 'ADMIN' }) : null, `${n}/${cols.length}`)), cells));
   });
   table.append(tb);
   b.append(el('div', { class: 'accwrap' }, table));
   if (!people.length) b.append(el('p', { class: 'hintline', text: 'No users match this filter.' }));
-  b.append(el('p', { class: 'footnote', text: 'Granting access to one user switches that application to "Selected users". If every staff member is ticked, it switches back to "Everyone". Pending or suspended users are not shown.' }));
+  b.append(el('p', { class: 'footnote', text: 'SEL = selected users, ADM = admins only, HID = hidden. Granting one user switches an application to "Selected users"; ticking every staff member switches it back to "Everyone". Pending or suspended users are not shown. Set each user\'s branch in the Users tab.' }));
 }
 
 /* ---------- Tab 3: Users ---------- */
@@ -1302,6 +1418,7 @@ async function refreshCrewCount() {
   const n = count || 0; for (const id of ['#crewDot', '#fabDot']) { $(id).hidden = !n; $(id).textContent = n; }
 }
 async function loadCrew() {
+  await loadBranches();
   const [r, pa] = await Promise.all([sb.from('portal_profiles').select('*').order('created_at', { ascending: false }), sb.from('portal_preapproved').select('*').order('email')]);
   if (r.error) { if (adminTab === 'crew') $('#dBody').replaceChildren(el('p', { class: 'msg show err', text: friendly(r.error) })); return; }
   crew = r.data || []; preapproved = pa.data || []; refreshCrewCount();
@@ -1313,13 +1430,14 @@ async function setCrew(p, patch, label) {
   toast(label); loadCrew();
 }
 function renderCrew(b) {
-  const pending = crew.filter(p => p.status === 'pending'), active = crew.filter(p => p.status === 'approved'), blocked = crew.filter(p => p.status === 'blocked');
+  const pending = crew.filter(p => p.status === 'pending').sort(byBranchName), active = crew.filter(p => p.status === 'approved').sort(byBranchName), blocked = crew.filter(p => p.status === 'blocked').sort(byBranchName);
   const appsFor = p => { if (p.is_admin) return 'All applications'; let n = 0; cfg.hubs.forEach(h => walkTools(h, (t, chain) => { if (visibleFor(p.id, chain, t)) n++; })); return plural(n, 'application'); };
   const head = (t, n) => el('div', { class: 'section-t', style: 'display:flex;justify-content:space-between' }, el('span', { text: t }), el('span', { text: String(n) }));
   const person = (p, acts, extra) => el('div', { class: 'crew' },
     el('div', { class: 'crewtop' },
       el('div', { class: 'avatar sm', text: nameOf(p).split(/[ @.]/).filter(w => w && !LOWER_WORDS.has(w.toLowerCase())).slice(0, 2).map(s => s[0].toUpperCase()).join('') }),
       el('div', { style: 'flex:1;min-width:0' }, el('div', { class: 'cn', text: nameOf(p) + (p.id === session.user.id ? ' (you)' : '') }), el('div', { class: 'ce', text: p.email })),
+      el('label', { class: 'brsel', title: 'Branch' }, select(Object.assign({ '': 'No branch' }, Object.fromEntries(branches.map(b => [b.code, `${b.code} · ${b.name}`]))), p.branch || '', v => setCrew(p, { branch: v || null }, `${nameOf(p)} → ${branchLabel(v || null)}`), { 'aria-label': 'Branch' })),
       el('span', { class: 'st ' + p.status, text: p.status === 'approved' ? (p.is_admin ? 'ADMIN' : 'USER') : p.status === 'blocked' ? 'SUSPENDED' : 'PENDING' })),
     extra ? el('div', { class: 'ce', style: 'margin-top:8px', text: extra }) : null,
     acts.length ? el('div', { class: 'row' }, acts) : null);
@@ -1357,7 +1475,8 @@ function renderCrew(b) {
 }
 
 /* ================= my account (all users) ================= */
-function openAccount() {
+async function openAccount() {
+  await loadBranches();
   const nm = el('input', { class: 'i', value: properName(profile.full_name), maxlength: 80 });
   const p1 = el('input', { class: 'i', type: 'password', autocomplete: 'new-password', placeholder: 'At least 8 characters' }), p2 = el('input', { class: 'i', type: 'password', autocomplete: 'new-password' });
   const m1 = el('div', { class: 'msg' }), m2 = el('div', { class: 'msg' });
@@ -1380,6 +1499,8 @@ function openAccount() {
       const { error } = await sb.auth.updateUser({ password: p1.value });
       if (error) return say(m2, friendly(error));
       p1.value = p2.value = ''; say(m2, 'Password updated.', true); } }, 'Update password'), m2,
+    el('div', { class: 'section-t', text: 'Branch' }),
+    el('p', { class: 'hintline', text: profile.branch ? branchLabel(profile.branch) + ' (set by an administrator)' : 'Not set yet. Ask an administrator to set your branch.' }),
     el('div', { class: 'section-t', text: 'Access' }),
     el('p', { class: 'hintline', text: isAdmin ? 'You are an administrator and can see every workspace and application.' : 'An administrator controls which applications you can see.' }));
   $('#acct').classList.add('open');
