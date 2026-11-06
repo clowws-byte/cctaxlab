@@ -464,6 +464,61 @@ table.acc th.uwho .cn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ubar .track{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;max-width:130px}
 .ubar .fill{display:block;height:100%;background:linear-gradient(90deg,#1fae8f,#4fd1c5);border-radius:3px}
 .ubar .cnt{font-size:11px;color:var(--muted);font-weight:700}
+
+/* v5: access split view */
+.accsplit{display:grid;grid-template-columns:300px 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;height:calc(100vh - 290px);min-height:420px;background:rgba(0,0,0,.12)}
+.accleft{display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0;background:rgba(255,255,255,.015)}
+.acchead{padding:10px;border-bottom:1px solid var(--line);background:#0d1838}
+.ulist{overflow:auto;flex:1}
+.ugroup{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;background:#112050;border:0;border-bottom:1px solid var(--line);color:var(--ink);font:inherit;font-size:12.5px;text-align:left;cursor:pointer;position:sticky;top:0;z-index:1}
+.ugroup b{color:var(--gold2);letter-spacing:.4px}.ugroup .gname{color:var(--muted)}.ugroup .gcount{margin-left:auto;color:var(--muted);font-size:11.5px;font-weight:700}
+.uitem{display:block;width:100%;text-align:left;padding:9px 12px 9px 16px;background:transparent;border:0;border-bottom:1px solid var(--line);border-left:3px solid transparent;color:var(--ink);font:inherit;cursor:pointer}
+.uitem:hover{background:rgba(255,255,255,.04)}
+.uitem.sel{background:rgba(var(--acc-rgb),.13);border-left-color:var(--gold)}
+.uitem .un{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px}
+.uitem .ue{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.accright{display:flex;flex-direction:column;min-width:0;min-height:0}
+.rhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rhead .cn{font-weight:700;font-size:15px}.rhead .ce{font-size:12px;color:var(--muted)}
+.bigcount b{font-size:22px;color:var(--gold2)}.bigcount span{color:var(--muted);font-size:12.5px;font-weight:600}
+.rtools{display:flex;gap:6px}
+.rtwrap{overflow:auto;flex:1}
+table.rt{width:100%;border-collapse:collapse;font-size:13px}
+table.rt th{position:sticky;top:0;z-index:1;background:#0d1838;color:var(--muted);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid var(--line2);text-align:left}
+table.rt th.c,table.rt td.c{text-align:center;width:120px}
+table.rt td{border-bottom:1px solid var(--line);padding:0}
+table.rt td.c{padding:6px 8px}
+table.rt .band1{background:rgba(var(--acc-rgb),.06)}
+table.rt .band2{background:rgba(155,140,255,.05)}
+table.rt .band3{background:rgba(79,209,197,.05)}
+table.rt th.band1{background:#102046}table.rt th.band2{background:#121c46}table.rt th.band3{background:#0f2044}
+table.rt tr.g td{background-color:rgba(255,255,255,.03)}
+table.rt tr.g.hub td.d{border-left:3px solid var(--c)}
+table.rt tr.g.hub td{background-color:rgba(255,255,255,.055)}
+table.rt tr.a:hover td{background-color:rgba(255,255,255,.035)}
+table.rt tr.blocked td.d{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 4px,transparent 4px 9px)}
+.tree{display:flex;align-items:center;gap:7px;width:100%;background:none;border:0;color:var(--ink);font:inherit;font-size:13px;padding-top:8px;padding-bottom:8px;text-align:left;cursor:pointer}
+.tree .gl{color:var(--muted);font-weight:500}
+.tree .gi{color:var(--c);display:grid}.tree .gi svg{width:16px;height:16px}
+.leaf{display:flex;align-items:center;gap:8px;padding-top:7px;padding-bottom:7px}
+.leaf .ai{color:var(--c);display:grid}.leaf .ai svg{width:15px;height:15px}
+.ck{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;border:1.5px solid rgba(160,180,230,.4);background:rgba(6,10,24,.5);color:#fff;padding:0;cursor:pointer}
+.ck svg{width:15px;height:15px}
+.ck.on{background:#1fae8f;border-color:#1fae8f}
+.ck.some{background:rgba(31,174,143,.25);border-color:#1fae8f}
+.ck .dash{width:10px;height:2px;background:#9ff0e7;border-radius:2px}
+.ck.adm{background:rgba(var(--acc-rgb),.35);border-color:transparent}
+.ck.blk{border-style:dashed;background:repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 3px,transparent 3px 6px);cursor:not-allowed}
+.ck:disabled{cursor:default}
+.ck:not(:disabled):hover{border-color:var(--gold)}
+.rule{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.rule.r-everyone{color:#9ff0e7;background:rgba(79,209,197,.1)}
+.rule.r-selected{color:var(--gold2);background:rgba(var(--acc-rgb),.14)}
+.rule.r-admins{color:#e4c97e;background:rgba(201,165,76,.14)}
+.rule.r-hidden{color:var(--dim);background:rgba(255,255,255,.06)}
+table.rt .vbadge{width:auto}
+@media(max-width:600px){table.rt .band2{display:none}table.rt .vbadge{padding:4px 6px}table.rt th.c,table.rt td.c{padding:6px 4px}}
+@media(max-width:860px){.rhead>div:nth-child(2){flex:1 1 calc(100% - 50px)}.rhead .cn{display:flex;flex-wrap:wrap;gap:6px}.bigcount{margin-left:44px}.rtools{margin-left:auto}.accsplit{grid-template-columns:1fr;height:auto}.accleft{max-height:300px;border-right:0;border-bottom:1px solid var(--line)}table.rt th.c,table.rt td.c{width:auto}.rtwrap{max-height:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1305,7 +1360,7 @@ async function saveDraft(quiet) {
 
 /* ---------- Tab: Access (user × application grid) ---------- */
 let accessQ = '';
-function toggleGrant(t, uid, visibleNow) {
+function toggleGrant(t, uid, visibleNow, noRender) {
   const staff = staffUsers().map(u => u.id);
   if (visibleNow) {
     if (t.access === 'everyone') { t.access = 'selected'; t.users = staff.filter(x => x !== uid); }
@@ -1315,101 +1370,107 @@ function toggleGrant(t, uid, visibleNow) {
     else t.users = [...new Set([...(t.users || []), uid])];
     if (staff.length && staff.every(x => t.users.includes(x))) { t.access = 'everyone'; t.users = []; }
   }
+  if (!noRender) { markDirty(); renderAdmin(); }
+}
+let accUser = null, accClosed = new Set(), accBranchHidden = new Set();
+// every app under node with its full chain
+function appsUnder(node, chain) { const out = []; walkTools(node, (t, ch) => out.push({ t, chain: chain.slice(0, -1).concat(ch) })); return out; }
+const isBlocked = chain => chain.find(x => x.access !== 'everyone');
+function nodeState(p, node, chain) {
+  const apps = appsUnder(node, chain);
+  const vis = apps.filter(a => p.is_admin || visibleFor(p.id, a.chain, a.t)).length;
+  const editable = p.is_admin ? [] : apps.filter(a => !isBlocked(a.chain));
+  const on = editable.filter(a => visibleFor(p.id, a.chain, a.t)).length;
+  return { total: apps.length, vis, editable, on };
+}
+function setAllFor(p, node, chain, grant) {
+  appsUnder(node, chain).forEach(a => { if (isBlocked(a.chain)) return; const v = visibleFor(p.id, a.chain, a.t); if (v !== grant) toggleGrant(a.t, p.id, v, true); });
   markDirty(); renderAdmin();
-}
-let accCollapsed = new Set(), accBranchHidden = new Set();
-function accColumns() {
-  const cols = [];
-  draft.hubs.forEach(h => {
-    if (accCollapsed.has(h.id)) { cols.push({ kind: 'sum', node: h, chain: [h], h }); return; }
-    const rec = (node, chain) => {
-      (node.folders || []).forEach(f => { const c2 = chain.concat(f); if (accCollapsed.has(f.id)) cols.push({ kind: 'sum', node: f, chain: c2, h }); else rec(f, c2); });
-      (node.tools || []).forEach(t => cols.push({ kind: 'app', t, chain, h }));
-    };
-    rec(h, [h]);
-    if (!cols.some(c => c.h === h)) cols.push({ kind: 'empty', chain: [h], h });
-  });
-  return cols;
-}
-function accCount(p, node, chain) { let v = 0, n = 0; walkTools(node, (t, ch) => { n++; if (p.is_admin || visibleFor(p.id, chain.slice(0, -1).concat(ch), t)) v++; }); return [v, n]; }
-function accSetAll(mode) {
-  accCollapsed = new Set();
-  if (mode === 'hubs') draft.hubs.forEach(h => accCollapsed.add(h.id));
-  if (mode === 'folders') draft.hubs.forEach(h => (h.folders || []).forEach(f => accCollapsed.add(f.id)));
-  renderAdmin();
 }
 function renderAccess(b) {
   const q = accessQ.trim().toLowerCase();
-  const people = crew.filter(p => p.status === 'approved').filter(p => !q || (nameOf(p) + ' ' + p.email + ' ' + branchLabel(p.branch)).toLowerCase().includes(q)).sort(byBranchName);
-  const totalApps = (() => { let n = 0; draft.hubs.forEach(h => walkTools(h, () => n++)); return n; })();
-  const search = el('input', { class: 'i', type: 'search', id: 'accessSearch', placeholder: 'Filter by name, email or branch', value: accessQ, 'aria-label': 'Filter users' });
-  search.oninput = e => { accessQ = e.target.value; const pos = e.target.selectionStart; renderAdmin(); const s2 = $('#accessSearch'); if (s2) { s2.focus(); s2.setSelectionRange(pos, pos); } };
-  const viewBtn = (label, mode) => el('button', { class: 'chip', onclick: () => accSetAll(mode) }, label);
-  b.append(el('p', { class: 'tabintro', text: 'Users are grouped by branch. Tap a cell to grant or remove access, then Save changes. Tap a workspace or folder heading to fold it into one summary column.' }),
-    el('div', { class: 'accbar' }, search,
-      el('div', { class: 'accviews' }, el('span', { class: 'hintline', style: 'margin:0', text: 'View:' }), viewBtn('All applications', 'all'), viewBtn('By folder', 'folders'), viewBtn('By workspace', 'hubs'))),
-    el('div', { class: 'acclegend' },
-      el('span', {}, el('i', { class: 'cell on mini' }, icon('check')), 'Has access'),
-      el('span', {}, el('i', { class: 'cell off mini' }), 'No access'),
-      el('span', {}, el('i', { class: 'cell adm mini' }, icon('check')), 'Admin (sees all)'),
-      el('span', {}, el('i', { class: 'cell blocked mini' }), 'Closed by workspace/folder setting'),
-      el('span', {}, el('i', { class: 'sumchip full mini', text: '3/3' }), el('i', { class: 'sumchip part mini', text: '1/3' }), el('i', { class: 'sumchip none mini', text: '0/3' }), 'Folded summary')));
-  if (!totalApps) { b.append(el('p', { class: 'hintline', text: 'No applications yet. Add some in the Applications tab.' })); return; }
+  const all = crew.filter(p => p.status === 'approved').sort(byBranchName);
+  const people = all.filter(p => !q || (nameOf(p) + ' ' + p.email + ' ' + branchLabel(p.branch)).toLowerCase().includes(q));
+  let total = 0; draft.hubs.forEach(h => walkTools(h, () => total++));
   if (!crew.length) { b.append(el('p', { class: 'hintline', text: 'Loading users…' })); return; }
-  const cols = accColumns(), ncol = cols.length + 1;
-  // header rows
-  const hubGroups = []; cols.forEach(c => { const g = hubGroups[hubGroups.length - 1]; if (g && g.h === c.h) g.n++; else hubGroups.push({ h: c.h, n: 1 }); });
-  const pathKey = c => c.kind === 'sum' ? (c.node === c.h ? '' : c.chain.slice(1).map(n => n.id).join('/')) : c.kind === 'app' ? c.chain.slice(1).map(n => n.id).join('/') : '';
-  const fGroups = []; cols.forEach(c => { const k = c.h.id + '|' + pathKey(c) + '|' + (c.kind === 'sum'); const g = fGroups[fGroups.length - 1]; if (g && g.k === k) g.n++; else fGroups.push({ k, c, n: 1 }); });
-  const r1 = el('tr', {}, el('th', { class: 'corner', rowspan: 3 }, el('div', {}, 'User'), el('div', { class: 'ce', style: 'font-weight:500;text-transform:none;letter-spacing:0', text: `${people.length} user${people.length === 1 ? '' : 's'} · ${totalApps} apps` })),
-    hubGroups.map(g => el('th', { class: 'grp', colspan: g.n, style: `--c:${g.h.color}` },
-      el('button', { class: 'grpbtn', title: accCollapsed.has(g.h.id) ? 'Show all applications' : 'Fold into one column', onclick: () => { accCollapsed.has(g.h.id) ? accCollapsed.delete(g.h.id) : accCollapsed.add(g.h.id); renderAdmin(); } },
-        el('span', { class: 'chev' + (accCollapsed.has(g.h.id) ? '' : ' down') }, icon('arrow')), icon(g.h.emoji), g.h.name))));
-  const r2 = el('tr', {}, fGroups.map(g => {
-    const c = g.c, segs = c.kind === 'empty' || (c.kind === 'sum' && c.node === c.h) ? [] : c.chain.slice(1);
-    return el('th', { class: 'fgrp' + (segs.length ? '' : ' nof'), colspan: g.n, style: `--c:${c.h.color}` }, segs.length ? el('span', { class: 'fpath' }, segs.flatMap((f, i) => [i ? el('span', { class: 'sep', text: '›' }) : null,
-      el('button', { class: 'fseg', title: accCollapsed.has(f.id) ? 'Show applications in this folder' : 'Fold this folder', onclick: () => { accCollapsed.has(f.id) ? accCollapsed.delete(f.id) : accCollapsed.add(f.id); renderAdmin(); } }, icon('folder'), f.name)])) : '');
-  }));
-  const r3 = el('tr', {}, cols.map(c => {
-    if (c.kind === 'app') return el('th', { class: 'app', title: c.chain.map(n => n.name).concat(c.t.name).join(' › ') + ' — ' + ACCESS_APP[c.t.access] }, el('div', { class: 'vt' }, c.t.name), c.t.access !== 'everyone' ? el('div', { class: 'acc-mode m-' + c.t.access, text: { selected: 'SEL', admins: 'ADM', hidden: 'HID' }[c.t.access] }) : null);
-    if (c.kind === 'sum') return el('th', { class: 'app sumh', title: 'Folded: ' + c.chain.map(n => n.name).join(' › ') }, el('div', { class: 'vt' }, `All in ${c.node.name} (${countAll(c.node)})`));
-    return el('th', { class: 'app' }, el('div', { class: 'vt muted' }, 'No apps yet'));
-  }));
-  const table = el('table', { class: 'acc v2' }, el('thead', {}, r1, r2, r3));
-  // body grouped by branch
-  const tb = el('tbody');
+  if (!accUser || !all.find(p => p.id === accUser)) accUser = (people[0] || all[0] || {}).id || null;
+  const countFor = p => { let v = 0; draft.hubs.forEach(h => walkTools(h, (t, ch) => { if (p.is_admin || visibleFor(p.id, ch, t)) v++; })); return v; };
+
+  // ---- left: users by branch ----
+  const search = el('input', { class: 'i', type: 'search', id: 'accessSearch', placeholder: 'Search name, email or branch', value: accessQ, 'aria-label': 'Search users' });
+  search.oninput = e => { accessQ = e.target.value; const pos = e.target.selectionStart; renderAdmin(); const s2 = $('#accessSearch'); if (s2) { s2.focus(); s2.setSelectionRange(pos, pos); } };
+  const list = el('div', { class: 'ulist' });
   const groups = []; people.forEach(p => { const k = p.branch || ''; const g = groups[groups.length - 1]; if (g && g.k === k) g.list.push(p); else groups.push({ k, list: [p] }); });
   groups.forEach(g => {
     const hidden = accBranchHidden.has(g.k);
-    tb.append(el('tr', { class: 'brow' }, el('th', { class: 'bhead', colspan: ncol },
-      el('button', { class: 'bbtn', onclick: () => { hidden ? accBranchHidden.delete(g.k) : accBranchHidden.add(g.k); renderAdmin(); } },
-        el('span', { class: 'chev' + (hidden ? '' : ' down') }, icon('arrow')), el('b', { text: g.k ? g.k : 'No branch' }), g.k ? el('span', { text: (branchOf(g.k) || {}).name || '' }) : null, el('span', { class: 'bcount', text: `${g.list.length} user${g.list.length === 1 ? '' : 's'}` })))));
+    list.append(el('button', { class: 'ugroup', onclick: () => { hidden ? accBranchHidden.delete(g.k) : accBranchHidden.add(g.k); renderAdmin(); } },
+      el('span', { class: 'chev' + (hidden ? '' : ' down') }, icon('arrow')), el('b', { text: g.k || 'No branch' }), el('span', { class: 'gname', text: g.k ? ((branchOf(g.k) || {}).name || '') : '' }), el('span', { class: 'gcount', text: String(g.list.length) })));
     if (hidden) return;
     g.list.forEach(p => {
-      let v = 0; draft.hubs.forEach(h => walkTools(h, (t, ch) => { if (p.is_admin || visibleFor(p.id, ch, t)) v++; }));
-      const pct = Math.round(100 * v / totalApps);
-      const cells = cols.map(c => {
-        if (c.kind === 'empty') return el('td', {}, '');
-        if (c.kind === 'sum') {
-          const [vv, nn] = accCount(p, c.node, c.chain);
-          return el('td', {}, el('span', { class: 'sumchip ' + (!nn ? 'none' : vv === nn ? 'full' : vv ? 'part' : 'none'), title: `${vv} of ${nn} applications in ${c.node.name}` }, nn ? `${vv}/${nn}` : '–'));
-        }
-        if (p.is_admin) return el('td', {}, el('span', { class: 'cell adm', title: 'Admins see everything' }, icon('check')));
-        const closed = c.chain.find(x => x.access !== 'everyone');
-        if (closed) return el('td', {}, el('span', { class: 'cell blocked', title: `"${closed.name}" is ${ACCESS_HUB[closed.access]} — change it in Visibility` }));
-        const on = visibleFor(p.id, c.chain, c.t);
-        return el('td', {}, el('button', { class: 'cell ' + (on ? 'on' : 'off'), title: `${on ? 'Remove' : 'Grant'} "${c.t.name}" for ${nameOf(p)}`, 'aria-pressed': on ? 'true' : 'false', onclick: () => toggleGrant(c.t, p.id, on) }, on ? icon('check') : null));
-      });
-      tb.append(el('tr', {}, el('th', { class: 'uwho' },
-        el('div', { class: 'cn' }, nameOf(p), p.is_admin ? el('span', { class: 'st approved', text: 'ADMIN' }) : null),
-        el('div', { class: 'ce', text: p.email }),
-        el('div', { class: 'ubar' }, el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${pct}%` })), el('span', { class: 'cnt', text: `${v}/${totalApps}` }))), cells));
+      const v = countFor(p), pct = total ? Math.round(100 * v / total) : 0;
+      list.append(el('button', { class: 'uitem' + (p.id === accUser ? ' sel' : ''), onclick: () => { accUser = p.id; renderAdmin(); } },
+        el('div', { class: 'un' }, el('span', { text: nameOf(p) }), p.is_admin ? el('span', { class: 'st approved', text: 'ADMIN' }) : null),
+        el('div', { class: 'ue', text: p.email }),
+        el('div', { class: 'ubar' }, el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${pct}%` })), el('span', { class: 'cnt', text: `${v}/${total}` }))));
     });
   });
-  table.append(tb);
-  b.append(el('div', { class: 'accwrap' }, table));
-  if (!people.length) b.append(el('p', { class: 'hintline', text: 'No users match this filter.' }));
-  b.append(el('p', { class: 'footnote', text: 'SEL = selected users, ADM = admins only, HID = hidden. Granting one user switches an application to "Selected users"; ticking every staff member switches it back to "Everyone". Pending or suspended users are not shown. Set each user\'s branch in the Users tab.' }));
+  if (!people.length) list.append(el('p', { class: 'hintline', style: 'padding:8px 12px', text: 'No users match.' }));
+  const left = el('div', { class: 'accleft' }, el('div', { class: 'acchead' }, search), list);
+
+  // ---- right: rights tree for selected user ----
+  const p = all.find(x => x.id === accUser);
+  const right = el('div', { class: 'accright' });
+  if (!p) right.append(el('p', { class: 'hintline', style: 'padding:16px', text: 'Select a user on the left.' }));
+  else if (!total) right.append(el('p', { class: 'hintline', style: 'padding:16px', text: 'No applications yet. Add some in the Applications tab.' }));
+  else {
+    const v = countFor(p);
+    right.append(el('div', { class: 'acchead rhead' },
+      el('div', { class: 'avatar sm', text: nameOf(p).split(/[ @.]/).filter(w => w && !LOWER_WORDS.has(w.toLowerCase())).slice(0, 2).map(s => s[0].toUpperCase()).join('') }),
+      el('div', { style: 'flex:1;min-width:0' }, el('div', { class: 'cn' }, nameOf(p), p.is_admin ? el('span', { class: 'st approved', style: 'margin-left:8px', text: 'ADMIN' }) : null),
+        el('div', { class: 'ce', text: `${p.email} · ${branchLabel(p.branch)}` })),
+      el('div', { class: 'bigcount' }, el('b', { text: String(v) }), el('span', { text: ` / ${total} apps` })),
+      el('div', { class: 'rtools' },
+        el('button', { class: 'chip', onclick: () => { accClosed = new Set(); renderAdmin(); } }, 'Expand all'),
+        el('button', { class: 'chip', onclick: () => { draft.hubs.forEach(h => { accClosed.add(h.id); }); renderAdmin(); } }, 'Collapse all'))));
+    if (p.is_admin) right.append(el('p', { class: 'note show', style: 'margin:10px 14px 0', text: 'Administrators can see every workspace, folder and application. Change their role in the Users tab to limit access.' }));
+    const tbl = el('table', { class: 'rt' }, el('thead', {}, el('tr', {},
+      el('th', { class: 'd', text: 'Description' }), el('th', { class: 'c band1', text: 'Access' }), el('th', { class: 'c band2', text: 'Rule' }), el('th', { class: 'c band3', text: 'Result' }))));
+    const tb = el('tbody');
+    const ckbox = (state, onclick, title, disabled) => el('button', { class: 'ck ' + state, title, disabled: !!disabled, 'aria-label': title, onclick }, state === 'on' ? icon('check') : state === 'some' ? el('span', { class: 'dash' }) : null);
+    const addNode = (node, chain, depth, kind, h) => {
+      const st = nodeState(p, node, chain), closed = accClosed.has(node.id);
+      const blockedBy = isBlocked(chain);
+      let cstate = 'off'; if (p.is_admin || (st.editable.length && st.on === st.editable.length)) cstate = 'on'; else if (st.on > 0) cstate = 'some';
+      const canEdit = !p.is_admin && st.editable.length > 0;
+      tb.append(el('tr', { class: 'g ' + kind + (blockedBy ? ' blocked' : ''), style: `--c:${h.color}` },
+        el('td', { class: 'd' }, el('button', { class: 'tree', style: `padding-left:${8 + depth * 22}px`, onclick: () => { closed ? accClosed.delete(node.id) : accClosed.add(node.id); renderAdmin(); } },
+          el('span', { class: 'chev' + (closed ? '' : ' down') }, icon('arrow')),
+          el('span', { class: 'gi' }, icon(kind === 'hub' ? node.emoji : (node.emoji || 'folder'))),
+          el('span', { class: 'gl', text: (kind === 'hub' ? 'Workspace : ' : 'Folder : ') }), el('b', { text: node.name || 'Untitled' }))),
+        el('td', { class: 'c band1' }, ckbox(cstate, () => setAllFor(p, node, chain, cstate !== 'on'), canEdit ? (cstate === 'on' ? 'Remove everything inside' : 'Grant everything inside') : 'Not editable here', !canEdit)),
+        el('td', { class: 'c band2' }, el('span', { class: 'rule r-' + node.access, text: ACCESS_HUB[node.access] })),
+        el('td', { class: 'c band3' }, el('span', { class: 'sumchip ' + (!st.total ? 'none' : st.vis === st.total ? 'full' : st.vis ? 'part' : 'none') }, st.total ? `${st.vis}/${st.total}` : '–'))));
+      if (closed) return;
+      (node.folders || []).forEach(f => addNode(f, chain.concat(f), depth + 1, 'folder', h));
+      (node.tools || []).forEach(t => {
+        const blk = isBlocked(chain), on = p.is_admin || visibleFor(p.id, chain, t);
+        const n = t.access === 'selected' ? (t.users || []).length : 0;
+        tb.append(el('tr', { class: 'a' + (blk ? ' blocked' : '') },
+          el('td', { class: 'd' }, el('div', { class: 'leaf', style: `padding-left:${30 + (depth + 1) * 22}px` }, el('span', { class: 'ai', style: `--c:${h.color}` }, icon(t.emoji)), el('span', { text: t.name || 'Untitled application' }))),
+          el('td', { class: 'c band1' }, p.is_admin ? ckbox('on adm', null, 'Admin sees everything', true)
+            : blk ? ckbox('blk', null, `Closed: "${blk.name}" is ${ACCESS_HUB[blk.access]}`, true)
+            : ckbox(on ? 'on' : 'off', () => toggleGrant(t, p.id, on), on ? 'Remove access' : 'Grant access')),
+          el('td', { class: 'c band2' }, el('span', { class: 'rule r-' + t.access, text: ACCESS_APP[t.access] + (t.access === 'selected' ? ` (${n})` : '') })),
+          el('td', { class: 'c band3' }, el('span', { class: 'vbadge ' + (on ? 'yes' : 'no') }, icon(on ? 'eye' : 'eyeoff'), on ? 'Visible' : 'Hidden'))));
+      });
+    };
+    draft.hubs.forEach(h => addNode(h, [h], 0, 'hub', h));
+    tbl.append(tb);
+    right.append(el('div', { class: 'rtwrap' }, tbl));
+  }
+  b.append(el('p', { class: 'tabintro', text: 'Pick a user on the left to see every workspace, folder and application they can access. Tick to grant, untick to remove, then Save changes. Folder and workspace boxes apply to everything inside.' }),
+    el('div', { class: 'accsplit' }, left, right),
+    el('p', { class: 'footnote', text: 'Rule = who the item is open to. Granting one user switches an application to "Selected users"; if every staff member is ticked it switches back to "Everyone". Striped rows are closed by a workspace or folder setting (change in Visibility).' }));
 }
 
 /* ---------- Tab 3: Users ---------- */
