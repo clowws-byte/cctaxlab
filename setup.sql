@@ -54,7 +54,7 @@ create index if not exists portal_tool_access_user_idx on public.portal_tool_acc
 create table if not exists public.portal_settings (
   id        int primary key default 1 check (id = 1),
   title     text not null default 'CCTaxLab',
-  subtitle  text not null default 'All our tax applications in one place.',
+  subtitle  text not null default 'Cheng & Co Taxation Sdn Bhd',
   theme     text not null default 'blue',
   animation text not null default 'calm'
 );
