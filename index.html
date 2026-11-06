@@ -330,6 +330,33 @@ header{align-items:center;gap:22px}
 .acctbtn:hover{background:rgba(255,255,255,.06)}
 #acct .sheet .avatar{width:44px;height:44px;font-size:15px}
 @media(max-width:600px){.vrow{flex-wrap:wrap;row-gap:8px}.vrow .vn{flex:1 1 calc(100% - 50px)}.vrow .sel{margin-left:44px;flex:1}.vrow .t-icon{margin-left:0}.userpick{padding-left:12px}.lg-note{margin-left:0;width:100%}}
+
+/* folders */
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.crumb{background:none;border:0;padding:0;color:var(--gold2);font:inherit;font-size:13px;font-weight:600}
+.crumb:hover{text-decoration:underline}
+.crumb.cur{color:var(--muted);font-weight:500}
+.crumbs .sep{color:var(--dim)}
+.backrow{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:2px 0 6px}
+.backrow svg{transform:rotate(180deg);width:16px;height:16px}
+.backrow:hover{color:var(--ink)}
+.tool.folderrow{width:100%;text-align:left;font:inherit;cursor:pointer;border-style:dashed}
+.tool.folderrow .t-icon{background:color-mix(in srgb,var(--c) 20%,transparent)}
+.children{margin-top:4px}
+.addbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.foldercard{border:1px solid var(--line);border-radius:10px;margin-top:8px;background:rgba(var(--acc-rgb),.035)}
+.foldercard.open{border-color:rgba(var(--acc-rgb),.35)}
+.folderhead{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}
+.folderhead .t-icon{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none;color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.folderhead .t-icon svg{width:17px;height:17px}
+.chev{display:grid;place-items:center;color:var(--muted);transition:transform .2s;flex:none}
+.chev svg{width:15px;height:15px}.chev.down{transform:rotate(90deg)}
+.folderbody{padding:0 10px 12px 22px;border-top:1px solid var(--line)}
+.vrow{padding-left:calc(12px + var(--d,0) * 18px)}
+.vrow .t-icon{margin-left:0}
+.vrow.folderv{background:rgba(var(--acc-rgb),.04)}
+.userpick{padding-left:calc(58px + var(--d,0) * 18px)}
+@media(max-width:600px){.vrow{padding-left:calc(10px + var(--d,0) * 10px)}.folderbody{padding-left:10px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -743,19 +770,24 @@ function showApp() { $('#app').hidden = false; $('#fab').classList.toggle('show'
 
 async function loadData() { await loadDataInner(); if (cfg && cfg.theme) applyLook({ theme: cfg.theme, anim: cfg.anim }); }
 async function loadDataInner() {
-  const [s, h, t, g] = await Promise.all([
+  const [s, h, f, t, g] = await Promise.all([
     sb.from('portal_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('portal_hubs').select('*').order('sort'),
+    sb.from('portal_folders').select('*').order('sort'),
     sb.from('portal_tools').select('*').order('sort'),
     sb.from('portal_tool_access').select('*')]);
-  const err = s.error || h.error || t.error || g.error;
+  const err = s.error || h.error || f.error || t.error || g.error;
   if (err) { note('Unable to load workspaces: ' + friendly(err)); cfg = cfg || { title: 'CCTaxLab', subtitle: '', hubs: [] }; return; }
   note('');
-  const grants = g.data || [];
+  const grants = g.data || [], fl = f.data || [], tl = t.data || [];
+  const mkTool = y => ({ id: y.id, name: y.name, emoji: iconKey(y.emoji), url: y.url, desc: y.description, access: y.access || 'everyone', users: grants.filter(r => r.tool_id === y.id).map(r => r.user_id) });
+  const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone',
+    folders: fl.filter(c => c.parent_id === x.id).map(mkFolder), tools: tl.filter(y => y.folder_id === x.id).map(mkTool) });
   cfg = {
     title: (s.data && s.data.title) || 'CCTaxLab', subtitle: (s.data && s.data.subtitle) || '', theme: (s.data && s.data.theme) || look.theme, anim: (s.data && s.data.animation) || look.anim,
     hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone',
-      tools: (t.data || []).filter(y => y.hub_id === x.id).map(y => ({ id: y.id, name: y.name, emoji: iconKey(y.emoji), url: y.url, desc: y.description, access: y.access || 'everyone', users: grants.filter(r => r.tool_id === y.id).map(r => r.user_id) })) }))
+      folders: fl.filter(c => c.hub_id === x.id && !c.parent_id).map(mkFolder),
+      tools: tl.filter(y => y.hub_id === x.id && !y.folder_id).map(mkTool) }))
   };
 }
 const myId = () => session && session.user.id;
@@ -763,6 +795,17 @@ const canSee = item => isAdmin || item.access === 'everyone' || (item.access ===
 const STATUS = { hidden: 'Hidden', admins: 'Admins only', selected: 'Selected users' };
 const status = item => STATUS[item.access] || null;
 const pill = st => el('span', { class: 'pill' }, icon(st === 'Hidden' ? 'eyeoff' : st === 'Selected users' ? 'users' : 'lock'), st);
+// tree helpers
+function walkTools(node, fn, chain = []) { const c = chain.concat(node); (node.tools || []).forEach(t => fn(t, c)); (node.folders || []).forEach(f => walkTools(f, fn, c)); }
+function walkFolders(node, fn, chain = []) { const c = chain.concat(node); (node.folders || []).forEach(f => { fn(f, c); walkFolders(f, fn, c); }); }
+const countVisible = node => { let n = 0; walkTools(node, (t, chain) => { if (chain.every(canSee) && canSee(t)) n++; }); return n; };
+const countAll = node => { let n = 0; walkTools(node, () => n++); return n; };
+function containersOf(root) { // [{node, label}]
+  const out = [];
+  root.hubs.forEach(h => { out.push({ node: h, label: h.name || 'Untitled' }); walkFolders(h, (f, chain) => out.push({ node: f, label: chain.concat(f).map(n => n.name || 'Untitled').join(' › ') })); });
+  return out;
+}
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
 /* ================= workspaces ================= */
 function renderGalaxy() {
@@ -771,7 +814,7 @@ function renderGalaxy() {
   const g = $('#galaxy'); g.replaceChildren();
   const q = query.trim().toLowerCase();
   let hubs = c.hubs.filter(canSee);
-  if (q) hubs = hubs.filter(h => h.name.toLowerCase().includes(q) || h.tools.filter(canSee).some(t => (t.name + ' ' + t.desc).toLowerCase().includes(q)));
+  if (q) hubs = hubs.filter(h => { if (h.name.toLowerCase().includes(q)) return true; let hit = false; walkTools(h, (t, chain) => { if (chain.every(canSee) && canSee(t) && (t.name + ' ' + t.desc + ' ' + chain.map(n => n.name).join(' ')).toLowerCase().includes(q)) hit = true; }); return hit; });
   if (!hubs.length) {
     g.append(el('div', { class: 'empty' }, el('div', { class: 'ring' }, icon('orbit')),
       el('h3', { text: q ? 'No matches' : isAdmin ? 'No workspaces yet' : 'Nothing here yet' }),
@@ -780,39 +823,60 @@ function renderGalaxy() {
     return;
   }
   hubs.forEach((h, i) => {
-    const n = h.tools.filter(canSee).length, st = status(h);
+    const n = countVisible(h), nf = (h.folders || []).filter(canSee).length, st = status(h);
     const b = el('button', { class: 'planet' + (st ? ' hidden-item' : ''), style: `--c:${h.color};animation-delay:${i * 60}ms`, 'aria-label': `${h.name}, ${n} applications`, onclick: () => openHub(h.id) },
       orb(h.color, i % 2 === 0),
       el('div', { class: 'p-icon' }, icon(h.emoji)),
       el('div', { class: 'pname', text: h.name }),
-      el('div', { class: 'pcount' }, el('span', { text: `${n} application${n === 1 ? '' : 's'}` }), el('span', { class: 'go' }, 'Open', icon('arrow'))),
+      el('div', { class: 'pcount' }, el('span', { text: plural(n, 'application') + (nf ? ' · ' + plural(nf, 'folder') : '') }), el('span', { class: 'go' }, 'Open', icon('arrow'))),
       st ? pill(st) : null);
     g.append(b);
   });
 }
 $('#q').addEventListener('input', e => { query = e.target.value; renderGalaxy(); });
 
-/* ================= workspace panel ================= */
-function openHub(id) { openHubId = id; warp(500); renderDock(); }
+/* ================= workspace panel (with folders) ================= */
+let dockPath = [];
+function openHub(id) { dockPath = [id]; openHubId = id; warp(500); renderDock(); }
+function resolvePath() {
+  const chain = []; let list = cfg ? cfg.hubs : [];
+  for (const id of dockPath) { const n = list.find(x => x.id === id); if (!n || !canSee(n)) break; chain.push(n); list = n.folders || []; }
+  return chain;
+}
 function renderDock() {
-  const h = cfg && cfg.hubs.find(x => x.id === openHubId);
-  if (!h || !canSee(h)) { closeDock(); return; }
+  const chain = resolvePath();
+  if (!chain.length) { closeDock(); return; }
+  dockPath = chain.map(n => n.id);
+  const h = chain[0], cur = chain[chain.length - 1];
   $('#dock').classList.add('open'); $('#sheet').style.setProperty('--c', h.color);
-  $('#dockIcon').replaceChildren(icon(h.emoji)); $('#dockIcon').style.setProperty('--c', h.color);
-  $('#dockTitle').textContent = h.name;
-  const tools = h.tools.filter(canSee);
-  $('#dockSub').textContent = tools.length ? `${tools.length} application${tools.length === 1 ? '' : 's'}` : 'No applications yet';
+  $('#dockIcon').replaceChildren(icon(chain.length > 1 ? 'folder' : h.emoji)); $('#dockIcon').style.setProperty('--c', h.color);
+  $('#dockTitle').textContent = cur.name;
+  const folders = (cur.folders || []).filter(canSee), tools = (cur.tools || []).filter(canSee);
+  const sub = $('#dockSub'); sub.replaceChildren();
+  if (chain.length > 1) {
+    sub.append(el('span', { class: 'crumbs' }, chain.flatMap((n, i) => i < chain.length - 1
+      ? [el('button', { class: 'crumb', text: n.name, onclick: () => { dockPath = dockPath.slice(0, i + 1); renderDock(); } }), el('span', { class: 'sep', text: '›' })]
+      : el('span', { class: 'crumb cur', text: n.name }))));
+  } else sub.append(document.createTextNode([folders.length ? plural(folders.length, 'folder') : '', tools.length ? plural(tools.length, 'application') : ''].filter(Boolean).join(' · ') || 'Nothing here yet'));
   const box = $('#tools'); box.replaceChildren();
-  if (!tools.length) box.append(el('div', { class: 'empty', style: 'margin:10px 0' }, el('div', { class: 'ring' }, icon('layers')), el('p', { style: 'margin:12px 0 0', text: isAdmin ? 'Add applications to this workspace in Admin.' : 'No applications are available here yet.' })));
+  if (chain.length > 1) box.append(el('button', { class: 'backrow', onclick: () => { dockPath.pop(); renderDock(); } }, icon('arrow'), 'Back to ' + chain[chain.length - 2].name));
+  if (!folders.length && !tools.length) box.append(el('div', { class: 'empty', style: 'margin:10px 0' }, el('div', { class: 'ring' }, icon('layers')), el('p', { style: 'margin:12px 0 0', text: isAdmin ? 'Add folders or applications here in Admin.' : 'No applications are available here yet.' })));
+  folders.forEach((f, i) => {
+    const n = countVisible(f), st = status(f);
+    box.append(el('button', { class: 'tool folderrow' + (st ? ' hidden-item' : ''), style: `animation-delay:${i * 50}ms`, onclick: () => { dockPath.push(f.id); renderDock(); } },
+      el('div', { class: 't-icon' }, icon(f.emoji || 'folder')),
+      el('div', { class: 't-main' }, el('div', { class: 't-name', text: f.name }), el('div', { class: 't-desc', text: plural(n, 'application') + ((f.folders || []).filter(canSee).length ? ' · ' + plural(f.folders.filter(canSee).length, 'folder') : '') }), st ? pill(st) : null),
+      el('div', { class: 't-go' }, 'Open', icon('arrow'))));
+  });
   tools.forEach((t, i) => {
     const url = safeUrl(t.url), st = status(t);
-    box.append(el(url ? 'a' : 'div', { class: 'tool' + (st ? ' hidden-item' : '') + (url ? '' : ' nolink'), style: `animation-delay:${i * 50}ms`, href: url, target: url ? '_blank' : null, rel: url ? 'noopener' : null },
+    box.append(el(url ? 'a' : 'div', { class: 'tool' + (st ? ' hidden-item' : '') + (url ? '' : ' nolink'), style: `animation-delay:${(folders.length + i) * 50}ms`, href: url, target: url ? '_blank' : null, rel: url ? 'noopener' : null },
       el('div', { class: 't-icon' }, icon(t.emoji)),
       el('div', { class: 't-main' }, el('div', { class: 't-name', text: t.name }), t.desc ? el('div', { class: 't-desc', text: t.desc }) : null, st ? pill(st) : null),
       el('div', { class: 't-go' }, url ? ['Open', icon('ext')] : 'Link pending')));
   });
 }
-function closeDock() { openHubId = null; $('#dock').classList.remove('open'); }
+function closeDock() { openHubId = null; dockPath = []; $('#dock').classList.remove('open'); }
 $('#dockClose').onclick = closeDock;
 $('#dock').addEventListener('click', e => { if (e.target.id === 'dock') closeDock(); });
 addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#acct').classList.contains('open')) closeAccount(); else if ($('#drawer').classList.contains('open')) closeAdmin(); else closeDock(); } });
@@ -820,6 +884,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#acct').clas
 /* ================= admin ================= */
 const ACCESS_HUB = { everyone: 'Everyone', admins: 'Admins only', hidden: 'Hidden' };
 const ACCESS_APP = { everyone: 'Everyone', selected: 'Selected users', admins: 'Admins only', hidden: 'Hidden' };
+const MAX_DEPTH = 4;
 let previewAs = 'any', preapproved = [];
 function openAdmin() { if (!draft) draft = clone(cfg); $('#drawer').classList.add('open'); renderAdmin(); loadCrew(); }
 function closeAdmin() { $('#drawer').classList.remove('open'); }
@@ -845,6 +910,7 @@ function confirmDelete(btn, what, doIt) {
 function move(arr, i, d) { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; markDirty(); renderAdmin(); }
 const staffUsers = () => crew.filter(p => p.status === 'approved' && !p.is_admin);
 const nameOf = p => p.full_name || p.email;
+const toggle = key => { expanded.has(key) ? expanded.delete(key) : expanded.add(key); renderAdmin(); };
 
 function renderAdmin() {
   for (const [id, tab] of [['#tabApps', 'apps'], ['#tabVis', 'vis'], ['#tabCrew', 'crew']]) $(id).classList.toggle('on', adminTab === tab);
@@ -854,21 +920,73 @@ function renderAdmin() {
   b.scrollTop = scroll; updateFoot();
 }
 
-/* ---------- Tab 1: Applications ---------- */
+/* ---------- Tab 1: Applications (tree) ---------- */
+function appRow(t, ti, parent, h) {
+  const key = 't:' + t.id, topen = expanded.has(key), url = safeUrl(t.url), bad = t.url && !url;
+  const row = el('div', { class: 'approw' + (topen ? ' open' : '') });
+  row.append(el('div', { class: 'apphead', onclick: e => { if (e.target.closest('button')) return; toggle(key); } },
+    el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(t.emoji)),
+    el('div', { class: 'am' }, el('div', { class: 'an', text: t.name || 'Untitled application' }),
+      el('div', { class: 'al' + (url ? '' : ' warn'), text: url ? url.replace(/^https?:\/\//, '').replace(/\/$/, '') : 'No link yet' })),
+    ib('up', 'Move up', () => move(parent.tools, ti, -1), ti === 0), ib('down', 'Move down', () => move(parent.tools, ti, 1), ti === parent.tools.length - 1),
+    ib(topen ? 'x' : 'edit', topen ? 'Close' : 'Edit application', () => toggle(key))));
+  if (topen) {
+    const tdel = el('button', { class: 'btn danger small' }, icon('trash'), 'Delete application'); tdel.onclick = () => confirmDelete(tdel, `"${t.name}"`, () => parent.tools.splice(ti, 1));
+    const locs = containersOf(draft), cur = locs.find(l => l.node === parent);
+    row.append(el('div', { class: 'appedit' },
+      el('label', { class: 'f', text: 'Application name' }), input(t.name, v => t.name = v, { maxlength: 60 }),
+      el('label', { class: 'f', text: 'Link (https://…)' }), input(t.url, v => t.url = v, { placeholder: 'https://', inputmode: 'url', onblur: renderAdmin }),
+      bad ? el('div', { class: 'err-s', text: 'The link must start with https:// or http://' }) : null,
+      el('label', { class: 'f', text: 'Short description (optional)' }), input(t.desc, v => t.desc = v, { maxlength: 240 }),
+      el('label', { class: 'f', text: 'Location (workspace › folder)' }),
+      select(Object.fromEntries(locs.map((l, i) => [String(i), l.label])), String(locs.indexOf(cur)), v => { const dest = locs[+v].node; if (dest === parent) return; parent.tools.splice(ti, 1); dest.tools.push(t); markDirty(); renderAdmin(); }),
+      el('label', { class: 'f', text: 'Icon' }), iconPicker(t.emoji, k => t.emoji = k),
+      el('div', { class: 'toggles' }, tdel, el('span', { class: 'hintline', text: 'Who can see it: Visibility tab' }))));
+  }
+  return row;
+}
+function childBlock(parent, h, depth) {
+  const box = el('div', { class: 'children' });
+  (parent.folders || []).forEach((f, fi) => box.append(folderCard(f, fi, parent, h, depth + 1)));
+  (parent.tools || []).forEach((t, ti) => box.append(appRow(t, ti, parent, h)));
+  box.append(el('div', { class: 'addbar' },
+    el('button', { class: 'btn ghost small', onclick: () => { const t = { id: newId(), name: 'New application', emoji: 'file', url: '', desc: '', access: 'everyone', users: [] }; parent.tools.push(t); expanded.add('t:' + t.id); if (parent !== h) expanded.add('f:' + parent.id); markDirty(); renderAdmin(); } }, icon('plus'), 'Add application'),
+    depth < MAX_DEPTH ? el('button', { class: 'btn ghost small', onclick: () => { const f = { id: newId(), name: 'New folder', emoji: 'folder', access: 'everyone', folders: [], tools: [] }; parent.folders = parent.folders || []; parent.folders.push(f); expanded.add('f:' + f.id); expanded.add('fe:' + f.id); markDirty(); renderAdmin(); } }, icon('folder'), 'Add folder') : null));
+  return box;
+}
+function folderCard(f, fi, parent, h, depth) {
+  const open = expanded.has('f:' + f.id), editing = expanded.has('fe:' + f.id);
+  const card = el('div', { class: 'foldercard' + (open ? ' open' : '') });
+  card.append(el('div', { class: 'folderhead', onclick: e => { if (e.target.closest('button')) return; toggle('f:' + f.id); } },
+    el('span', { class: 'chev' + (open ? ' down' : '') }, icon('arrow')),
+    el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(f.emoji || 'folder')),
+    el('div', { class: 'am' }, el('div', { class: 'an', text: f.name || 'Untitled folder' }), el('div', { class: 'al', text: `Folder · ${plural(countAll(f), 'app')}${(f.folders || []).length ? ' · ' + plural(f.folders.length, 'sub-folder') : ''}` })),
+    ib('up', 'Move up', () => move(parent.folders, fi, -1), fi === 0), ib('down', 'Move down', () => move(parent.folders, fi, 1), fi === parent.folders.length - 1),
+    ib(editing ? 'x' : 'edit', editing ? 'Close' : 'Rename / settings', () => { toggle('fe:' + f.id); })));
+  if (editing) {
+    const del = el('button', { class: 'btn danger small' }, icon('trash'), 'Delete folder'); del.onclick = () => confirmDelete(del, `"${f.name}" and everything inside it`, () => parent.folders.splice(fi, 1));
+    card.append(el('div', { class: 'wsbox', style: 'margin:0 12px 10px' },
+      el('label', { class: 'f', style: 'margin-top:0', text: 'Folder name' }), input(f.name, v => f.name = v, { maxlength: 60 }),
+      el('label', { class: 'f', text: 'Icon' }), iconPicker(f.emoji || 'folder', k => f.emoji = k),
+      el('div', { class: 'toggles' }, del)));
+  }
+  if (open) card.append(el('div', { class: 'folderbody' }, childBlock(f, h, depth)));
+  return card;
+}
 function renderApps(b) {
-  b.append(el('p', { class: 'tabintro', text: 'Add, rename, reorder or delete workspaces and applications, and set each application\'s link.' }));
+  b.append(el('p', { class: 'tabintro', text: 'Build your structure: Workspace › Folder › Application. Folders can hold sub-folders. Tap a folder to open it; use the pencil to rename.' }));
   draft.hubs.forEach((h, hi) => {
     const open = expanded.has(h.id);
     const card = el('div', { class: 'hubcard expanded' });
     card.append(el('div', { class: 'hubrow' },
       el('div', { class: 'p-icon', style: `--c:${h.color}` }, icon(h.emoji)),
-      el('div', { class: 'hn' }, h.name || 'Untitled workspace', el('small', { text: `${h.tools.length} app${h.tools.length === 1 ? '' : 's'}` })),
+      el('div', { class: 'hn' }, h.name || 'Untitled workspace', el('small', { text: plural(countAll(h), 'app') + ((h.folders || []).length ? ' · ' + plural(h.folders.length, 'folder') : '') })),
       ib('up', 'Move workspace up', () => move(draft.hubs, hi, -1), hi === 0),
       ib('down', 'Move workspace down', () => move(draft.hubs, hi, 1), hi === draft.hubs.length - 1),
-      ib(open ? 'x' : 'edit', open ? 'Close workspace settings' : 'Edit workspace', () => { open ? expanded.delete(h.id) : expanded.add(h.id); renderAdmin(); })));
+      ib(open ? 'x' : 'edit', open ? 'Close workspace settings' : 'Edit workspace', () => toggle(h.id))));
     const body = el('div', { class: 'hubedit' });
     if (open) {
-      const del = el('button', { class: 'btn danger small' }, icon('trash'), 'Delete workspace'); del.onclick = () => confirmDelete(del, `"${h.name}" and its ${h.tools.length} app(s)`, () => draft.hubs.splice(hi, 1));
+      const del = el('button', { class: 'btn danger small' }, icon('trash'), 'Delete workspace'); del.onclick = () => confirmDelete(del, `"${h.name}" and everything inside it`, () => draft.hubs.splice(hi, 1));
       body.append(el('div', { class: 'wsbox' },
         el('label', { class: 'f', style: 'margin-top:0', text: 'Workspace name' }), input(h.name, v => h.name = v, { maxlength: 60 }),
         el('label', { class: 'f', text: 'Icon' }), iconPicker(h.emoji, k => h.emoji = k),
@@ -876,90 +994,65 @@ function renderApps(b) {
         el('div', { class: 'swatches' }, COLORS.map(c => el('button', { class: 'sw' + (h.color === c ? ' on' : ''), style: `background:${c}`, 'aria-label': 'Colour ' + c, onclick: () => { h.color = c; markDirty(); renderAdmin(); } }))),
         el('div', { class: 'toggles' }, del)));
     }
-    h.tools.forEach((t, ti) => {
-      const key = 't:' + t.id, topen = expanded.has(key), url = safeUrl(t.url), bad = t.url && !url;
-      const row = el('div', { class: 'approw' + (topen ? ' open' : '') });
-      row.append(el('div', { class: 'apphead', onclick: e => { if (e.target.closest('button')) return; topen ? expanded.delete(key) : expanded.add(key); renderAdmin(); } },
-        el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(t.emoji)),
-        el('div', { class: 'am' }, el('div', { class: 'an', text: t.name || 'Untitled application' }),
-          el('div', { class: 'al' + (url ? '' : ' warn'), text: url ? url.replace(/^https?:\/\//, '').replace(/\/$/, '') : 'No link yet' })),
-        ib('up', 'Move up', () => move(h.tools, ti, -1), ti === 0), ib('down', 'Move down', () => move(h.tools, ti, 1), ti === h.tools.length - 1),
-        ib(topen ? 'x' : 'edit', topen ? 'Close' : 'Edit application', () => { topen ? expanded.delete(key) : expanded.add(key); renderAdmin(); })));
-      if (topen) {
-        const tdel = el('button', { class: 'btn danger small' }, icon('trash'), 'Delete application'); tdel.onclick = () => confirmDelete(tdel, `"${t.name}"`, () => h.tools.splice(ti, 1));
-        const hubOpts = Object.fromEntries(draft.hubs.map(x => [x.id, x.name || 'Untitled']));
-        row.append(el('div', { class: 'appedit' },
-          el('label', { class: 'f', text: 'Application name' }), input(t.name, v => t.name = v, { maxlength: 60 }),
-          el('label', { class: 'f', text: 'Link (https://…)' }), input(t.url, v => t.url = v, { placeholder: 'https://', inputmode: 'url', onblur: renderAdmin }),
-          bad ? el('div', { class: 'err-s', text: 'The link must start with https:// or http://' }) : null,
-          el('label', { class: 'f', text: 'Short description (optional)' }), input(t.desc, v => t.desc = v, { maxlength: 240 }),
-          el('label', { class: 'f', text: 'Workspace' }), select(hubOpts, h.id, v => { if (v === h.id) return; h.tools.splice(ti, 1); draft.hubs.find(x => x.id === v).tools.push(t); markDirty(); renderAdmin(); }),
-          el('label', { class: 'f', text: 'Icon' }), iconPicker(t.emoji, k => t.emoji = k),
-          el('div', { class: 'toggles' }, tdel, el('span', { class: 'hintline', text: 'Who can see it: Visibility tab' }))));
-      }
-      body.append(row);
-    });
-    body.append(el('button', { class: 'btn ghost small', style: 'margin-top:10px', onclick: () => {
-      const t = { id: newId(), name: 'New application', emoji: 'file', url: '', desc: '', access: 'everyone', users: [] };
-      h.tools.push(t); expanded.add('t:' + t.id); markDirty(); renderAdmin(); } }, icon('plus'), 'Add application'));
+    body.append(childBlock(h, h, 0));
     card.append(body); b.append(card);
   });
   b.append(el('button', { class: 'btn ghost', style: 'margin-top:16px;width:100%', onclick: () => {
-    const h = { id: newId(), name: 'New workspace', emoji: 'layers', color: COLORS[draft.hubs.length % COLORS.length], access: 'everyone', tools: [] };
+    const h = { id: newId(), name: 'New workspace', emoji: 'layers', color: COLORS[draft.hubs.length % COLORS.length], access: 'everyone', folders: [], tools: [] };
     draft.hubs.push(h); expanded.add(h.id); markDirty(); renderAdmin(); $('#dBody').scrollTop = 1e6; } }, icon('plus'), 'Add workspace'));
-  // portal settings
   const sopen = expanded.has('settings');
   const sc = el('div', { class: 'hubcard', style: 'margin-top:22px' },
-    el('div', { class: 'hubrow', style: 'cursor:pointer', onclick: () => { sopen ? expanded.delete('settings') : expanded.add('settings'); renderAdmin(); } },
+    el('div', { class: 'hubrow', style: 'cursor:pointer', onclick: () => toggle('settings') },
       el('div', { class: 'p-icon' }, icon('gear')), el('div', { class: 'hn' }, 'Portal settings', el('small', { text: 'Name, tagline, colours, animation' })), ib(sopen ? 'x' : 'edit', 'Portal settings', null)));
   if (sopen) sc.append(el('div', { class: 'hubedit', style: 'display:block' },
     el('label', { class: 'f', style: 'margin-top:0', text: 'Portal name' }), input(draft.title, v => draft.title = v, { maxlength: 80 }),
-    el('label', { class: 'f', text: 'Tagline (optional)' }), input(draft.subtitle, v => draft.subtitle = v, { maxlength: 160 }),
+    el('label', { class: 'f', text: 'Company name line' }), input(draft.subtitle, v => draft.subtitle = v, { maxlength: 160 }),
     lookPicker(() => ({ theme: draft.theme, anim: draft.anim }), l => { draft.theme = l.theme; draft.anim = l.anim; applyLook(l); markDirty(); })));
   b.append(sc);
 }
 
 /* ---------- Tab 2: Visibility ---------- */
-function visibleFor(subj, h, t) {
+function visibleFor(subj, chain, t) {
   if (subj !== 'any' && crew.find(p => p.id === subj && p.is_admin)) return true;
-  if (h.access !== 'everyone') return false;
+  if (!chain.every(n => n.access === 'everyone')) return false;
   if (!t) return true;
   return t.access === 'everyone' || (t.access === 'selected' && subj !== 'any' && (t.users || []).includes(subj));
 }
+const badge = v => el('span', { class: 'vbadge ' + (v ? 'yes' : 'no'), title: v ? 'Visible' : 'Not visible' }, icon(v ? 'eye' : 'eyeoff'), v ? 'Visible' : 'Hidden');
 function renderVis(b) {
   const users = staffUsers();
   if (previewAs !== 'any' && !users.find(u => u.id === previewAs)) previewAs = 'any';
   const opts = Object.assign({ any: 'Any staff member (default view)' }, Object.fromEntries(users.map(u => [u.id, nameOf(u) + ' · ' + u.email])));
-  const all = draft.hubs.flatMap(h => h.tools.map(t => [h, t])), vis = all.filter(([h, t]) => visibleFor(previewAs, h, t)).length;
-  b.append(el('p', { class: 'tabintro', text: 'Choose who can see each workspace and application. Pick a user to check exactly what they will see.' }),
+  let total = 0, vis = 0; draft.hubs.forEach(h => walkTools(h, (t, chain) => { total++; if (visibleFor(previewAs, chain, t)) vis++; }));
+  b.append(el('p', { class: 'tabintro', text: 'Choose who can see each workspace, folder and application. Pick a user to check exactly what they will see.' }),
     el('div', { class: 'previewbar' },
       el('label', { class: 'f', style: 'margin:0 0 6px', text: 'Preview as' }),
       select(opts, previewAs, v => { previewAs = v; renderAdmin(); }),
-      el('div', { class: 'summary' }, el('b', { text: `${vis} of ${all.length}` }), ` applications visible to ${previewAs === 'any' ? 'staff' : nameOf(users.find(u => u.id === previewAs))}`)),
+      el('div', { class: 'summary' }, el('b', { text: `${vis} of ${total}` }), ` applications visible to ${previewAs === 'any' ? 'staff' : nameOf(users.find(u => u.id === previewAs))}`)),
     el('div', { class: 'legend' },
       el('span', {}, el('i', { class: 'yes' }, icon('eye')), 'Visible'), el('span', {}, el('i', { class: 'no' }, icon('eyeoff')), 'Not visible'),
-      el('span', { class: 'lg-note', text: 'Admins always see everything.' })));
-  draft.hubs.forEach(h => {
-    const hv = visibleFor(previewAs, h);
-    const card = el('div', { class: 'viscard' });
-    card.append(el('div', { class: 'vrow hubv' },
-      el('div', { class: 'p-icon', style: `--c:${h.color}` }, icon(h.emoji)),
-      el('div', { class: 'vn' }, el('b', { text: h.name || 'Untitled workspace' }), el('small', { text: 'Workspace' })),
-      select(ACCESS_HUB, h.access, v => { h.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Workspace access' }),
-      badge(hv)));
-    h.tools.forEach(t => {
-      const tv = visibleFor(previewAs, h, t);
-      const row = el('div', { class: 'vrow' },
+      el('span', { class: 'lg-note', text: 'Hiding a workspace or folder hides everything inside it. Admins always see everything.' })));
+  const toolRows = (card, node, chain, h, depth) => {
+    (node.folders || []).forEach(f => {
+      const fc = chain.concat(f);
+      card.append(el('div', { class: 'vrow folderv', style: `--d:${depth}` },
+        el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(f.emoji || 'folder')),
+        el('div', { class: 'vn' }, el('b', { text: f.name || 'Untitled folder' }), el('small', { text: 'Folder' + (!chain.every(n => n.access === 'everyone') ? ' · inside a closed level' : '') })),
+        select(ACCESS_HUB, f.access, v => { f.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Folder access' }),
+        badge(visibleFor(previewAs, fc))));
+      toolRows(card, f, fc, h, depth + 1);
+    });
+    (node.tools || []).forEach(t => {
+      const n = (t.users || []).length;
+      card.append(el('div', { class: 'vrow', style: `--d:${depth}` },
         el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(t.emoji)),
         el('div', { class: 'vn' }, el('b', { text: t.name || 'Untitled application' }),
-          el('small', { text: t.access === 'selected' ? `${(t.users || []).length} user${(t.users || []).length === 1 ? '' : 's'} selected` : (h.access !== 'everyone' ? 'Workspace is not open to staff' : '') })),
+          el('small', { text: t.access === 'selected' ? plural(n, 'user') + ' selected' : (!chain.every(x => x.access === 'everyone') ? 'Inside a closed level' : '') })),
         select(ACCESS_APP, t.access, v => { t.access = v; t.users = t.users || []; if (v === 'selected') expanded.add('u:' + t.id); markDirty(); renderAdmin(); }, { 'aria-label': 'Application access' }),
-        badge(tv));
-      card.append(row);
+        badge(visibleFor(previewAs, chain, t))));
       if (t.access === 'selected') {
         const uopen = expanded.has('u:' + t.id);
-        const pick = el('div', { class: 'userpick' },
-          el('button', { class: 'link', onclick: () => { uopen ? expanded.delete('u:' + t.id) : expanded.add('u:' + t.id); renderAdmin(); }, text: uopen ? 'Hide user list' : 'Choose users…' }));
+        const pick = el('div', { class: 'userpick', style: `--d:${depth}` }, el('button', { class: 'link', onclick: () => toggle('u:' + t.id), text: uopen ? 'Hide user list' : 'Choose users…' }));
         if (uopen) pick.append(users.length ? el('div', { class: 'uchips' }, users.map(u => {
           const on = (t.users || []).includes(u.id);
           return el('button', { class: 'uchip' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', onclick: () => { t.users = on ? t.users.filter(x => x !== u.id) : [...(t.users || []), u.id]; markDirty(); renderAdmin(); } }, icon(on ? 'check' : 'plus'), nameOf(u));
@@ -967,33 +1060,54 @@ function renderVis(b) {
         card.append(pick);
       }
     });
-    if (!h.tools.length) card.append(el('p', { class: 'hintline', style: 'padding:6px 12px 10px', text: 'No applications in this workspace.' }));
+  };
+  draft.hubs.forEach(h => {
+    const card = el('div', { class: 'viscard' });
+    card.append(el('div', { class: 'vrow hubv' },
+      el('div', { class: 'p-icon', style: `--c:${h.color}` }, icon(h.emoji)),
+      el('div', { class: 'vn' }, el('b', { text: h.name || 'Untitled workspace' }), el('small', { text: 'Workspace' })),
+      select(ACCESS_HUB, h.access, v => { h.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Workspace access' }),
+      badge(visibleFor(previewAs, [h]))));
+    toolRows(card, h, [h], h, 1);
+    if (!countAll(h) && !(h.folders || []).length) card.append(el('p', { class: 'hintline', style: 'padding:6px 12px 10px', text: 'Nothing in this workspace yet.' }));
     b.append(card);
   });
   b.append(el('p', { class: 'footnote', text: 'These rules are enforced by the database, so staff never receive items they are not allowed to see. Each application should still keep its own login, because anyone who has its direct link can reach it.' }));
 }
-const badge = v => el('span', { class: 'vbadge ' + (v ? 'yes' : 'no'), title: v ? 'Visible' : 'Not visible' }, icon(v ? 'eye' : 'eyeoff'), v ? 'Visible' : 'Hidden');
 
 $('#discardBtn').onclick = () => { draft = clone(cfg); applyLook({ theme: cfg.theme, anim: cfg.anim }); dirty = false; renderAdmin(); toast('Changes discarded'); };
+function flatten(root) {
+  const now = new Date().toISOString(), hubs = [], folders = [], tools = [], grants = [];
+  root.hubs.forEach((h, i) => {
+    hubs.push({ id: h.id, name: (h.name || 'Workspace').slice(0, 60), emoji: iconKey(h.emoji), color: col(h.color), access: ACCESS_HUB[h.access] ? h.access : 'everyone', sort: i, updated_at: now });
+    const walk = (node, parentId) => {
+      (node.folders || []).forEach((f, fi) => { folders.push({ id: f.id, hub_id: h.id, parent_id: parentId, name: (f.name || 'Folder').slice(0, 60), emoji: iconKey(f.emoji || 'folder'), access: ACCESS_HUB[f.access] ? f.access : 'everyone', sort: fi, updated_at: now }); walk(f, f.id); });
+      (node.tools || []).forEach((t, ti) => {
+        tools.push({ id: t.id, hub_id: h.id, folder_id: parentId, name: (t.name || 'Application').slice(0, 60), emoji: iconKey(t.emoji), url: (t.url || '').trim().slice(0, 1000), description: (t.desc || '').slice(0, 240), access: ACCESS_APP[t.access] ? t.access : 'everyone', sort: ti, updated_at: now });
+        if (t.access === 'selected') (t.users || []).forEach(u => grants.push({ tool_id: t.id, user_id: u }));
+      });
+    };
+    walk(h, null);
+  });
+  return { hubs, folders, tools, grants };
+}
 $('#saveBtn').onclick = async () => {
   saving = true; updateFoot();
   try {
-    const now = new Date().toISOString();
-    const hubs = draft.hubs.map((h, i) => ({ id: h.id, name: (h.name || 'Workspace').slice(0, 60), emoji: iconKey(h.emoji), color: col(h.color), access: ACCESS_HUB[h.access] ? h.access : 'everyone', sort: i, updated_at: now }));
-    const tools = draft.hubs.flatMap(h => h.tools.map((t, i) => ({ id: t.id, hub_id: h.id, name: (t.name || 'Application').slice(0, 60), emoji: iconKey(t.emoji), url: (t.url || '').trim().slice(0, 1000), description: (t.desc || '').slice(0, 240), access: ACCESS_APP[t.access] ? t.access : 'everyone', sort: i, updated_at: now })));
-    const grants = draft.hubs.flatMap(h => h.tools.filter(t => t.access === 'selected').flatMap(t => (t.users || []).map(u => ({ tool_id: t.id, user_id: u }))));
-    const keepHubs = new Set(hubs.map(h => h.id)), keepTools = new Set(tools.map(t => t.id));
-    const goneTools = cfg.hubs.flatMap(h => h.tools.map(t => t.id)).filter(id => !keepTools.has(id));
-    const goneHubs = cfg.hubs.map(h => h.id).filter(id => !keepHubs.has(id));
+    const nw = flatten(draft), old = flatten(cfg);
+    const gone = (a, b) => { const keep = new Set(b.map(x => x.id)); return a.map(x => x.id).filter(id => !keep.has(id)); };
+    const goneTools = gone(old.tools, nw.tools), goneFolders = gone(old.folders, nw.folders), goneHubs = gone(old.hubs, nw.hubs);
     const chk = r => { if (r.error) throw r.error; };
     chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim }).eq('id', 1));
     if (goneTools.length) chk(await sb.from('portal_tools').delete().in('id', goneTools));
-    if (hubs.length) chk(await sb.from('portal_hubs').upsert(hubs));
-    if (tools.length) chk(await sb.from('portal_tools').upsert(tools));
-    if (tools.length) chk(await sb.from('portal_tool_access').delete().in('tool_id', tools.map(t => t.id)));
-    if (grants.length) chk(await sb.from('portal_tool_access').insert(grants));
+    if (goneFolders.length) chk(await sb.from('portal_folders').delete().in('id', goneFolders));
+    if (nw.hubs.length) chk(await sb.from('portal_hubs').upsert(nw.hubs));
+    if (nw.folders.length) chk(await sb.from('portal_folders').upsert(nw.folders));
+    if (nw.tools.length) chk(await sb.from('portal_tools').upsert(nw.tools));
+    if (nw.tools.length) chk(await sb.from('portal_tool_access').delete().in('tool_id', nw.tools.map(t => t.id)));
+    if (nw.grants.length) chk(await sb.from('portal_tool_access').insert(nw.grants));
     if (goneHubs.length) chk(await sb.from('portal_hubs').delete().in('id', goneHubs));
-    await loadData(); draft = clone(cfg); dirty = false; renderGalaxy(); if (openHubId) renderDock();
+    await loadData(); draft = clone(cfg); dirty = false; renderGalaxy(); if (dockPath.length) renderDock();
     toast('Changes saved');
   } catch (e) { toast('Could not save: ' + friendly(e)); }
   saving = false; renderAdmin();
@@ -1017,7 +1131,7 @@ async function setCrew(p, patch, label) {
 }
 function renderCrew(b) {
   const pending = crew.filter(p => p.status === 'pending'), active = crew.filter(p => p.status === 'approved'), blocked = crew.filter(p => p.status === 'blocked');
-  const appsFor = p => p.is_admin ? 'All applications' : `${cfg.hubs.flatMap(h => h.tools.map(t => [h, t])).filter(([h, t]) => visibleFor(p.id, h, t)).length} applications`;
+  const appsFor = p => { if (p.is_admin) return 'All applications'; let n = 0; cfg.hubs.forEach(h => walkTools(h, (t, chain) => { if (visibleFor(p.id, chain, t)) n++; })); return plural(n, 'application'); };
   const head = (t, n) => el('div', { class: 'section-t', style: 'display:flex;justify-content:space-between' }, el('span', { text: t }), el('span', { text: String(n) }));
   const person = (p, acts, extra) => el('div', { class: 'crew' },
     el('div', { class: 'crewtop' },
@@ -1029,14 +1143,12 @@ function renderCrew(b) {
   b.append(el('div', { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px' },
     el('p', { class: 'tabintro', style: 'margin:0', text: 'Approve access requests, set roles, and suspend or restore users.' }),
     el('button', { class: 'btn ghost small', onclick: loadCrew }, icon('refresh'), 'Refresh')));
-
   b.append(head('Access requests', pending.length));
   if (!pending.length) b.append(el('p', { class: 'hintline', text: 'No pending requests.' }));
   pending.forEach(p => b.append(person(p, [
     el('button', { class: 'btn small', text: 'Approve', onclick: () => setCrew(p, { status: 'approved' }, 'Approved ' + p.email) }),
     el('button', { class: 'btn ghost small', text: 'Approve as admin', onclick: () => setCrew(p, { status: 'approved', is_admin: true }, p.email + ' approved as admin') }),
     el('button', { class: 'btn danger small', text: 'Reject', onclick: () => setCrew(p, { status: 'blocked' }, 'Request rejected') })], 'Requested ' + new Date(p.created_at).toLocaleDateString())));
-
   b.append(head('Active users', active.length));
   active.forEach(p => {
     const me = p.id === session.user.id, acts = [];
@@ -1047,12 +1159,8 @@ function renderCrew(b) {
     }
     b.append(person(p, acts, 'Can see: ' + appsFor(p)));
   });
-
   if (blocked.length) { b.append(head('Suspended / rejected', blocked.length)); blocked.forEach(p => b.append(person(p, [el('button', { class: 'btn ghost small', text: 'Restore access', onclick: () => setCrew(p, { status: 'approved' }, 'Access restored for ' + p.email) })]))); }
-
-  // pre-approve
-  b.append(head('Pre-approved emails', preapproved.length),
-    el('p', { class: 'hintline', text: 'People on this list are approved automatically when they request access.' }));
+  b.append(head('Pre-approved emails', preapproved.length), el('p', { class: 'hintline', text: 'People on this list are approved automatically when they request access.' }));
   const em = el('input', { class: 'i', type: 'email', placeholder: 'name@company.com', 'aria-label': 'Email to pre-approve' });
   let role = 'user';
   b.append(el('div', { class: 'addrow' }, em, select({ user: 'User', admin: 'Admin' }, 'user', v => role = v), el('button', { class: 'btn small', onclick: async () => {

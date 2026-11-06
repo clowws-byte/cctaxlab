@@ -163,3 +163,44 @@ revoke execute on function public.portal_handle_new_user()   from anon, authenti
 insert into public.portal_hubs (name, emoji, color, sort, access)
 select * from (values ('Corporate Tax','calculator','#00aeef',0,'everyone'), ('Transfer Pricing','globe','#5b8def',1,'everyone'), ('Administration','building','#4fd1c5',2,'admins')) v
 where not exists (select 1 from public.portal_hubs);
+
+-- 7. Folders inside workspaces (any depth) ------------------------------------------
+create table if not exists public.portal_folders (
+  id          uuid primary key default gen_random_uuid(),
+  hub_id      uuid not null references public.portal_hubs(id) on delete cascade,
+  parent_id   uuid references public.portal_folders(id) on delete cascade,
+  name        text not null,
+  emoji       text not null default 'folder',
+  access      text not null default 'everyone' check (access in ('everyone','admins','hidden')),
+  sort        int  not null default 0,
+  updated_at  timestamptz not null default now()
+);
+create index if not exists portal_folders_hub_idx on public.portal_folders(hub_id);
+create index if not exists portal_folders_parent_idx on public.portal_folders(parent_id);
+alter table public.portal_tools add column if not exists folder_id uuid references public.portal_folders(id) on delete cascade;
+create index if not exists portal_tools_folder_idx on public.portal_tools(folder_id);
+
+create or replace function public.portal_folder_open(f uuid) returns boolean
+language sql stable security definer set search_path = '' as $$
+  with recursive chain as (
+    select id, parent_id, access, 1 as depth from public.portal_folders where id = f
+    union all
+    select p.id, p.parent_id, p.access, c.depth + 1 from public.portal_folders p join chain c on p.id = c.parent_id where c.depth < 50
+  )
+  select exists (select 1 from chain) and not exists (select 1 from chain where access <> 'everyone');
+$$;
+revoke execute on function public.portal_folder_open(uuid) from anon, public;
+grant  execute on function public.portal_folder_open(uuid) to authenticated;
+
+alter table public.portal_folders enable row level security;
+create policy "folders read" on public.portal_folders for select to authenticated using (
+  public.portal_is_admin() or (public.portal_is_approved() and public.portal_hub_open(hub_id) and public.portal_folder_open(id)));
+create policy "folders admin write" on public.portal_folders for all to authenticated
+  using (public.portal_is_admin()) with check (public.portal_is_admin());
+
+drop policy if exists "tools read" on public.portal_tools;
+create policy "tools read" on public.portal_tools for select to authenticated using (
+  public.portal_is_admin() or (
+    public.portal_is_approved() and public.portal_hub_open(hub_id)
+    and (folder_id is null or public.portal_folder_open(folder_id))
+    and (access = 'everyone' or (access = 'selected' and public.portal_has_grant(id)))));
