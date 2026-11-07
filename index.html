@@ -604,7 +604,10 @@ body[data-theme^=tree] .side h2{font-size:34px}
 body[data-theme^=tree] .brandtext h1{font-size:clamp(28px,3.4vw,34px)}
 
 /* tree colours: night = gold line art under a moon-like sun */
-.vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{stroke:#c9a96a;stroke-opacity:.45}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-lf{fill:#e7d4a6;fill-opacity:.75}
+.vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{fill:#c9a96a;fill-opacity:.6}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-tr{fill:#d9be86}
+.vtsvg .l1{fill:#c8c47e}.vtsvg .l2{fill:#e2cf8e}.vtsvg .l3{fill:#9fb36e}.vtsvg .t-lf{opacity:.8}
+.vtsvg .r1{animation:rustle 4.6s ease-in-out infinite}.vtsvg .r2{animation:rustle 6.2s ease-in-out -2s infinite}.vtsvg .r3{animation:rustle 5.3s ease-in-out -1s infinite reverse}.vtsvg .r4{animation:rustle 7.1s ease-in-out -3s infinite}
+@keyframes rustle{0%,100%{transform:translate(0,0)}35%{transform:translate(1.8px,-1.4px)}70%{transform:translate(-1.2px,.8px)}}
 /* ---------- Vision Tree · Morning (white) ---------- */
 body[data-theme=treeday]{--gold:#b8924a;--gold2:#8a6a2c;--acc-rgb:184,146,74;--acc2-rgb:160,120,50;--btn-ink:#fffaf0;--neb1:rgba(255,196,110,.30);--neb2:rgba(150,200,140,.16);--bg:#fdfbf6;--bg-b:#f2eee3;--planet:#cfe0c4;
   --ink:#1f2a24;--muted:#5d6a62;--dim:#8a958d;--panel:rgba(255,255,255,.74);--panel2:rgba(255,255,255,.92);--line:rgba(60,64,40,.12);--line2:rgba(60,64,40,.22);--red:#c8473f;--teal:#1e8f7d}
@@ -628,9 +631,11 @@ body[data-theme=treeday] .planet:hover,body[data-theme=treeday] .planet:focus-vi
 body[data-theme=treeday] .avatar{background:#f3ead6;color:#6b5220}
 body[data-theme=treeday] .vtree{opacity:.85}
 body[data-theme=treeday] .vtsvg .t-hz{stroke:#8a6a2c;stroke-opacity:.25}
-body[data-theme=treeday] .vtsvg .t-rt{stroke:#9b7b45;stroke-opacity:.45}
+body[data-theme=treeday] .vtsvg .t-rt{fill:#8f7445;fill-opacity:.72}
+body[data-theme=treeday] .vtsvg .t-tr{fill:#8a7046}
 body[data-theme=treeday] .vtsvg .t-br{stroke:#8f7445}
-body[data-theme=treeday] .vtsvg .t-lf{fill:#6e9e4a;fill-opacity:.8}
+body[data-theme=treeday] .vtsvg .t-lf{opacity:.9}
+body[data-theme=treeday] .vtsvg .l1{fill:#4f8f34}body[data-theme=treeday] .vtsvg .l2{fill:#76b043}body[data-theme=treeday] .vtsvg .l3{fill:#a3c95e}
 body[data-theme=treeday] .motto,body[data-theme=treeday] .hero h2,body[data-theme=treeday] .hero p{text-shadow:0 0 6px #fbf8f1,0 0 14px #fbf8f1,0 0 24px #fbf8f1}
 body[data-theme=tree] .motto,body[data-theme=tree] .hero h2,body[data-theme=tree] .hero p{text-shadow:0 0 6px #0b1814,0 0 14px #0b1814,0 0 24px #0b1814}
 body[data-theme=treeday] .sprig{color:color-mix(in srgb,var(--c) 60%,#7a5c22)}
@@ -835,34 +840,64 @@ $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $
 
 /* ================= Vision Tree drawings ================= */
 const treeSVG = (depth = 9, seed = 7, o = {}) => {
-  const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46;
+  const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46, LS = o.leaf || .4, ID = 'lf' + seed;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const br = [], lf = [], rt = [];
+  const br = [], lf = [[], [], [], []], rt = [];
   const f = n => n.toFixed(1);
   function grow(x, y, ang, len, w, d, t0) {
-    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = (rnd() - .5) * len * .25;
+    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = d === 1 ? 0 : (rnd() - .5) * len * .25;
     const mx = (x + x2) / 2 + Math.cos(ang + 1.57) * bend, my = (y + y2) / 2 + Math.sin(ang + 1.57) * bend;
     br.push(`<path class="br" pathLength="1" d="M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}" stroke-width="${f(w)}" style="animation-delay:${f(t0)}s"/>`);
     const t1 = t0 + .38;
-    if (d >= depth) { lf.push(`<ellipse class="lf" cx="${f(x2)}" cy="${f(y2)}" rx="${f(2.2 + rnd() * 1.6)}" ry="${f(1.2 + rnd() * .8)}" transform="rotate(${f(ang * 57.3)} ${f(x2)} ${f(y2)})" style="animation-delay:${f(t1 + rnd() * .8)}s"/>`); return; }
+    if (d >= depth - 4) {
+      const k = d >= depth ? 3 : d >= depth - 1 ? 2 : rnd() < .6 ? 1 : 0;
+      for (let j = 0; j < k; j++) {
+        const t = .45 + rnd() * .55, side = rnd() < .5 ? -1 : 1, off = (2 + rnd() * 6) * LS * side;
+        const lx = x + (x2 - x) * t + Math.cos(ang + 1.57) * off, ly = y + (y2 - y) * t + Math.sin(ang + 1.57) * off;
+        const rot = ang * 57.3 + side * (25 + rnd() * 45) + (rnd() - .5) * 30, sc = LS * (.75 + rnd() * .6);
+        lf[Math.floor(rnd() * 4)].push(`<use href="#${ID}" class="lf l${1 + Math.floor(rnd() * 3)}" transform="translate(${f(lx)} ${f(ly)}) rotate(${f(rot)}) scale(${sc.toFixed(2)})" style="animation-delay:${f(t1 + rnd() * .9)}s"/>`);
+      }
+      if (d >= depth) return;
+    }
     const n = d < 3 ? 2 : rnd() < .25 ? 3 : 2;
     for (let i = 0; i < n; i++) {
       const spread = (n === 2 ? (i ? 1 : -1) : (i - 1)) * (.32 + rnd() * .22) * SP + (rnd() - .5) * .12;
       grow(x2, y2, Math.min(-.3, Math.max(-2.84, ang + spread - (ang + LEAN) * .2)), len * (LF + rnd() * .1), Math.max(.5, w * .7), d + 1, t1);
     }
   }
-  function root(x, y, ang, len, w, d, t0) {
-    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
-    rt.push(`<path class="br" pathLength="1" d="M${f(x)} ${f(y)}Q${f((x + x2) / 2 + (rnd() - .5) * 10)} ${f((y + y2) / 2)} ${f(x2)} ${f(y2)}" stroke-width="${f(w)}" style="animation-delay:${f(t0)}s"/>`);
-    if (d >= 5) return;
-    for (let i = 0; i < 2; i++) root(x2, y2, ang + (i ? 1 : -1) * (.3 + rnd() * .3), len * .72, Math.max(.4, w * .8), d + 1, t0 + .3);
+  // smooth tapering ribbon along a list of points (used for roots)
+  function ribbon(pts, w0, w1) {
+    const L = [], R = [], n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], m = Math.hypot(dx, dy) || 1;
+      const w = (w0 + (w1 - w0) * Math.pow(i / (n - 1), .7)) / 2, nx = -dy / m * w, ny = dx / m * w;
+      L.push(`${f(pts[i][0] + nx)} ${f(pts[i][1] + ny)}`); R.push(`${f(pts[i][0] - nx)} ${f(pts[i][1] - ny)}`);
+    }
+    return 'M' + L.join('L') + 'L' + R.reverse().join('L') + 'Z';
   }
+  function rootPts(x, y, ang, len, steps) {
+    const pts = [[x, y]], st = len / steps;
+    for (let i = 0; i < steps; i++) { ang += (1.5708 - ang) * .035 + (rnd() - .5) * .14; x += Math.cos(ang) * st; y += Math.sin(ang) * st; pts.push([x, y]); }
+    return pts;
+  }
+  const roots = [.06, .26, .62, 1.12, 2.02, 2.52, 2.88, 3.08];
+  roots.forEach((a, i) => {
+    const shallow = a < .4 || a > 2.74, len = RL * (shallow ? 2.4 : 1.5) * (.85 + rnd() * .3), w = W0 * (shallow ? .42 : .5);
+    const pts = rootPts(X0 + Math.cos(a) * W0 * .45, Y0 + 1, a, len, 16), dl = (.15 + i * .06).toFixed(2);
+    rt.push(`<path class="lf" d="${ribbon(pts, w, .6)}" style="animation-delay:${dl}s"/>`);
+    for (const j of [5, 9, 12]) { if (rnd() < .3) continue;
+      const p0 = pts[j], sa = a + (rnd() < .5 ? -1 : 1) * (.45 + rnd() * .4), sw = w * (1 - j / 16) * .55;
+      rt.push(`<path class="lf" d="${ribbon(rootPts(p0[0], p0[1], sa, len * (.22 + rnd() * .2), 8), sw, .4)}" style="animation-delay:${dl}s"/>`); }
+  });
+  const fl = W0 * 1.9, fh = W0 * 3.6;
+  const flare = `<path class="lf" d="M${f(X0 - fl)} ${f(Y0 + 2)}C${f(X0 - W0 * .7)} ${f(Y0 - 2)} ${f(X0 - W0 * .46)} ${f(Y0 - fh * .35)} ${f(X0 - W0 * .38)} ${f(Y0 - fh)}L${f(X0 + W0 * .38)} ${f(Y0 - fh)}C${f(X0 + W0 * .46)} ${f(Y0 - fh * .35)} ${f(X0 + W0 * .7)} ${f(Y0 - 2)} ${f(X0 + fl)} ${f(Y0 + 2)}Z"/>`;
   grow(X0, Y0, -1.5708, L0, W0, 1, 0);
-  for (const a of [.25, .7, 1.2, 1.57, 1.94, 2.44, 2.89]) root(X0, Y0, a, RL + rnd() * RL * .4, W0 * .22, 1, .1);
   return `<svg class="vtsvg" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="${o.par || 'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg">
-  <line class="t-hz" x1="${o.vw ? 0 : 80}" y1="${Y0}" x2="${o.vw ? VW : 520}" y2="${Y0}" stroke-width=".8"/>
-  <g class="t-rt" fill="none" stroke-linecap="round">${rt.join('')}</g>
-  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g><g class="t-lf">${lf.join('')}</g></g></svg>`;
+  <defs><path id="${ID}" d="M0 0C3 -3.6 8 -4.2 12 0C8 4.2 3 3.6 0 0Z"/></defs>
+  <line class="t-hz" x1="${o.vw ? 0 : 60}" y1="${Y0}" x2="${o.vw ? VW : 540}" y2="${Y0}" stroke-width=".8"/>
+  <g class="t-rt">${rt.join('')}</g>
+  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr">${flare}</g><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g>
+  <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}</g></g></svg>`;
 };
 const sprig = () => {
   const d = document.createElement('div'); d.className = 'sprig'; d.setAttribute('aria-hidden', 'true');
@@ -871,7 +906,7 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-$('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1130, y: 905, len: 250, w: 30, spread: 1.32, lenf: .76, lean: 1.62, rootLen: 70, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
+$('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1130, y: 875, len: 200, w: 30, spread: 1.32, lenf: .745, lean: 1.62, rootLen: 80, leaf: 1.3, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
