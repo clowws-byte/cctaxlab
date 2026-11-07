@@ -919,7 +919,7 @@ function screenWaiting(kind) {
     el('div', { class: 'statusbox' }, el('span', { class: 'pulse' + (pending ? '' : ' red') }),
       el('div', {}, el('small', { text: 'Account' }), el('b', { text: (profile && (profile.full_name || profile.email)) || '' }))),
     pending ? btn : null,
-    el('div', { class: 'links', style: 'justify-content:center' }, el('button', { class: 'link', text: 'Sign out', onclick: () => sb.auth.signOut() }))]);
+    el('div', { class: 'links', style: 'justify-content:center' }, el('button', { class: 'link', text: 'Sign out', onclick: () => sb.auth.signOut({ scope: 'local' }) }))]);
 }
 function enterApp() {
   showApp(); const g = $('#gate');
@@ -1571,10 +1571,13 @@ $('#acct').addEventListener('click', e => { if (e.target.id === 'acct') closeAcc
 $('#acctBtn').onclick = openAccount;
 
 /* ================= start ================= */
-$('#signOut').onclick = () => sb.auth.signOut();
+$('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
 (function start() {
   if (!window.supabase || SUPABASE_URL.startsWith('__')) { gate([el('h3', { text: 'Portal not yet connected' }), el('p', { class: 'lead', text: 'This portal is awaiting its database connection.' })]); return; }
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  // Refresh the session as soon as the tab is used again (browsers pause timers in background tabs)
+  const wake = () => { if (document.visibilityState === 'visible') sb.auth.getSession().catch(() => {}); };
+  document.addEventListener('visibilitychange', wake); addEventListener('focus', wake); addEventListener('online', wake);
   gate([el('h3', { text: 'Loading…' }), el('p', { class: 'lead', text: 'Checking your session.' })]);
   if (!window.__DEMO) sb.from('portal_settings').select('theme,animation').eq('id', 1).maybeSingle().then(r => { if (r && r.data && r.data.theme) applyLook({ theme: r.data.theme, anim: r.data.animation }); });
   let started = false;
