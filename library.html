@@ -195,6 +195,37 @@ body.locked input,body.locked textarea{-webkit-user-select:text;user-select:text
 body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(160,122,74,.02) 0 1px,transparent 1px 7px),linear-gradient(180deg,#fffdf8,#f6f3ec)}
 .wrap{position:relative}
 header,.hero{background:none}
+
+/* ---------- dark mode ---------- */
+body.dark{--bg:#081631;--bg-b:#10264f;--ink:#eef1f8;--muted:#97a3bf;--dim:#6b7899;--panel:rgba(16,26,56,.72);--panel2:rgba(22,34,72,.85);--line:rgba(160,180,230,.14);--line2:rgba(160,180,230,.26);--acc2:#6fd3ff;--btn-ink:#04142b;--amber:#f5c26b;color-scheme:dark}
+body.dark::before{background:repeating-linear-gradient(90deg,rgba(160,180,230,.025) 0 1px,transparent 1px 7px),linear-gradient(180deg,#081631,#10264f)}
+body.dark .shelves{opacity:.13}
+body.dark .shelves::after{background:radial-gradient(60% 80% at 50% 0%,rgba(255,196,120,.18),transparent 70%)}
+body.dark .card,body.dark .cat{box-shadow:none}
+body.dark .cat::after{background:radial-gradient(circle at 35% 35%,rgba(var(--acc-rgb),.55),rgba(var(--acc-rgb),.08) 70%);opacity:.5}
+body.dark .btn.ghost:hover{background:rgba(255,255,255,.06)}
+body.dark .btn.danger{color:#ffb3b8}
+body.dark .chip,body.dark .cat .cadm button,body.dark .pill.cat-pill{background:rgba(255,255,255,.04)}
+body.dark select.sel,body.dark input.inp,body.dark textarea.inp,body.dark .tagbox{background:rgba(6,12,30,.55)}
+body.dark select.sel option{background:#0b1430}
+body.dark .pill{color:#8be9df}
+body.dark .pill.type{color:var(--acc2)}
+body.dark .state.ok{color:#8be9df}
+body.dark .state.warn{color:#ffb3b8}
+body.dark .snip{color:#c4cde2}
+body.dark .summary{color:#d5dcec}
+body.dark .fulltext{color:#c4cde2;background:rgba(0,0,0,.2)}
+body.dark mark{background:rgba(var(--acc-rgb),.32);color:#fff}
+body.dark .drawer,body.dark .modal{background:linear-gradient(180deg,#0c1838,#0a1430)}
+body.dark .item{background:rgba(255,255,255,.02)}
+body.dark .toast{background:#13224a;border-color:var(--line2)}
+body.dark .dim{background:rgba(2,6,18,.6)}
+body.dark .spin{border-color:rgba(255,255,255,.2);border-top-color:var(--acc2)}
+body.dark .viewer{background:#1d2335}
+body.dark .vmsg{color:var(--muted);background:var(--panel2);border-color:var(--line2)}
+body.dark .vmsg h3{color:var(--ink)}
+.theme{display:inline-flex;align-items:center;justify-content:center;width:36px;height:34px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--muted)}
+.theme:hover{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -208,6 +239,7 @@ header,.hero{background:none}
     </div>
     <div class="who">
       <span id="whoName"></span><span class="tag" id="whoTag" hidden>ADMIN</span>
+      <button class="theme" id="themeBtn" type="button"></button>
       <a class="back" href="./">← Portal</a>
     </div>
   </header>
@@ -261,7 +293,7 @@ const el = (tag, attrs = {}, ...kids) => {
   for (const k of kids.flat()) if (k != null && k !== false) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
   return n;
 };
-const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/>', plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>' };
+const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/>', plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>' };
 const icon = k => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.innerHTML = ICONS[k]; return s; };
 let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); };
 const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -273,6 +305,17 @@ const loaded = {};
 const loadScript = src => loaded[src] ||= new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.append(s); });
 // renders text containing <<hit>> markers as safe nodes with <mark>
 const marked = s => { const f = document.createDocumentFragment(); String(s || '').split(/(<<|>>)/).reduce((on, part) => { if (part === '<<') return true; if (part === '>>') return false; if (part) f.append(on ? el('mark', { text: part }) : document.createTextNode(part)); return on; }, false); return f; };
+
+/* ---------- light / dark mode (remembered on this device) ---------- */
+function setTheme(t) {
+  document.body.classList.toggle('dark', t === 'dark');
+  const b = $('#themeBtn'); b.replaceChildren(icon(t === 'dark' ? 'sun' : 'moon'));
+  b.title = t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'; b.setAttribute('aria-label', b.title);
+  try { localStorage.setItem('cctlib-theme', t); } catch {}
+}
+let savedTheme = 'light'; try { savedTheme = localStorage.getItem('cctlib-theme') || 'light'; } catch {}
+setTheme(savedTheme);
+$('#themeBtn').onclick = () => setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 
 /* ---------- state ---------- */
 let sb, me = null, isAdmin = false, docs = [], cats = [], curCat = null, hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'relevance';
