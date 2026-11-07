@@ -164,7 +164,7 @@ body.locked{-webkit-user-select:none;user-select:none}
 body.locked input,body.locked textarea{-webkit-user-select:text;user-select:text}
 
 /* view-only document viewer */
-.viewer{position:fixed;inset:0;z-index:30;background:#1d2335;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-user-select:none;user-select:none}
+.viewer{position:fixed;inset:0;z-index:30;background:#ffffff;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-user-select:none;user-select:none}
 .viewer.open{opacity:1;pointer-events:auto}
 .vbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#0c1838;border-bottom:1px solid var(--line2)}
 .vbar h2{margin:0;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -172,20 +172,20 @@ body.locked input,body.locked textarea{-webkit-user-select:text;user-select:text
 .vbar .zoom{display:flex;gap:4px;align-items:center;color:var(--muted);font-size:12.5px}
 .vbody{flex:1;overflow:auto;position:relative;padding:24px 16px 60px}
 .vpages{display:flex;flex-direction:column;align-items:center;gap:16px}
-.vpages canvas{background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45);max-width:none;display:block}
-.vpage-ph{background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45)}
-.vdoc{background:#fff;color:#111;max-width:1000px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.vpages canvas{background:#fff;box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef;max-width:none;display:block}
+.vpage-ph{background:#fff;box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef}
+.vdoc{background:#fff;color:#111;max-width:1000px;margin:0 auto;box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef}
 .vdoc.textview{padding:40px 48px;white-space:pre-wrap;font-size:14px;line-height:1.6;font-family:Georgia,serif}
 .vdocx{display:flex;justify-content:center}
 .vdocx .docx-wrapper{background:transparent!important;padding:0!important}
-.vdocx .docx-wrapper>section.docx{box-shadow:0 4px 24px rgba(0,0,0,.45);margin-bottom:16px}
-.vsheet{background:#fff;color:#111;overflow:auto;max-width:100%;width:fit-content;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.vdocx .docx-wrapper>section.docx{box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef;margin-bottom:16px}
+.vsheet{background:#fff;color:#111;overflow:auto;max-width:100%;width:fit-content;margin:0 auto;box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef}
 .vsheet table{border-collapse:collapse;font-size:12.5px;font-family:Calibri,Arial,sans-serif}
 .vsheet td,.vsheet th{border:1px solid #d4d4d4;padding:3px 8px;white-space:nowrap}
 .vtabs{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
-.vframe{width:100%;max-width:1000px;margin:0 auto;display:block;border:0;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45);min-height:70vh}
-.vmsg{max-width:520px;margin:12vh auto;text-align:center;color:var(--muted);background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:30px}
-.vmsg h3{color:var(--ink);margin:0 0 8px}
+.vframe{width:100%;max-width:1000px;margin:0 auto;display:block;border:0;background:#fff;box-shadow:0 2px 14px rgba(15,30,60,.16);outline:1px solid #e3e7ef;min-height:70vh}
+.vmsg{max-width:520px;margin:12vh auto;text-align:center;color:#5b6475;background:#f5f7fb;border:1px solid #e3e7ef;border-radius:16px;padding:30px}
+.vmsg h3{color:#1a2233;margin:0 0 8px}
 @media print{body *{display:none!important}body::after{content:"Printing is disabled for the CCT Library.";display:block;padding:40px;font:16px sans-serif;color:#000}}
 </style>
 </head>
