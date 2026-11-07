@@ -337,9 +337,11 @@ create index if not exists kb_documents_category_idx on public.kb_documents (cat
 -- A workspace can go straight into its first application (used by CCT Library)
 alter table public.portal_hubs add column if not exists open_direct boolean not null default false;
 
--- 10. Selected by branch, and View / Edit levels ---------------------------------------
-alter table public.portal_tools add column if not exists default_level text not null default 'edit' check (default_level in ('view','edit'));
+-- 10. Selected by branch, and Closed applications -----------------------------------------
 create table if not exists public.portal_tool_branch_access (tool_id uuid not null references public.portal_tools(id) on delete cascade, branch text not null references public.portal_branches(code) on update cascade on delete cascade, primary key (tool_id, branch));
-create table if not exists public.portal_tool_levels (tool_id uuid not null references public.portal_tools(id) on delete cascade, user_id uuid not null references public.portal_profiles(id) on delete cascade, level text not null check (level in ('view','edit')), primary key (tool_id, user_id));
--- portal_my_branch(), portal_has_grant() (user OR branch), RLS policies, and portal_my_access(p_tool, p_url)
--- are defined in migration "cctaxlab_branch_grants_and_levels". Apps call portal_my_access via access.js.
+-- portal_my_branch(); portal_has_grant() = user selected OR user's branch selected; RLS: read own branch or admin, write admin.
+alter table public.portal_tools add column if not exists status text not null default 'active' check (status in ('active','closed'));
+alter table public.portal_tools add column if not exists closed_note text not null default '';
+alter table public.portal_tools add column if not exists closed_at timestamptz;
+-- Closed applications stay on the dashboard; staff cannot open them (link hidden in the portal); admins can.
+-- Unused (View/Edit feature was reverted 2026-11-08): portal_tools.default_level, portal_tool_levels, portal_my_access().
