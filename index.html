@@ -21,6 +21,7 @@
   --radius:16px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
 body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;
   background-image:radial-gradient(70vmax 50vmax at 85% -10%,var(--neb1),transparent 60%),radial-gradient(60vmax 45vmax at -10% 110%,var(--neb2),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg-b));background-attachment:fixed}
@@ -999,10 +1000,12 @@ const canDrag = () => typeof Sortable !== 'undefined';
 let arranging = false, orderTimer = null;
 function setArrangeBtn() {
   const b = $('#arrangeBtn'); b.hidden = !isAdmin || !canDrag();
+  if (!isAdmin && arranging) { arranging = false; document.body.classList.remove('arranging'); }
   b.replaceChildren(icon(arranging ? 'check' : 'move'), arranging ? 'Done arranging' : 'Arrange');
   b.classList.toggle('on', arranging);
 }
 $('#arrangeBtn').onclick = () => {
+  if (!isAdmin) return;
   if (!arranging && dirty) return toast('Save or discard your Admin changes first');
   arranging = !arranging; document.body.classList.toggle('arranging', arranging);
   if (arranging) { query = ''; $('#q').value = ''; toast('Drag cards to rearrange. Open a workspace to arrange inside it.'); }
