@@ -264,6 +264,41 @@ body{background-image:radial-gradient(55vmax 45vmax at 100% 0%,rgba(255,196,120,
 .signout{background:rgba(6,14,32,.55);color:#d6def0}
 .motto{text-shadow:0 1px 8px rgba(4,10,26,.6)}
 @media(max-width:760px){.sun{right:-42vmax;top:-44vmax;width:92vmax;height:92vmax;opacity:.8}}
+
+/* ---------- what's new ---------- */
+.bellbtn{position:relative;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;border:1px solid rgba(160,180,230,.18);background:rgba(6,14,32,.55);color:var(--ink);cursor:pointer}
+.bellbtn:hover{border-color:var(--gold)}
+.bellbtn svg{width:18px;height:18px}
+.bellbtn .dot{position:absolute;top:-5px;right:-6px;margin:0}
+.newslist{display:flex;flex-direction:column;gap:18px}
+.ndate{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.nitem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel);margin-top:8px}
+.nitem.fresh{border-color:rgba(var(--acc-rgb),.55);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.08)}
+.nhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nhead b{font-size:14.5px}
+.nitem p,.updbody{margin:6px 0 0;color:var(--muted);font-size:13.5px;line-height:1.55}
+.kind{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:6px}
+.kind.k-new{background:rgba(var(--acc-rgb),.16);color:var(--gold2)}
+.kind.k-improved{background:rgba(79,209,197,.14);color:#9ff0e7}
+.kind.k-fixed{background:rgba(228,180,80,.16);color:#f2c96d}
+.newtag{font-size:10px;font-weight:800;color:#fff;background:var(--red);padding:2px 6px;border-radius:999px}
+.updcard{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:rgba(255,255,255,.025)}
+.updcard.on{border-color:rgba(79,209,197,.4);background:rgba(79,209,197,.05)}
+.updcard.editing{border-color:rgba(var(--acc-rgb),.5)}
+.annbox{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;min-width:62px;padding-top:2px}
+.annbox input{position:absolute;opacity:0;pointer-events:none}
+.annbox small{font-size:10.5px;color:var(--muted);font-weight:700}
+.annbox:focus-within .ck{outline:2px solid var(--gold)}
+.updmain{flex:1;min-width:0}
+.updmeta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+.updmeta .muted{color:var(--dim)}
+.updacts{display:flex;gap:6px;align-items:center}
+.updgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.updgrid .sel{width:100%}
+.annline{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.annline input{width:16px;height:16px;accent-color:#1fae8f}
+textarea.i{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--line2);background:rgba(6,10,24,.55);color:var(--ink);font:inherit;font-size:14px;resize:vertical}
+@media(max-width:600px){.updgrid{grid-template-columns:1fr}.updcard{flex-wrap:wrap}}
 /* ---------- logo ---------- */
 .logo{display:inline-flex;align-items:center}
 .logo img{height:40px;display:block}
@@ -554,7 +589,7 @@ table.rt .vbadge{width:auto}
     </div>
     <div class="motto"><span><b>Clarify</b> in Complexity, <b>Confidence</b> in Compliance</span><span><b>Efficiency</b> without Compromise, <b>Stability</b> with Purpose</span></div>
     <div class="who">
-      <button class="acctbtn" id="acctBtn" title="My account"><span class="avatar" id="avatar" aria-hidden="true"></span><span id="whoName"></span></button><span class="tag" id="adminTag" hidden>ADMIN</span>
+      <button class="bellbtn" id="newsBtn" title="What's new" aria-label="What's new" hidden><span id="bellIc"></span><span class="dot" id="newsDot" hidden></span></button><button class="acctbtn" id="acctBtn" title="My account"><span class="avatar" id="avatar" aria-hidden="true"></span><span id="whoName"></span></button><span class="tag" id="adminTag" hidden>ADMIN</span>
       <button class="signout" id="signOut">Sign out</button>
     </div>
   </header>
@@ -597,6 +632,7 @@ table.rt .vbadge{width:auto}
     <button class="tab on" id="tabApps">Applications</button>
     <button class="tab" id="tabVis">Visibility</button>
     <button class="tab" id="tabAccess">Access</button>
+    <button class="tab" id="tabNews">Updates</button>
     <button class="tab" id="tabCrew">Users<span class="dot" id="crewDot" hidden></span></button>
   </div>
   <div class="d-body" id="dBody"></div>
@@ -606,6 +642,7 @@ table.rt .vbadge{width:auto}
     <button class="btn small" id="saveBtn">Save changes</button>
   </div>
 </aside>
+<div class="dock" id="news" role="dialog" aria-modal="true" aria-label="What's new"><div class="sheet" id="newsBody"></div></div>
 <div class="dock" id="acct" role="dialog" aria-modal="true" aria-label="My account"><div class="sheet" id="acctBody"></div></div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -638,6 +675,8 @@ const P = {
   palette:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.3A5.7 5.7 0 0 0 22 9.7C22 5.4 17.5 2 12 2z"/>',
   grip:'<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
   move:'<path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  megaphone:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   x:'<path d="M18 6L6 18M6 6l12 12"/>',
   arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
@@ -691,7 +730,7 @@ const friendly = e => {
 };
 const orb = (c, ring = true) => { const o = el('div', { class: 'orb', style: c ? `--c:${c}` : null }); if (ring) { o.prepend(el('span', { class: 'rb' })); o.append(el('span', { class: 'rf' })); } return o; };
 $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $('.bigplanet').append(orb(null, false)); $('.moon2').append(orb(null, false)); $('#sysOrb').replaceWith(orb('var(--gold)'));
-$('#searchIcon').append(icon('search')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
+$('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
 const THEMES = { blue: ['Cheng Blue', '#00aeef', '#071229'], gold: ['Navy & Gold', '#c9a54c', '#081028'], teal: ['Emerald', '#2ec4a0', '#06191c'], violet: ['Royal Violet', '#9b8cff', '#0e0a2a'], silver: ['Graphite', '#c3cede', '#0d1118'], copper: ['Copper', '#e8875a', '#140b14'] };
@@ -956,8 +995,9 @@ async function afterLogin() {
   isAdmin = !!profile.is_admin;
   setMyName(profile.full_name ? properName(profile.full_name) : profile.email);
   $('#adminTag').hidden = !isAdmin;
-  await Promise.all([loadData(), loadBranches()]);
+  await Promise.all([loadData(), loadBranches(), loadUpdates()]);
   enterApp();
+  if (unseen().length) setTimeout(() => { if (profile && !$('#news').classList.contains('open')) openNews(); }, 1400);
   if (isAdmin) loadCrew();
 }
 function setMyName(nm) {
@@ -1117,7 +1157,7 @@ function wireDockSort(cur) {
 function closeDock() { openHubId = null; dockPath = []; $('#dock').classList.remove('open'); }
 $('#dockClose').onclick = closeDock;
 $('#dock').addEventListener('click', e => { if (e.target.id === 'dock') closeDock(); });
-addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#acct').classList.contains('open')) closeAccount(); else if ($('#drawer').classList.contains('open')) closeAdmin(); else closeDock(); } });
+addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#news').classList.contains('open')) closeNews(); else if ($('#acct').classList.contains('open')) closeAccount(); else if ($('#drawer').classList.contains('open')) closeAdmin(); else closeDock(); } });
 
 /* ================= admin ================= */
 const ACCESS_HUB = { everyone: 'Everyone', admins: 'Admins only', hidden: 'Hidden' };
@@ -1127,7 +1167,7 @@ let previewAs = 'any', preapproved = [];
 function openAdmin() { if (!draft) draft = clone(cfg); $('#drawer').classList.add('open'); renderAdmin(); loadCrew(); }
 function closeAdmin() { $('#drawer').classList.remove('open'); }
 $('#openAdmin').onclick = openAdmin; $('#closeAdmin').onclick = closeAdmin;
-for (const [id, tab] of [['#tabApps', 'apps'], ['#tabVis', 'vis'], ['#tabAccess', 'access'], ['#tabCrew', 'crew']]) $(id).onclick = () => { adminTab = tab; renderAdmin(); if (tab === 'crew' || tab === 'access') loadCrew(); };
+for (const [id, tab] of [['#tabApps', 'apps'], ['#tabVis', 'vis'], ['#tabAccess', 'access'], ['#tabNews', 'news'], ['#tabCrew', 'crew']]) $(id).onclick = () => { adminTab = tab; renderAdmin(); if (tab === 'crew' || tab === 'access' || tab === 'news') loadCrew(); if (tab === 'news') loadUpdates().then(() => adminTab === 'news' && renderAdmin()); };
 function markDirty() { dirty = true; updateFoot(); }
 function updateFoot() {
   const s = $('#saveStatus'); s.textContent = saving ? 'Saving…' : dirty ? 'Unsaved changes' : 'All changes saved'; s.classList.toggle('dirty', dirty);
@@ -1151,11 +1191,11 @@ const nameOf = p => properName(p.full_name) || p.email;
 const toggle = key => { expanded.has(key) ? expanded.delete(key) : expanded.add(key); renderAdmin(); };
 
 function renderAdmin() {
-  for (const [id, tab] of [['#tabApps', 'apps'], ['#tabVis', 'vis'], ['#tabAccess', 'access'], ['#tabCrew', 'crew']]) $(id).classList.toggle('on', adminTab === tab);
-  $('#dFoot').style.display = adminTab === 'crew' ? 'none' : '';
+  for (const [id, tab] of [['#tabApps', 'apps'], ['#tabVis', 'vis'], ['#tabAccess', 'access'], ['#tabNews', 'news'], ['#tabCrew', 'crew']]) $(id).classList.toggle('on', adminTab === tab);
+  $('#dFoot').style.display = (adminTab === 'crew' || adminTab === 'news') ? 'none' : '';
   $('#drawer').classList.toggle('wide', adminTab === 'access');
   const b = $('#dBody'); const scroll = b.scrollTop; b.replaceChildren();
-  if (adminTab === 'apps') renderApps(b); else if (adminTab === 'vis') renderVis(b); else if (adminTab === 'access') renderAccess(b); else renderCrew(b);
+  if (adminTab === 'apps') renderApps(b); else if (adminTab === 'vis') renderVis(b); else if (adminTab === 'access') renderAccess(b); else if (adminTab === 'news') renderUpdatesTab(b); else renderCrew(b);
   b.scrollTop = scroll; updateFoot();
 }
 
@@ -1590,6 +1630,105 @@ function closeAccount() { $('#acct').classList.remove('open'); }
 $('#acct').addEventListener('click', e => { if (e.target.id === 'acct') closeAccount(); });
 $('#acctBtn').onclick = openAccount;
 
+/* ================= What's new (all users) ================= */
+let updates = [];
+const KIND = { new: 'New', improved: 'Improved', fixed: 'Fixed' };
+const fmtDate = d => { try { return new Date(d + (String(d).length === 10 ? 'T00:00:00' : '')).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return d; } };
+const announced = () => updates.filter(u => u.announce && (u.audience === 'everyone' || isAdmin));
+const unseen = () => announced().filter(u => !profile.updates_seen_at || new Date(u.announced_at || u.created_at) > new Date(profile.updates_seen_at));
+async function loadUpdates() {
+  const r = await sb.from('portal_updates').select('*').order('released_at', { ascending: false }).order('created_at', { ascending: false });
+  if (!r.error) updates = r.data || [];
+  setNewsDot();
+}
+function setNewsDot() {
+  const n = profile ? unseen().length : 0;
+  $('#newsDot').hidden = !n; $('#newsDot').textContent = n;
+  $('#newsBtn').hidden = !profile;
+}
+async function openNews() {
+  const list = announced(), fresh = new Set(unseen().map(u => u.id));
+  const box = $('#newsBody');
+  const groups = []; list.forEach(u => { const g = groups[groups.length - 1]; if (g && g.d === u.released_at) g.items.push(u); else groups.push({ d: u.released_at, items: [u] }); });
+  box.replaceChildren(
+    el('div', { class: 'sheet-head' }, el('div', { class: 'p-icon' }, icon('megaphone')), el('div', {}, el('h2', { text: "What's new" }), el('p', { text: list.length ? 'Latest updates to CCTaxLab' : 'No announcements yet' })), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeNews }, icon('x'))),
+    el('div', { class: 'divider' }),
+    list.length ? el('div', { class: 'newslist' }, groups.map(g => el('div', { class: 'ngroup' },
+      el('div', { class: 'ndate', text: fmtDate(g.d) }),
+      g.items.map(u => el('div', { class: 'nitem' + (fresh.has(u.id) ? ' fresh' : '') },
+        el('div', { class: 'nhead' }, el('span', { class: 'kind k-' + u.kind, text: KIND[u.kind] || 'New' }), el('b', { text: u.title }),
+          fresh.has(u.id) ? el('span', { class: 'newtag', text: 'NEW' }) : null, u.audience === 'admins' ? el('span', { class: 'st approved', text: 'ADMINS' }) : null),
+        u.body ? el('p', { text: u.body }) : null))))) :
+      el('div', { class: 'empty', style: 'margin:10px 0' }, el('div', { class: 'ring' }, icon('megaphone')), el('p', { style: 'margin:12px 0 0', text: 'Announcements from your administrator will appear here.' })));
+  $('#news').classList.add('open');
+  if (fresh.size) {
+    const { data, error } = await sb.rpc('portal_mark_updates_seen');
+    if (!error) { profile.updates_seen_at = data || new Date().toISOString(); setNewsDot(); }
+  }
+}
+function closeNews() { $('#news').classList.remove('open'); }
+$('#news').addEventListener('click', e => { if (e.target.id === 'news') closeNews(); });
+$('#newsBtn').onclick = openNews;
+
+/* ---------- Admin tab: Updates ---------- */
+let updEditing = null, updSeen = {};
+async function renderUpdatesTab(b) {
+  const staff = crew.filter(p => p.status === 'approved');
+  const seenBy = u => u.announce ? staff.filter(p => (u.audience === 'everyone' || p.is_admin) && p.updates_seen_at && new Date(p.updates_seen_at) >= new Date(u.announced_at || u.created_at)).length : 0;
+  const audienceCount = u => staff.filter(p => u.audience === 'everyone' || p.is_admin).length;
+  b.append(el('div', { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap' },
+    el('p', { class: 'tabintro', style: 'margin:0', text: 'Updates installed in the portal. Tick "Announce" to show an update to users under What\'s new. Unseen announcements pop up once after sign-in.' }),
+    el('button', { class: 'btn small', onclick: () => { updEditing = 'new'; renderAdmin(); } }, icon('plus'), 'Add update')));
+  if (updEditing === 'new') b.append(updForm({ title: '', body: '', kind: 'new', audience: 'everyone', released_at: new Date().toISOString().slice(0, 10), announce: false }));
+  const ann = updates.filter(u => u.announce).length;
+  b.append(el('div', { class: 'section-t', style: 'display:flex;justify-content:space-between' }, el('span', { text: 'All updates' }), el('span', { text: `${ann} announced · ${updates.length - ann} not announced` })));
+  if (!updates.length) b.append(el('p', { class: 'hintline', text: 'No updates yet.' }));
+  updates.forEach(u => {
+    if (updEditing === u.id) { b.append(updForm(u)); return; }
+    const del = el('button', { class: 'iconbtn', title: 'Delete', 'aria-label': 'Delete update' }, icon('trash'));
+    del.onclick = () => { const box = el('span', { class: 'confirm' }, 'Delete?', el('button', { class: 'btn danger small', text: 'Delete', onclick: async () => { const { error } = await sb.from('portal_updates').delete().eq('id', u.id); if (error) return toast(friendly(error)); await loadUpdates(); renderAdmin(); toast('Update deleted'); } }), el('button', { class: 'btn ghost small', text: 'Cancel', onclick: () => box.replaceWith(del) })); del.replaceWith(box); };
+    b.append(el('div', { class: 'updcard' + (u.announce ? ' on' : '') },
+      el('label', { class: 'annbox', title: u.announce ? 'Announced to users' : 'Not announced' },
+        el('input', { type: 'checkbox', checked: u.announce, onchange: e => setAnnounce(u, e.target.checked) }), el('span', { class: 'ck ' + (u.announce ? 'on' : 'off') }, u.announce ? icon('check') : null), el('small', { text: 'Announce' })),
+      el('div', { class: 'updmain' },
+        el('div', { class: 'nhead' }, el('span', { class: 'kind k-' + u.kind, text: KIND[u.kind] }), el('b', { text: u.title }), u.audience === 'admins' ? el('span', { class: 'st approved', text: 'ADMINS ONLY' }) : null),
+        u.body ? el('p', { class: 'updbody', text: u.body }) : null,
+        el('div', { class: 'updmeta' }, el('span', { text: 'Installed ' + fmtDate(u.released_at) }),
+          u.announce ? el('span', { text: `Announced ${fmtDate(String(u.announced_at || u.created_at).slice(0, 10))} · seen by ${seenBy(u)} of ${audienceCount(u)}` }) : el('span', { class: 'muted', text: 'Not announced' }))),
+      el('div', { class: 'updacts' }, el('button', { class: 'iconbtn', title: 'Edit', 'aria-label': 'Edit update', onclick: () => { updEditing = u.id; renderAdmin(); } }, icon('edit')), del)));
+  });
+}
+async function setAnnounce(u, on) {
+  const patch = { announce: on, updated_at: new Date().toISOString() };
+  if (on) patch.announced_at = new Date().toISOString();
+  const { error } = await sb.from('portal_updates').update(patch).eq('id', u.id);
+  if (error) { toast('Could not update: ' + friendly(error)); return renderAdmin(); }
+  await loadUpdates(); renderAdmin(); toast(on ? `"${u.title}" announced to ${u.audience === 'admins' ? 'admins' : 'all users'}` : `"${u.title}" hidden from What's new`);
+}
+function updForm(u) {
+  const title = el('input', { class: 'i', value: u.title, maxlength: 120, placeholder: 'e.g. New TP Documentation app' });
+  const body = el('textarea', { class: 'i', rows: 3, maxlength: 1000, placeholder: 'What changed and how to use it' }); body.value = u.body || '';
+  const date = el('input', { class: 'i', type: 'date', value: u.released_at });
+  let kind = u.kind, audience = u.audience, announce = !!u.announce;
+  const ann = el('input', { type: 'checkbox', checked: announce, onchange: e => announce = e.target.checked });
+  const save = el('button', { class: 'btn small', text: u.id ? 'Save' : 'Add update', onclick: async () => {
+    if (!title.value.trim()) return toast('Please enter a title');
+    const row = { title: title.value.trim(), body: body.value.trim(), kind, audience, released_at: date.value || new Date().toISOString().slice(0, 10), announce, updated_at: new Date().toISOString() };
+    if (announce && (!u.id || !u.announce)) row.announced_at = new Date().toISOString();
+    const r = u.id ? await sb.from('portal_updates').update(row).eq('id', u.id) : await sb.from('portal_updates').insert(row);
+    if (r.error) return toast('Could not save: ' + friendly(r.error));
+    updEditing = null; await loadUpdates(); renderAdmin(); toast(u.id ? 'Update saved' : 'Update added'); } });
+  return el('div', { class: 'updcard editing' }, el('div', { class: 'updmain', style: 'width:100%' },
+    el('label', { class: 'f', style: 'margin-top:0', text: 'Title' }), title,
+    el('label', { class: 'f', text: 'Details' }), body,
+    el('div', { class: 'updgrid' },
+      el('div', {}, el('label', { class: 'f', text: 'Type' }), select(KIND, kind, v => kind = v)),
+      el('div', {}, el('label', { class: 'f', text: 'Show to' }), select({ everyone: 'Everyone', admins: 'Admins only' }, audience, v => audience = v)),
+      el('div', {}, el('label', { class: 'f', text: 'Installed on' }), date)),
+    el('label', { class: 'annline' }, ann, 'Announce to users now'),
+    el('div', { class: 'toggles' }, save, el('button', { class: 'btn ghost small', text: 'Cancel', onclick: () => { updEditing = null; renderAdmin(); } }))));
+}
+
 /* ================= start ================= */
 $('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
 (function start() {
@@ -1604,7 +1743,7 @@ $('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
   sb.auth.onAuthStateChange((event, s) => {
     session = s;
     if (event === 'PASSWORD_RECOVERY') { recovering = true; screenNewPassword(); return; }
-    if (event === 'SIGNED_OUT' || !s) { arranging = false; document.body.classList.remove('arranging'); profile = null; isAdmin = false; cfg = null; draft = null; dirty = false; closeAdmin(); closeDock(); closeAccount(); screenSignIn(); return; }
+    if (event === 'SIGNED_OUT' || !s) { arranging = false; document.body.classList.remove('arranging'); profile = null; isAdmin = false; cfg = null; draft = null; dirty = false; closeAdmin(); closeDock(); closeAccount(); closeNews(); updates = []; $('#newsBtn').hidden = true; screenSignIn(); return; }
     if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') return;
     if (event === 'SIGNED_IN' && started && profile) return;
     started = true; setTimeout(afterLogin, 0);

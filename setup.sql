@@ -219,3 +219,22 @@ create policy "branches admin write" on public.portal_branches for all to authen
 alter table public.portal_profiles add column if not exists branch text references public.portal_branches(code) on update cascade on delete set null;
 create index if not exists portal_profiles_branch_idx on public.portal_profiles(branch);
 -- (portal_handle_new_user updated to store raw_user_meta_data->>'branch')
+
+-- 9. What's new / updates -----------------------------------------------------------
+create table if not exists public.portal_updates (
+  id uuid primary key default gen_random_uuid(), title text not null, body text not null default '',
+  kind text not null default 'new' check (kind in ('new','improved','fixed')),
+  audience text not null default 'everyone' check (audience in ('everyone','admins')),
+  released_at date not null default current_date, announce boolean not null default false, announced_at timestamptz,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+alter table public.portal_profiles add column if not exists updates_seen_at timestamptz;
+alter table public.portal_updates enable row level security;
+create policy "updates read" on public.portal_updates for select to authenticated using (
+  public.portal_is_admin() or (public.portal_is_approved() and announce and audience = 'everyone'));
+create policy "updates admin write" on public.portal_updates for all to authenticated using (public.portal_is_admin()) with check (public.portal_is_admin());
+create or replace function public.portal_mark_updates_seen() returns timestamptz
+language plpgsql security definer set search_path = '' as $$
+declare t timestamptz := now();
+begin update public.portal_profiles set updates_seen_at = t where id = (select auth.uid()); return t; end $$;
+revoke execute on function public.portal_mark_updates_seen() from anon, public;
+grant execute on function public.portal_mark_updates_seen() to authenticated;
