@@ -264,6 +264,34 @@ body{background-image:radial-gradient(55vmax 45vmax at 100% 0%,rgba(255,196,120,
 .signout{background:rgba(6,14,32,.55);color:#d6def0}
 .motto{text-shadow:0 1px 8px rgba(4,10,26,.6)}
 @media(max-width:760px){.sun{right:-42vmax;top:-44vmax;width:92vmax;height:92vmax;opacity:.8}}
+
+/* ---------- solar-system view ---------- */
+.viewsw{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:rgba(6,14,32,.45)}
+.viewsw button{background:transparent;border:0;color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer}
+.viewsw button.on{background:rgba(var(--acc-rgb),.18);color:var(--ink)}
+.galaxy.orbitmode{display:block}
+.solar{position:relative;width:100%;margin-top:6px;animation:rise .6s cubic-bezier(.2,.8,.2,1)}
+.oring{position:absolute;border-radius:50%;border:1px solid rgba(255,214,150,.13);box-shadow:0 0 0 1px rgba(var(--acc-rgb),.04) inset;pointer-events:none}
+.osun{position:absolute;width:150px;height:150px;transform:translate(-50%,-50%);z-index:60;pointer-events:none}
+.osun .odisc{position:absolute;inset:38px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fffaf0 0 18%,#ffe3a3 42%,#ffc062 70%,#f59f3a 100%);box-shadow:0 0 40px 12px rgba(255,200,110,.55),0 0 120px 40px rgba(255,180,90,.25);animation:sunpulse 7s ease-in-out infinite}
+.osun .orays{position:absolute;inset:-70px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,226,165,.16) 0deg 4deg,transparent 4deg 13deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 18%,transparent 62%);animation:spin 90s linear infinite}
+.osun .sunl{position:absolute;left:50%;top:100%;transform:translate(-50%,-6px);text-align:center;white-space:nowrap}
+.osun .sunl b{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#ffe3a8;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.oplanet{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:inherit;cursor:pointer;padding:0;will-change:transform;transition:filter .2s}
+.oplanet .oball{position:relative;width:var(--s);height:var(--s);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.oplanet .oball .orb{--s:var(--s);width:100%;height:100%;box-shadow:inset -12px -10px 22px rgba(2,4,14,.72),inset 8px 6px 14px rgba(255,220,160,.20),0 0 26px color-mix(in srgb,var(--c) 45%,transparent)}
+.oplanet .oicon{position:absolute;inset:0;display:grid;place-items:center;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));z-index:2}
+.oplanet .oicon svg{width:calc(var(--s) * .36);height:calc(var(--s) * .36);stroke-width:1.9}
+.oplanet .olabel{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 10px;border-radius:10px;background:rgba(6,14,32,.55);border:1px solid rgba(160,180,230,.14);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);white-space:nowrap;transition:border-color .2s,background .2s}
+.oplanet .olabel b{font-size:13.5px}
+.oplanet .olabel span{font-size:11.5px;color:var(--muted)}
+.oplanet .olabel .pill{margin-top:4px}
+.oplanet.hover .oball,.oplanet:focus-visible .oball{transform:scale(1.14)}
+.oplanet.hover .olabel,.oplanet:focus-visible .olabel{border-color:color-mix(in srgb,var(--c) 70%,transparent);background:rgba(10,22,48,.85)}
+.oplanet:focus-visible{outline:none}
+body.orbitview .sun{opacity:.35;transition:opacity .8s}
+body.orbitview .orbits{opacity:0;transition:opacity .8s}
+.hero{position:relative;z-index:70}
 /* ---------- logo ---------- */
 .logo{display:inline-flex;align-items:center}
 .logo img{height:40px;display:block}
@@ -561,7 +589,7 @@ table.rt .vbadge{width:auto}
   <div class="note" id="note"></div>
   <div class="hero">
     <div><h2 id="greet">Welcome back</h2><p>Select a workspace to open its applications.</p></div>
-    <div class="herotools"><button class="btn ghost small" id="arrangeBtn" hidden></button><label class="search"><span id="searchIcon"></span><input id="q" type="search" placeholder="Search applications" aria-label="Search applications"></label></div>
+    <div class="herotools"><div class="viewsw" id="viewSw" role="group" aria-label="Layout"><button id="vOrbit" title="Solar system view">Orbit</button><button id="vGrid" title="Card view">Grid</button></div><button class="btn ghost small" id="arrangeBtn" hidden></button><label class="search"><span id="searchIcon"></span><input id="q" type="search" placeholder="Search applications" aria-label="Search applications"></label></div>
   </div>
   <div class="galaxy" id="galaxy" aria-live="polite"></div>
 </div>
@@ -1016,7 +1044,7 @@ const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const canDrag = () => typeof Sortable !== 'undefined';
 let arranging = false, orderTimer = null;
 function setArrangeBtn() {
-  const b = $('#arrangeBtn'); b.hidden = !isAdmin || !canDrag();
+  const b = $('#arrangeBtn'); setViewSw(); b.hidden = !isAdmin || !canDrag();
   if (!isAdmin && arranging) { arranging = false; document.body.classList.remove('arranging'); }
   b.replaceChildren(icon(arranging ? 'check' : 'move'), arranging ? 'Done arranging' : 'Arrange');
   b.classList.toggle('on', arranging);
@@ -1041,12 +1069,18 @@ function renderGalaxy() {
   let hubs = c.hubs.filter(canSee);
   if (q) hubs = hubs.filter(h => { if (h.name.toLowerCase().includes(q)) return true; let hit = false; walkTools(h, (t, chain) => { if (chain.every(canSee) && canSee(t) && (t.name + ' ' + t.desc + ' ' + chain.map(n => n.name).join(' ')).toLowerCase().includes(q)) hit = true; }); return hit; });
   if (!hubs.length) {
+    document.body.classList.remove('orbitview'); g.classList.remove('orbitmode');
     g.append(el('div', { class: 'empty' }, el('div', { class: 'ring' }, icon('orbit')),
       el('h3', { text: q ? 'No matches' : isAdmin ? 'No workspaces yet' : 'Nothing here yet' }),
       el('p', { text: q ? 'Try a different search term.' : isAdmin ? 'Open Admin to add your first workspace and applications.' : 'No workspaces have been made available to you yet.' }),
       isAdmin && !q ? el('button', { class: 'btn', onclick: openAdmin, text: 'Open Admin' }) : null));
     return;
   }
+  const orbitOn = useOrbit();
+  document.body.classList.toggle('orbitview', orbitOn);
+  g.classList.toggle('orbitmode', orbitOn);
+  setViewSw();
+  if (orbitOn) return renderOrbit(g, hubs);
   hubs.forEach((h, i) => {
     const n = countVisible(h), nf = (h.folders || []).filter(canSee).length, st = status(h);
     const b = el('button', { class: 'planet' + (st ? ' hidden-item' : ''), 'data-id': h.id, style: `--c:${h.color};animation-delay:${arranging ? 0 : i * 60}ms`, 'aria-label': `${h.name}, ${n} applications`, onclick: () => openHub(h.id) },
@@ -1061,6 +1095,66 @@ function renderGalaxy() {
   if (arranging && canDrag()) Sortable.create(g, sortOpts({ onEnd: e => { if (e.oldIndex === e.newIndex) return; reorderBy(cfg.hubs, [...g.children].map(x => x.dataset.id)); saveOrderSoon(); } }));
 }
 $('#q').addEventListener('input', e => { query = e.target.value; renderGalaxy(); });
+
+/* ================= solar-system view ================= */
+let viewMode = (() => { try { return localStorage.getItem('cctl-view') || 'orbit'; } catch { return 'orbit'; } })();
+let orbitBodies = [], orbitPaused = false, orbitLast = 0, orbitRAF = 0;
+const useOrbit = () => viewMode === 'orbit' && !arranging && !query.trim() && innerWidth >= 760;
+function setViewSw() {
+  const sw = $('#viewSw'); if (!sw) return;
+  sw.hidden = innerWidth < 760;
+  $('#vOrbit').classList.toggle('on', viewMode === 'orbit'); $('#vGrid').classList.toggle('on', viewMode !== 'orbit');
+}
+function setView(m) { viewMode = m; try { localStorage.setItem('cctl-view', m); } catch {} renderGalaxy(); }
+$('#vOrbit').onclick = () => setView('orbit'); $('#vGrid').onclick = () => setView('grid');
+let orbitResizeT; addEventListener('resize', () => { clearTimeout(orbitResizeT); orbitResizeT = setTimeout(() => { if (cfg && !$('#app').hidden) renderGalaxy(); }, 200); });
+
+function renderOrbit(g, hubs) {
+  const W = Math.max(700, g.clientWidth || 1100), n = hubs.length;
+  const perRing = n <= 6 ? 1 : 2, rings = Math.ceil(n / perRing);
+  const aMax = Math.min(W / 2 - 80, 560), a0 = Math.min(190, aMax * .42), tilt = .36;
+  const step = rings > 1 ? (aMax - a0) / (rings - 1) : 0;
+  const bMax = aMax * tilt, H = Math.round(bMax * 2 + 210);
+  const sys = el('div', { class: 'solar', style: `height:${H}px` });
+  const cx = W / 2, cy = H / 2 - 6;
+  const sun = el('div', { class: 'osun', style: `left:${cx}px;top:${cy}px` }, el('div', { class: 'orays' }), el('div', { class: 'odisc' }), el('div', { class: 'olabel sunl' }, el('b', { text: (cfg && cfg.title) || 'CCTaxLab' })));
+  sys.append(sun);
+  for (let r = 0; r < rings; r++) { const a = a0 + r * step, b = a * tilt; sys.append(el('div', { class: 'oring', style: `left:${cx - a}px;top:${cy - b}px;width:${2 * a}px;height:${2 * b}px` })); }
+  orbitBodies = [];
+  hubs.forEach((h, i) => {
+    const r = Math.floor(i / perRing), a = a0 + r * step, b = a * tilt;
+    const n2 = countVisible(h), nf = (h.folders || []).filter(canSee).length, st = status(h);
+    const size = Math.round(Math.max(54, Math.min(84, 60 + n2 * 3)));
+    const body = el('button', { class: 'oplanet' + (st ? ' hidden-item' : ''), 'data-id': h.id, style: `--c:${h.color};--s:${size}px`, 'aria-label': `${h.name}, ${n2} applications`, onclick: () => openHub(h.id) },
+      el('div', { class: 'oball' }, orb(h.color, i % 3 !== 1), el('span', { class: 'oicon' }, icon(h.emoji))),
+      el('div', { class: 'olabel' }, el('b', { text: h.name }), el('span', { text: plural(n2, 'app') + (nf ? ' · ' + plural(nf, 'folder') : '') }), st ? pill(st) : null));
+    body.addEventListener('pointerenter', () => { orbitPaused = true; body.classList.add('hover'); });
+    body.addEventListener('pointerleave', () => { orbitPaused = false; body.classList.remove('hover'); });
+    body.addEventListener('focus', () => { orbitPaused = true; }); body.addEventListener('blur', () => { orbitPaused = false; });
+    const start = (perRing === 2 ? (i % 2) * Math.PI : 0) + r * 2.39996 + .6;
+    orbitBodies.push({ el: body, a, b, th: start, w: (2 * Math.PI) / (55 + a * .16), cx, cy });
+    sys.append(body);
+  });
+  g.append(sys);
+  placeOrbit(); cancelAnimationFrame(orbitRAF); orbitLast = 0; orbitRAF = requestAnimationFrame(orbitTick);
+}
+function placeOrbit() {
+  for (const o of orbitBodies) {
+    const x = o.cx + o.a * Math.cos(o.th), y = o.cy + o.b * Math.sin(o.th), depth = (Math.sin(o.th) + 1) / 2;
+    o.el.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) scale(${.82 + depth * .26})`;
+    o.el.style.zIndex = String(10 + Math.round(depth * 100));
+    o.el.style.opacity = o.el.classList.contains('hidden-item') ? '' : String(.78 + depth * .22);
+  }
+}
+function orbitTick(t) {
+  if (!orbitBodies.length || !document.body.classList.contains('orbitview')) { orbitBodies = []; return; }
+  const dt = orbitLast ? Math.min(.1, (t - orbitLast) / 1000) : 0; orbitLast = t;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!orbitPaused && !reduce && !document.hidden) for (const o of orbitBodies) o.th += o.w * dt;
+  placeOrbit();
+  orbitRAF = requestAnimationFrame(orbitTick);
+}
+
 
 /* ================= workspace panel (with folders) ================= */
 let dockPath = [];
