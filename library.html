@@ -129,7 +129,7 @@ label.f{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-b
 .tk button{background:none;border:0;color:inherit;padding:0 3px;font-size:14px;line-height:1}
 .pick{display:flex;flex-wrap:wrap;gap:6px}
 .pick .chip{font-size:12px;padding:5px 10px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#13224a;border:1px solid var(--line2);padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;transition:all .2s;z-index:40;pointer-events:none}
+.toast{position:fixed;left:50%;top:20px;transform:translateX(-50%) translateY(-20px);background:#13224a;border:1px solid var(--line2);padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;transition:all .2s;z-index:40;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .gate{max-width:440px;margin:14vh auto;text-align:center;background:var(--panel2);border:1px solid var(--line2);border-radius:18px;padding:34px 28px}
 .gate h3{margin:0 0 8px;font-size:20px}
@@ -371,7 +371,7 @@ async function extractText(file, onStatus) {
       onStatus(`Reading page ${i} of ${pdf.numPages}…`);
       const c = await (await pdf.getPage(i)).getTextContent();
       let line = '', lastY = null; const lines = [];
-      for (const it of c.items) { const y = it.transform[5]; if (lastY !== null && Math.abs(y - lastY) > 2) { lines.push(line); line = ''; } line += it.str + (it.hasEOL ? '\n' : ''); lastY = y; }
+      for (const it of c.items) { const y = it.transform[5]; if (lastY !== null && Math.abs(y - lastY) > 2) { lines.push(line); line = ''; } line += it.str; lastY = y; }
       lines.push(line); out.push(lines.join('\n'));
     }
     let meta = {}; try { meta = (await pdf.getMetadata()).info || {}; } catch {}
@@ -394,7 +394,7 @@ async function extractText(file, onStatus) {
     const x = await z.file('content.xml').async('string');
     return { text: new DOMParser().parseFromString(x.replace(/<\/text:p>|<\/text:h>/g, '\n'), 'text/xml').documentElement.textContent };
   }
-  if (['html', 'htm', 'mht'].includes(e)) { const doc = new DOMParser().parseFromString(await file.text(), 'text/html'); doc.querySelectorAll('script,style').forEach(n => n.remove()); return { text: doc.body ? doc.body.innerText || doc.body.textContent : '' }; }
+  if (['html', 'htm', 'mht'].includes(e)) { const doc = new DOMParser().parseFromString(await file.text(), 'text/html'); doc.querySelectorAll('script,style').forEach(n => n.remove()); const h1 = doc.querySelector('h1'); doc.querySelectorAll('p,div,h1,h2,h3,h4,li,tr,br').forEach(n => n.append('\n')); return { text: doc.body ? doc.body.textContent : '', metaTitle: doc.title || (h1 && h1.textContent.trim()) }; }
   if (e === 'eml') { const raw = await file.text(); const doc = new DOMParser().parseFromString(raw.replace(/=\r?\n/g, ''), 'text/html'); return { text: (doc.body.textContent || raw).replace(/^[A-Za-z0-9+/=]{60,}$/gm, '') }; }
   if (e === 'rtf') { const r = await file.text(); return { text: r.replace(/\\par[d]?/g, '\n').replace(/\{\\\*[^{}]*\}/g, '').replace(/\\'[0-9a-f]{2}/gi, '').replace(/\\[a-z]+-?\d* ?/gi, '').replace(/[{}]/g, '') }; }
   if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tif', 'tiff'].includes(e)) return { text: '', image: true };
@@ -457,7 +457,8 @@ function suggest(file, text, metaTitle) {
   // topics
   const topics = TOPIC_WORDS.filter(w => lower.includes(w.toLowerCase())).map(w => ({ w, n: lower.split(w.toLowerCase()).length - 1 })).sort((a, b) => b.n - a.n).slice(0, 8).map(x => x.w);
   // summary: first meaningful sentences
-  const sentences = t.replace(/\s+/g, ' ').match(/[^.!?]{40,400}[.!?]/g) || [];
+  const DOT = '\u2024';
+  const sentences = (t.replace(/\s+/g, ' ').replace(/\b(No|Nos|s|ss|Sdn|Bhd|Mr|Mrs|Ms|Dr|e\.g|i\.e|P\.U|vs|Co|Ltd)\./g, (m, a) => a + DOT).match(/[^.!?]{40,400}[.!?]/g) || []).map(x => x.split(DOT).join('.'));
   let summary = ''; for (const s of sentences) { if (/copyright|all rights reserved|disclaimer|www\.|@|tel[:.]|fax/i.test(s)) continue; if ((summary + s).length > 480) break; summary += s.trim() + ' '; if (summary.length > 260) break; }
   // doc type guess
   const docType = /budget/i.test(title) ? 'Budget Commentary' : /alert/i.test(title) ? 'Tax Alert' : /newsletter|bulletin|issue/i.test(title + ' ' + lower.slice(0, 2000)) ? 'Newsletter' : 'Newsletter';
