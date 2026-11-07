@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tax Knowledge Library · CCTaxLab</title>
+<title>CCT Library · CCTaxLab</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230b1430' stroke='%2300aeef' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%2300aeef'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,6 +137,57 @@ label.f{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-b
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--acc2);border-radius:50%;animation:sp 0.8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
 .note{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* breadcrumb + categories */
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:22px 0 -14px;flex-wrap:wrap}
+.crumbs a{color:var(--acc2);text-decoration:none;font-weight:600;cursor:pointer}
+.crumbs a:hover{text-decoration:underline}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.cat{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;color:var(--ink);cursor:pointer;overflow:hidden;transition:border-color .15s,transform .15s;min-height:170px;display:flex;flex-direction:column;backdrop-filter:blur(8px)}
+.cat:hover{border-color:rgba(var(--acc-rgb),.5);transform:translateY(-2px)}
+.cat::after{content:"";position:absolute;right:-50px;top:-50px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(var(--acc-rgb),.55),rgba(var(--acc-rgb),.08) 70%);opacity:.55}
+.cat .cicon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(var(--acc-rgb),.12);border:1px solid rgba(var(--acc-rgb),.35);color:var(--acc2);margin-bottom:16px;position:relative;z-index:1}
+.cat .cicon svg{width:22px;height:22px}
+.cat h3{margin:0 0 4px;font-size:18px;position:relative;z-index:1}
+.cat p{margin:0;color:var(--muted);font-size:13px;position:relative;z-index:1;flex:1}
+.cat .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:12.5px;color:var(--muted);position:relative;z-index:1}
+.cat .cfoot b{color:var(--acc2)}
+.cat .cadm{position:absolute;top:12px;right:12px;z-index:2;display:flex;gap:6px}
+.cat .cadm button{background:rgba(6,12,30,.7);border:1px solid var(--line2);color:var(--muted);border-radius:8px;width:30px;height:30px;display:grid;place-items:center}
+.cat .cadm button:hover{color:var(--ink)}
+.cat.add{border-style:dashed;align-items:center;justify-content:center;color:var(--muted);font-weight:600}
+.cat.add::after{display:none}
+.pill.cat-pill{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--line2)}
+
+/* staff cannot select / copy text on the page */
+body.locked{-webkit-user-select:none;user-select:none}
+body.locked input,body.locked textarea{-webkit-user-select:text;user-select:text}
+
+/* view-only document viewer */
+.viewer{position:fixed;inset:0;z-index:30;background:#1d2335;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .15s;-webkit-user-select:none;user-select:none}
+.viewer.open{opacity:1;pointer-events:auto}
+.vbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#0c1838;border-bottom:1px solid var(--line2)}
+.vbar h2{margin:0;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbar .vtag{font-size:11px;color:var(--amber);border:1px solid rgba(245,194,107,.35);background:rgba(245,194,107,.08);padding:3px 8px;border-radius:6px;font-weight:700;white-space:nowrap}
+.vbar .zoom{display:flex;gap:4px;align-items:center;color:var(--muted);font-size:12.5px}
+.vbody{flex:1;overflow:auto;position:relative;padding:24px 16px 60px}
+.vpages{display:flex;flex-direction:column;align-items:center;gap:16px}
+.vpages canvas{background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45);max-width:none;display:block}
+.vpage-ph{background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.vdoc{background:#fff;color:#111;max-width:1000px;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.vdoc.textview{padding:40px 48px;white-space:pre-wrap;font-size:14px;line-height:1.6;font-family:Georgia,serif}
+.vdocx{display:flex;justify-content:center}
+.vdocx .docx-wrapper{background:transparent!important;padding:0!important}
+.vdocx .docx-wrapper>section.docx{box-shadow:0 4px 24px rgba(0,0,0,.45);margin-bottom:16px}
+.vsheet{background:#fff;color:#111;overflow:auto;max-width:100%;width:fit-content;margin:0 auto;box-shadow:0 4px 24px rgba(0,0,0,.45)}
+.vsheet table{border-collapse:collapse;font-size:12.5px;font-family:Calibri,Arial,sans-serif}
+.vsheet td,.vsheet th{border:1px solid #d4d4d4;padding:3px 8px;white-space:nowrap}
+.vtabs{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.vframe{width:100%;max-width:1000px;margin:0 auto;display:block;border:0;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45);min-height:70vh}
+.vmsg{max-width:520px;margin:12vh auto;text-align:center;color:var(--muted);background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:30px}
+.vmsg h3{color:var(--ink);margin:0 0 8px}
+.wm{position:fixed;left:0;right:0;top:57px;bottom:0;pointer-events:none;z-index:5;background-repeat:repeat}
+@media print{body *{display:none!important}body::after{content:"Printing is disabled for the CCT Library.";display:block;padding:40px;font:16px sans-serif;color:#000}}
 </style>
 </head>
 <body>
@@ -145,7 +196,7 @@ label.f{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-b
     <div class="brand">
       <img src="data:image/png;base64,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" alt="Cheng &amp; Co Group">
       <div class="divline"></div>
-      <div><h1>Tax Knowledge Library</h1><p class="sub">CCT Library · CCTaxLab</p></div>
+      <div><h1>CCT Library</h1><p class="sub">CCTaxLab · Tax Knowledge</p></div>
     </div>
     <div class="who">
       <span id="whoName"></span><span class="tag" id="whoTag" hidden>ADMIN</span>
@@ -157,6 +208,7 @@ label.f{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-b
 
 <div class="dim" id="dim"></div>
 <aside class="drawer" id="drawer" aria-label="Document"></aside>
+<section class="viewer" id="viewer" aria-label="Document viewer"></section>
 <section class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Upload"></section>
 <div class="toast" id="toast" role="status"></div>
 
@@ -201,7 +253,7 @@ const el = (tag, attrs = {}, ...kids) => {
   for (const k of kids.flat()) if (k != null && k !== false) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
   return n;
 };
-const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>' };
+const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/>', plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>' };
 const icon = k => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.innerHTML = ICONS[k]; return s; };
 let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); };
 const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -215,7 +267,7 @@ const loadScript = src => loaded[src] ||= new Promise((res, rej) => { const s = 
 const marked = s => { const f = document.createDocumentFragment(); String(s || '').split(/(<<|>>)/).reduce((on, part) => { if (part === '<<') return true; if (part === '>>') return false; if (part) f.append(on ? el('mark', { text: part }) : document.createTextNode(part)); return on; }, false); return f; };
 
 /* ---------- state ---------- */
-let sb, me = null, isAdmin = false, docs = [], hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'relevance';
+let sb, me = null, isAdmin = false, docs = [], cats = [], curCat = null, hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'relevance';
 
 /* ---------- boot ---------- */
 (async function boot() {
@@ -226,15 +278,26 @@ let sb, me = null, isAdmin = false, docs = [], hits = null, q = '', fType = new 
   if (!prof || prof.status !== 'approved') return gate('Access pending', 'Your account has not been approved yet. Please contact an administrator.', true);
   me = prof; isAdmin = !!prof.is_admin;
   $('#whoName').textContent = prof.full_name || prof.email; $('#whoTag').hidden = !isAdmin;
-  renderShell(); await loadDocs();
+  document.body.classList.toggle('locked', !isAdmin);
+  await loadCats(); readHash(); renderShell(); await loadDocs();
 })().catch(e => gate('Something went wrong', e.message, true));
 
 function gate(title, msg, link) {
   $('#app').replaceChildren(el('div', { class: 'gate' }, el('h3', { text: title }), el('p', { text: msg }), link ? el('a', { class: 'btn', href: './' }, 'Go to CCTaxLab portal') : null));
 }
 
+async function loadCats() {
+  const { data, error } = await sb.from('kb_categories').select('*').order('sort').order('created_at');
+  if (error) { toast('Could not load categories: ' + error.message); return; }
+  cats = data || [];
+}
+const catName = id => (cats.find(c => c.id === id) || {}).name || 'Uncategorised';
+function readHash() { const m = location.hash.match(/cat=([0-9a-f-]{36})/); curCat = m && cats.some(c => c.id === m[1]) ? m[1] : null; }
+function goCat(id) { location.hash = id ? 'cat=' + id : ''; }
+addEventListener('hashchange', () => { readHash(); q = ''; hits = null; fType.clear(); fDoc = ''; fYear = ''; renderShell(); renderFilters(); renderResults(); scrollTo(0, 0); });
+
 async function loadDocs() {
-  const { data, error } = await sb.from('kb_documents').select('id,title,doc_type,issue_date,tax_types,topics,legislation,summary,file_path,file_name,file_type,file_size,status,created_at').order('issue_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+  const { data, error } = await sb.from('kb_documents').select('id,category_id,title,doc_type,issue_date,tax_types,topics,legislation,summary,file_path,file_name,file_type,file_size,status,created_at').order('issue_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
   if (error) { toast('Could not load: ' + error.message); return; }
   docs = data || []; renderFilters(); renderResults();
 }
@@ -243,15 +306,19 @@ async function loadDocs() {
 function renderShell() {
   let t;
   const input = el('input', { type: 'search', placeholder: 'Search newsletters… e.g. "capital allowance" or s.140A surcharge', 'aria-label': 'Search', oninput: e => { clearTimeout(t); t = setTimeout(() => runSearch(e.target.value), 300); } });
-  $('#app').replaceChildren(
+  const c = cats.find(x => x.id === curCat);
+  input.placeholder = c ? `Search ${c.name}…` : 'Search all categories… e.g. "capital allowance" or s.140A surcharge';
+  $('#app').replaceChildren(...[
+    c ? el('div', { class: 'crumbs' }, el('a', { onclick: () => goCat(null), text: 'CCT Library' }), '›', el('span', { text: c.name })) : null,
     el('div', { class: 'hero' },
-      el('div', {}, el('h2', {}, 'Tax ', el('span', { text: 'Knowledge Library' })), el('p', { text: 'Newsletters, alerts and technical notes from Cheng & Co, searchable down to every word inside.' })),
-      isAdmin ? el('button', { class: 'btn', onclick: openUpload }, icon('upload'), 'Upload documents') : null),
+      c ? el('div', {}, el('h2', {}, el('span', { text: c.name })), el('p', { text: c.description || 'Double-click a document to read it.' }))
+        : el('div', {}, el('h2', {}, 'CCT ', el('span', { text: 'Library' })), el('p', { text: 'Choose a category, or search across everything.' })),
+      isAdmin && c ? el('button', { class: 'btn', onclick: openUpload }, icon('upload'), 'Upload documents') : null),
     el('div', { class: 'searchbar' }, icon('search'), input),
     el('p', { class: 'hint', text: 'Tip: use quotes for an exact phrase, OR for alternatives, and - to exclude a word (e.g. "e-invoice" -penalty).' }),
     el('div', { class: 'filters', id: 'filters' }),
     el('div', { class: 'count', id: 'count' }),
-    el('div', { class: 'results', id: 'results' }));
+    el('div', { class: 'results', id: 'results' })].filter(Boolean));
 }
 
 async function runSearch(v) {
@@ -264,8 +331,10 @@ async function runSearch(v) {
 }
 
 function renderFilters() {
-  const counts = {}; docs.forEach(d => d.tax_types.forEach(t => counts[t] = (counts[t] || 0) + 1));
-  const years = uniq(docs.map(d => d.issue_date && d.issue_date.slice(0, 4))).sort().reverse();
+  const scope = docs.filter(d => !curCat || d.category_id === curCat);
+  $('#filters').hidden = !curCat && !q;
+  const counts = {}; scope.forEach(d => d.tax_types.forEach(t => counts[t] = (counts[t] || 0) + 1));
+  const years = uniq(scope.map(d => d.issue_date && d.issue_date.slice(0, 4))).sort().reverse();
   const types = TAX_TYPES.map(x => x[0]).filter(t => counts[t]).concat(Object.keys(counts).filter(t => !TAX_TYPES.some(x => x[0] === t)));
   const chips = el('div', { class: 'chips' }, types.map(t => el('button', { class: 'chip' + (fType.has(t) ? ' on' : ''), onclick: () => { fType.has(t) ? fType.delete(t) : fType.add(t); renderFilters(); renderResults(); } }, t, el('b', { text: counts[t] }))));
   const sel = (val, opts, set, label) => { const s = el('select', { class: 'sel', 'aria-label': label, onchange: e => { set(e.target.value); renderResults(); } }, opts.map(([v, l]) => el('option', { value: v, text: l }))); s.value = val; return s; };
@@ -275,22 +344,42 @@ function renderFilters() {
     sel(sort, [['relevance', 'Best match / newest'], ['newest', 'Newest first'], ['oldest', 'Oldest first'], ['title', 'Title A–Z']], v => sort = v, 'Sort'));
 }
 
+function renderCats() {
+  $('#filters').hidden = true; $('#count').textContent = '';
+  const n = id => docs.filter(d => d.category_id === id).length;
+  const last = id => docs.filter(d => d.category_id === id && d.issue_date).map(d => d.issue_date).sort().pop();
+  const box = el('div', { class: 'cats' }, cats.map(c => el('div', { class: 'cat', tabindex: '0', role: 'button', onclick: () => goCat(c.id), onkeydown: e => { if (e.key === 'Enter') goCat(c.id); } },
+    isAdmin ? el('div', { class: 'cadm' }, el('button', { 'aria-label': 'Edit category', title: 'Edit category', onclick: e => { e.stopPropagation(); editCat(c); } }, icon('edit')), el('button', { 'aria-label': 'Delete category', title: 'Delete category', onclick: e => { e.stopPropagation(); deleteCat(c); } }, icon('trash'))) : null,
+    el('div', { class: 'cicon' }, icon('book')),
+    el('h3', { text: c.name }), el('p', { text: c.description || '' }),
+    el('div', { class: 'cfoot' }, el('span', {}, el('b', { text: n(c.id) }), ` document${n(c.id) === 1 ? '' : 's'}`), el('span', { text: last(c.id) ? 'Latest ' + fmtDate(last(c.id)) : '' })))),
+    isAdmin ? el('button', { class: 'cat add', onclick: () => editCat(null) }, icon('plus'), 'Add category') : null);
+  $('#results').replaceChildren(cats.length || isAdmin ? box : el('div', { class: 'empty' }, el('h3', { text: 'No categories yet' })));
+}
+
+let clickT;
+function cardClick(id) { clearTimeout(clickT); clickT = setTimeout(() => openDoc(id), 260); }
+function cardDbl(id) { clearTimeout(clickT); const d = docs.find(x => x.id === id); if (d) viewDoc(d); }
+
 function renderResults() {
-  let list = docs.filter(d => (!hits || hits.has(d.id)) && (!fType.size || d.tax_types.some(t => fType.has(t))) && (!fDoc || d.doc_type === fDoc) && (!fYear || (d.issue_date || '').startsWith(fYear)));
+  if (!curCat && !q) return renderCats();
+  $('#filters').hidden = false;
+  let list = docs.filter(d => (!curCat || d.category_id === curCat) && (!hits || hits.has(d.id)) && (!fType.size || d.tax_types.some(t => fType.has(t))) && (!fDoc || d.doc_type === fDoc) && (!fYear || (d.issue_date || '').startsWith(fYear)));
   const byDate = (a, b) => (b.issue_date || '').localeCompare(a.issue_date || '') || b.created_at.localeCompare(a.created_at);
   if (sort === 'relevance' && hits) list.sort((a, b) => hits.get(b.id).rank - hits.get(a.id).rank);
   else if (sort === 'oldest') list.sort((a, b) => -byDate(a, b)); else if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title)); else list.sort(byDate);
-  $('#count').textContent = docs.length ? `${list.length} of ${docs.length} document${docs.length === 1 ? '' : 's'}${q ? ` matching “${q}”` : ''}` : '';
+  const total = docs.filter(d => !curCat || d.category_id === curCat).length;
+  $('#count').textContent = total ? `${list.length} of ${total} document${total === 1 ? '' : 's'}${q ? ` matching “${q}”` : ''}${curCat ? '' : ' in all categories'} · double-click to read` : '';
   const box = $('#results');
-  if (!docs.length) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'The library is empty' }), el('p', { text: isAdmin ? 'Upload your first newsletters with the Upload documents button. Any file type works; text is extracted automatically so it can be searched.' : 'No documents have been published yet.' }))); return; }
+  if (!total) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'The library is empty' }), el('p', { text: isAdmin ? 'Upload your first newsletters with the Upload documents button. Any file type works; text is extracted automatically so it can be searched.' : 'No documents have been published yet.' }))); return; }
   if (!list.length) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'No matches' }), el('p', { text: 'Try fewer words, or clear the filters.' }))); return; }
   box.replaceChildren(...list.map(d => {
     const [k, lab] = fileKind(d.file_name); const h = hits && hits.get(d.id);
-    return el('div', { class: 'card', tabindex: '0', onclick: () => openDoc(d.id), onkeydown: e => { if (e.key === 'Enter') openDoc(d.id); } },
+    return el('div', { class: 'card', tabindex: '0', title: 'Double-click to read', onclick: () => cardClick(d.id), ondblclick: () => cardDbl(d.id), onkeydown: e => { if (e.key === 'Enter') viewDoc(d); } },
       el('div', { class: 'ficon ' + k, text: d.file_name ? lab : '—' }),
       el('div', {},
         el('h3', { text: d.title }),
-        el('div', { class: 'meta' }, el('span', { class: 'pill type', text: d.doc_type }), d.status === 'draft' ? el('span', { class: 'pill draft', text: 'Draft (admins only)' }) : null, d.tax_types.map(t => el('span', { class: 'pill', text: t }))),
+        el('div', { class: 'meta' }, !curCat ? el('span', { class: 'pill cat-pill', text: catName(d.category_id) }) : null, el('span', { class: 'pill type', text: d.doc_type }), d.status === 'draft' ? el('span', { class: 'pill draft', text: 'Draft (admins only)' }) : null, d.tax_types.map(t => el('span', { class: 'pill', text: t }))),
         h && h.snippet ? el('p', { class: 'snip' }, marked(h.snippet)) : d.summary ? el('p', { class: 'snip', text: d.summary.length > 260 ? d.summary.slice(0, 260) + '…' : d.summary }) : null),
       el('div', { class: 'date', text: fmtDate(d.issue_date) }));
   }));
@@ -301,29 +390,21 @@ function closeAll() { $('#drawer').classList.remove('open'); $('#modal').classLi
 $('#dim').onclick = () => { if ($('#modal').classList.contains('open') && pending.some(p => p.state !== 'saved')) { if (!confirm('Close without saving the uploads?')) return; pending = []; } closeAll(); };
 addEventListener('keydown', e => { if (e.key === 'Escape') $('#dim').onclick(); });
 
-async function signed(path, download) {
-  const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(path, 3600, download ? { download } : undefined);
-  if (error) throw error; return data.signedUrl;
-}
-async function openFile(d, download) {
-  const w = download ? null : window.open('', '_blank');
-  try { const u = await signed(d.file_path, download ? d.file_name : null); if (w) w.location = u; else location.href = u; }
-  catch (e) { if (w) w.close(); toast('Could not open file: ' + e.message); }
-}
 
 async function openDoc(id) {
   const d = docs.find(x => x.id === id); if (!d) return;
   const dr = $('#drawer');
   const body = el('div', { class: 'dbody' });
+  $('#dim').classList.add('open'); dr.classList.add('open');
   dr.replaceChildren(el('div', { class: 'dhead' }, el('h2', { text: d.title }), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeAll }, icon('x'))), body,
     el('div', { class: 'dfoot' },
-      d.file_path ? el('button', { class: 'btn small', onclick: () => openFile(d) }, icon('ext'), 'Open file') : null,
-      d.file_path ? el('button', { class: 'btn ghost small', onclick: () => openFile(d, true) }, icon('down'), 'Download') : null,
+      el('button', { class: 'btn small', onclick: () => viewDoc(d) }, icon('eye'), 'View document'),
       el('span', { class: 'spacer' }),
       isAdmin ? el('button', { class: 'btn ghost small', onclick: () => editDoc(d) }, icon('edit'), 'Edit') : null,
       isAdmin ? el('button', { class: 'btn danger small', onclick: () => deleteDoc(d) }, icon('trash'), 'Delete') : null));
   const lst = (a, cls) => a.length ? el('div', { class: 'pick' }, a.map(t => el('span', { class: cls || 'pill', text: t }))) : el('span', { style: 'color:var(--dim)', text: '—' });
   body.append(el('dl', { class: 'kv' },
+    el('dt', { text: 'Category' }), el('dd', { text: catName(d.category_id) }),
     el('dt', { text: 'Type' }), el('dd', { text: d.doc_type + (d.status === 'draft' ? ' · Draft' : '') }),
     el('dt', { text: 'Issue date' }), el('dd', { text: fmtDate(d.issue_date) || '—' }),
     el('dt', { text: 'Tax type' }), el('dd', {}, lst(d.tax_types)),
@@ -331,9 +412,9 @@ async function openDoc(id) {
     el('dt', { text: 'Topics' }), el('dd', {}, lst(d.topics, 'chip')),
     el('dt', { text: 'File' }), el('dd', { text: d.file_name ? `${d.file_name} · ${fmtSize(d.file_size)}` : '—' })));
   if (d.summary) body.append(el('div', { class: 'sect', text: 'Summary' }), el('div', { class: 'summary', text: d.summary }));
+  if (!isAdmin) return;
   const ftWrap = el('div', {}, el('span', { class: 'spin' }));
-  body.append(el('div', { class: 'sect', text: 'Full text' }), ftWrap);
-  $('#dim').classList.add('open'); dr.classList.add('open'); dr.querySelector('.dbody').scrollTop = 0;
+  body.append(el('div', { class: 'sect', text: 'Extracted text (admins only, used for search)' }), ftWrap);
   const { data } = await sb.from('kb_documents').select('body_text').eq('id', id).maybeSingle();
   const text = (data && data.body_text) || '';
   if (!text) { ftWrap.replaceChildren(el('p', { class: 'note', text: 'No text was extracted from this file. Open the file to read it.' })); return; }
@@ -484,6 +565,7 @@ function taxPicker(arr) {
 function metaForm(m) {
   const typeSel = el('select', { class: 'sel f-in', onchange: e => m.docType = e.target.value }, DOC_TYPES.map(x => el('option', { value: x, text: x }))); typeSel.value = m.docType;
   const stSel = el('select', { class: 'sel f-in', onchange: e => m.status = e.target.value }, el('option', { value: 'published', text: 'Published (all staff)' }), el('option', { value: 'draft', text: 'Draft (admins only)' })); stSel.value = m.status || 'published';
+  const catSel = el('select', { class: 'sel f-in', onchange: e => m.categoryId = e.target.value }, cats.map(c => el('option', { value: c.id, text: c.name }))); catSel.value = m.categoryId || '';
   return el('div', { class: 'grid' },
     el('div', { class: 'full' }, el('label', { class: 'f', text: 'Title' }), el('input', { class: 'inp f-in', value: m.title, maxlength: '300', oninput: e => m.title = e.target.value })),
     el('div', {}, el('label', { class: 'f', text: 'Document type' }), typeSel),
@@ -492,13 +574,14 @@ function metaForm(m) {
     el('div', {}, el('label', { class: 'f', text: 'Legislation cited (Enter to add)' }), tagInput(m.legislation, 'e.g. s.140A, Public Ruling 5/2024')),
     el('div', {}, el('label', { class: 'f', text: 'Topics (Enter to add)' }), tagInput(m.topics, 'e.g. capital allowance')),
     el('div', { class: 'full' }, el('label', { class: 'f', text: 'Summary' }), el('textarea', { class: 'inp f-in', rows: '3', oninput: e => m.summary = e.target.value }, m.summary || '')),
+    el('div', {}, el('label', { class: 'f', text: 'Category' }), catSel),
     el('div', {}, el('label', { class: 'f', text: 'Visibility' }), stSel));
 }
 
 /* ---------- upload ---------- */
 let pending = [];
 function openUpload() {
-  pending = []; const md = $('#modal');
+  pending = []; const md = $('#modal'); md.style.width = '';
   const list = el('div', { id: 'uplist' });
   const fileIn = el('input', { type: 'file', multiple: true, hidden: true, onchange: e => { addFiles(e.target.files); e.target.value = ''; } });
   const drop = el('div', { class: 'drop' }, el('strong', { text: 'Drop files here, or click to choose' }), 'Any format: PDF, Word, Excel, PowerPoint, email, web pages, images and more (up to 50 MB each). Text is extracted and tags are suggested; check them before saving.', fileIn);
@@ -539,7 +622,7 @@ async function processItem(item) {
   const status = m => { item.st.textContent = m; };
   try { item.ex = await extractText(item.file, status); item.text = (item.ex.text || '').replace(/\u0000/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); }
   catch (e) { item.ex = { error: e.message }; item.text = ''; }
-  item.meta = suggest(item.file, item.text, item.ex.metaTitle); item.meta.status = 'published';
+  item.meta = suggest(item.file, item.text, item.ex.metaTitle); item.meta.status = 'published'; item.meta.categoryId = curCat || (cats[0] && cats[0].id);
   item.state = 'ready'; drawItem(item); refreshSave();
 }
 
@@ -550,7 +633,7 @@ function drawItem(item) {
   item.st.className = 'state ' + cls; item.st.textContent = msg;
   const extra = [];
   if (item.ex.image || scanned) extra.push(el('div', { class: 'note' }, (scanned && n ? 'Very little text found; this PDF may be scanned. ' : item.ex.image ? 'This is an image. ' : 'This PDF looks scanned. ') + 'You can read the text with OCR (may take a minute). ',
-    el('button', { class: 'btn ghost small', type: 'button', onclick: async e => { e.target.disabled = true; item.state = 'work'; refreshSave(); item.st.className = 'state work'; try { const t = await ocr(item, m => item.st.textContent = m); item.text = (item.text + '\n\n' + t).trim(); const keep = item.meta; const s = suggest(item.file, item.text, item.ex.metaTitle); item.meta = { ...s, title: keep.title, status: keep.status }; } catch (er) { toast('OCR failed: ' + er.message); } item.state = 'ready'; drawItem(item); refreshSave(); } }, 'Run OCR')));
+    el('button', { class: 'btn ghost small', type: 'button', onclick: async e => { e.target.disabled = true; item.state = 'work'; refreshSave(); item.st.className = 'state work'; try { const t = await ocr(item, m => item.st.textContent = m); item.text = (item.text + '\n\n' + t).trim(); const keep = item.meta; const s = suggest(item.file, item.text, item.ex.metaTitle); item.meta = { ...s, title: keep.title, status: keep.status, categoryId: keep.categoryId }; } catch (er) { toast('OCR failed: ' + er.message); } item.state = 'ready'; drawItem(item); refreshSave(); } }, 'Run OCR')));
   if (item.ex.unsupported || ['doc', 'ppt', 'msg'].includes(ext(item.file.name))) extra.push(el('div', { class: 'note', text: 'Text cannot be read from this older/binary format in the browser, so only the title, tags and summary will be searchable. Saving it as PDF or the newer Office format (.docx/.pptx) makes the full text searchable.' }));
   [...item.node.children].slice(1).forEach(c => c.remove());
   item.node.append(...extra, metaForm(item.meta));
@@ -568,7 +651,7 @@ async function saveAll() {
     const path = `${id}/${safe}`;
     const up = await sb.storage.from(BUCKET).upload(path, item.file, { contentType: item.file.type || 'application/octet-stream', upsert: false });
     if (up.error) { item.st.className = 'state warn'; item.st.textContent = 'Upload failed: ' + up.error.message; continue; }
-    const row = { id, title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), body_text: item.text.slice(0, MAX_TEXT), file_path: path, file_name: item.file.name, file_type: item.file.type || ext(item.file.name), file_size: item.file.size, status: m.status };
+    const row = { id, category_id: m.categoryId || null, title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), body_text: item.text.slice(0, MAX_TEXT), file_path: path, file_name: item.file.name, file_type: item.file.type || ext(item.file.name), file_size: item.file.size, status: m.status };
     const { error } = await sb.from('kb_documents').insert(row);
     if (error) { await sb.storage.from(BUCKET).remove([path]); item.st.className = 'state warn'; item.st.textContent = 'Save failed: ' + error.message; continue; }
     item.state = 'saved'; item.st.className = 'state ok'; item.st.textContent = 'Saved ✓'; ok++;
@@ -580,12 +663,12 @@ async function saveAll() {
 
 /* ---------- edit ---------- */
 function editDoc(d) {
-  const m = { title: d.title, docType: d.doc_type, date: d.issue_date, taxTypes: [...d.tax_types], topics: [...d.topics], legislation: [...d.legislation], summary: d.summary, status: d.status };
+  const m = { categoryId: d.category_id, title: d.title, docType: d.doc_type, date: d.issue_date, taxTypes: [...d.tax_types], topics: [...d.topics], legislation: [...d.legislation], summary: d.summary, status: d.status };
   const dr = $('#drawer');
   const save = el('button', { class: 'btn small', onclick: async () => {
     if (!m.title.trim()) return toast('Title is required');
     save.disabled = true;
-    const patch = { title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), status: m.status };
+    const patch = { category_id: m.categoryId || null, title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), status: m.status };
     const { error } = await sb.from('kb_documents').update(patch).eq('id', d.id);
     if (error) { save.disabled = false; return toast('Could not save: ' + error.message); }
     Object.assign(d, patch); renderFilters(); renderResults(); toast('Saved'); openDoc(d.id);
@@ -593,6 +676,151 @@ function editDoc(d) {
   dr.replaceChildren(el('div', { class: 'dhead' }, el('h2', { text: 'Edit document' }), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeAll }, icon('x'))),
     el('div', { class: 'dbody' }, metaForm(m)),
     el('div', { class: 'dfoot' }, el('span', { class: 'spacer' }), el('button', { class: 'btn ghost small', onclick: () => openDoc(d.id) }, 'Cancel'), save));
+}
+
+/* ---------- categories (admins) ---------- */
+function editCat(c) {
+  const m = { name: c ? c.name : '', description: c ? c.description : '' };
+  const md = $('#modal');
+  const save = el('button', { class: 'btn', onclick: async () => {
+    const name = m.name.trim(); if (!name) return toast('Category name is required');
+    save.disabled = true;
+    const res = c ? await sb.from('kb_categories').update({ name, description: m.description.trim() }).eq('id', c.id)
+                  : await sb.from('kb_categories').insert({ name, description: m.description.trim(), sort: cats.length });
+    if (res.error) { save.disabled = false; return toast('Could not save: ' + res.error.message); }
+    closeAll(); await loadCats(); renderShell(); renderResults(); toast(c ? 'Category updated' : 'Category added');
+  } }, c ? 'Save changes' : 'Add category');
+  md.replaceChildren(
+    el('div', { class: 'dhead' }, el('h2', { text: c ? 'Edit category' : 'New category' }), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeAll }, icon('x'))),
+    el('div', { class: 'dbody' }, el('div', { class: 'grid' },
+      el('div', { class: 'full' }, el('label', { class: 'f', text: 'Name' }), el('input', { class: 'inp f-in', value: m.name, maxlength: '80', placeholder: 'e.g. CCT.TaxAlert', oninput: e => m.name = e.target.value })),
+      el('div', { class: 'full' }, el('label', { class: 'f', text: 'Description (optional)' }), el('input', { class: 'inp f-in', value: m.description, maxlength: '200', oninput: e => m.description = e.target.value })))),
+    el('div', { class: 'dfoot' }, el('span', { class: 'spacer' }), el('button', { class: 'btn ghost', onclick: closeAll }, 'Cancel'), save));
+  md.style.width = 'min(520px,96vw)';
+  $('#dim').classList.add('open'); md.classList.add('open');
+  setTimeout(() => md.querySelector('input').focus(), 50);
+}
+async function deleteCat(c) {
+  const n = docs.filter(d => d.category_id === c.id).length;
+  if (n) return toast(`“${c.name}” still has ${n} document${n === 1 ? '' : 's'}. Move or delete them first.`);
+  if (!confirm(`Delete the empty category “${c.name}”?`)) return;
+  const { error } = await sb.from('kb_categories').delete().eq('id', c.id);
+  if (error) return toast('Could not delete: ' + error.message);
+  await loadCats(); renderResults(); toast('Category deleted');
+}
+
+/* ---------- view-only document viewer ---------- */
+let viewerOpen = false, pdfState = null;
+function watermark() {
+  const cv = document.createElement('canvas'); cv.width = 420; cv.height = 240;
+  const g = cv.getContext('2d'); g.translate(210, 120); g.rotate(-0.42);
+  g.font = '600 15px "Plus Jakarta Sans", sans-serif'; g.fillStyle = 'rgba(90,100,130,.16)'; g.textAlign = 'center';
+  g.fillText(`${me.full_name || ''} · ${me.email}`, 0, -6);
+  g.fillText(`CCT Library · ${new Date().toLocaleDateString('en-GB')} · View only`, 0, 16);
+  return cv.toDataURL();
+}
+function closeViewer() {
+  viewerOpen = false; pdfState = null; const v = $('#viewer'); v.classList.remove('open');
+  setTimeout(() => { if (!viewerOpen) v.replaceChildren(); }, 200);
+}
+// block copying, saving, printing and right-click while the viewer is open (and on the page for staff)
+document.addEventListener('contextmenu', e => { if (viewerOpen || (!isAdmin && !/INPUT|TEXTAREA/.test(e.target.tagName))) e.preventDefault(); });
+['copy', 'cut', 'dragstart'].forEach(t => document.addEventListener(t, e => { if (viewerOpen || (!isAdmin && !/INPUT|TEXTAREA/.test(e.target.tagName))) e.preventDefault(); }));
+document.addEventListener('keydown', e => {
+  if (!viewerOpen) return;
+  if (e.key === 'Escape') { e.stopImmediatePropagation(); closeViewer(); return; }
+  if ((e.ctrlKey || e.metaKey) && /^[acsxpu]$/i.test(e.key)) e.preventDefault();
+  if ((e.ctrlKey || e.metaKey) && /^[=+]$/.test(e.key) && pdfState) { e.preventDefault(); pdfState.zoom(1.15); }
+  if ((e.ctrlKey || e.metaKey) && e.key === '-' && pdfState) { e.preventDefault(); pdfState.zoom(1 / 1.15); }
+}, true);
+
+async function viewDoc(d) {
+  closeAll(); viewerOpen = true;
+  const v = $('#viewer'), body = el('div', { class: 'vbody' }), zoomBox = el('div', { class: 'zoom' });
+  v.replaceChildren(
+    el('div', { class: 'vbar' }, el('h2', { text: d.title }), zoomBox, el('span', { class: 'vtag', text: 'VIEW ONLY' }), el('button', { class: 'x', 'aria-label': 'Close viewer', onclick: closeViewer }, icon('x'))),
+    body, el('div', { class: 'wm', style: `background-image:url(${watermark()})` }));
+  v.classList.add('open');
+  const msg = (h, p) => body.replaceChildren(el('div', { class: 'vmsg' }, el('h3', { text: h }), el('p', { text: p })));
+  if (!d.file_path) return msg('No file', 'This entry has no file attached.');
+  body.replaceChildren(el('div', { class: 'vmsg' }, el('span', { class: 'spin' }), el('p', { text: 'Opening document…' })));
+  const { data: blob, error } = await sb.storage.from(BUCKET).download(d.file_path);
+  if (!viewerOpen) return;
+  if (error || !blob) return msg('Could not open the document', (error && error.message) || 'Please try again.');
+  const e = ext(d.file_name);
+  try {
+    if (e === 'pdf') return await viewPdf(blob, body, zoomBox);
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'].includes(e)) {
+      const bmp = await createImageBitmap(blob), cv = el('canvas'); cv.width = bmp.width; cv.height = bmp.height; cv.getContext('2d').drawImage(bmp, 0, 0);
+      cv.style.width = Math.min(bmp.width, body.clientWidth - 40) + 'px'; body.replaceChildren(el('div', { class: 'vpages' }, cv)); return;
+    }
+    if (e === 'docx') {
+      await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js');
+      const box = el('div', { class: 'vdocx' }); body.replaceChildren(box);
+      await docx.renderAsync(blob, box, null, { inWrapper: true, ignoreLastRenderedPageBreak: false, renderComments: false, renderChanges: false, useBase64URL: true });
+      return;
+    }
+    if (['xlsx', 'xls', 'xlsm', 'ods', 'csv'].includes(e)) {
+      await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      const wb = XLSX.read(await blob.arrayBuffer(), { type: 'array', cellStyles: true });
+      const sheet = el('div', { class: 'vsheet' }), tabs = el('div', { class: 'vtabs' });
+      const show = n => { const tmp = el('div'); tmp.innerHTML = XLSX.utils.sheet_to_html(wb.Sheets[n], { header: '', footer: '' }); tmp.querySelectorAll('script,style,a').forEach(x => x.replaceWith(...x.childNodes)); sheet.replaceChildren(...tmp.childNodes); [...tabs.children].forEach(b => b.classList.toggle('on', b.textContent === n)); };
+      wb.SheetNames.forEach(n => tabs.append(el('button', { class: 'chip', onclick: () => show(n) }, n)));
+      body.replaceChildren(...(wb.SheetNames.length > 1 ? [tabs, sheet] : [sheet])); show(wb.SheetNames[0]); return;
+    }
+    if (e === 'pptx') {
+      await loadScript('https://cdn.jsdelivr.net/npm/pptx-preview@1.0.7/dist/pptx-preview.umd.js');
+      const w = Math.min(1000, body.clientWidth - 40), box = el('div', { style: 'display:flex;justify-content:center' });
+      body.replaceChildren(box);
+      await pptxPreview.init(box, { width: w, height: Math.round(w * 9 / 16), mode: 'list' }).preview(await blob.arrayBuffer());
+      return;
+    }
+    if (['html', 'htm'].includes(e)) {
+      const html = await blob.text(), fr = el('iframe', { class: 'vframe', sandbox: 'allow-same-origin', title: d.title });
+      fr.srcdoc = html; body.replaceChildren(fr);
+      fr.onload = () => { try { const dd = fr.contentDocument; const st = dd.createElement('style'); st.textContent = '*{-webkit-user-select:none!important;user-select:none!important}@media print{body{display:none}}'; dd.head.append(st);
+        ['contextmenu', 'copy', 'cut', 'dragstart'].forEach(t => dd.addEventListener(t, ev => ev.preventDefault())); dd.addEventListener('keydown', ev => { if ((ev.ctrlKey || ev.metaKey) && /^[acsxpu]$/i.test(ev.key)) ev.preventDefault(); if (ev.key === 'Escape') closeViewer(); });
+        dd.querySelectorAll('a').forEach(a => a.removeAttribute('href')); fr.style.height = Math.max(dd.documentElement.scrollHeight + 20, 500) + 'px'; } catch {} };
+      return;
+    }
+    // everything else: show the extracted text as a page
+    const { data } = await sb.from('kb_documents').select('body_text').eq('id', d.id).maybeSingle();
+    const text = data && data.body_text;
+    if (text) { body.replaceChildren(el('div', { class: 'vmsg', style: 'margin:0 auto 16px;padding:10px 16px;max-width:1000px;font-size:12.5px', text: 'The original layout of this file type cannot be shown in the browser, so its text is shown instead. Upload a PDF version to see the original design.' }), el('div', { class: 'vdoc textview', text })); return; }
+    msg('Preview not available', 'This file type cannot be displayed in the browser. Ask an administrator to upload a PDF version.');
+  } catch (er) { console.error(er); msg('Could not display the document', er.message || String(er)); }
+}
+
+async function viewPdf(blob, body, zoomBox) {
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({ data: await blob.arrayBuffer() }).promise;
+  const first = await pdf.getPage(1), base = first.getViewport({ scale: 1 });
+  let scale = Math.min(1.6, (Math.min(body.clientWidth, 1100) - 40) / base.width);
+  const wrap = el('div', { class: 'vpages' }), pct = el('span', { style: 'min-width:44px;text-align:center' });
+  body.replaceChildren(wrap);
+  let io;
+  const build = () => {
+    if (io) io.disconnect();
+    pct.textContent = Math.round(scale * 100) + '%';
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    wrap.replaceChildren();
+    io = new IntersectionObserver(ents => ents.forEach(async en => {
+      if (!en.isIntersecting || en.target.dataset.done) return; en.target.dataset.done = '1';
+      const page = await pdf.getPage(+en.target.dataset.p), vp = page.getViewport({ scale: scale * dpr });
+      const cv = el('canvas'); cv.width = vp.width; cv.height = vp.height; cv.style.width = vp.width / dpr + 'px'; cv.style.height = vp.height / dpr + 'px';
+      await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      en.target.replaceWith(cv);
+    }), { root: body, rootMargin: '600px' });
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const ph = el('div', { class: 'vpage-ph', 'data-p': String(i), style: `width:${base.width * scale}px;height:${base.height * scale}px` });
+      wrap.append(ph); io.observe(ph);
+    }
+  };
+  pdfState = { zoom: f => { scale = Math.max(0.4, Math.min(4, scale * f)); build(); } };
+  zoomBox.replaceChildren(el('button', { class: 'x', 'aria-label': 'Zoom out', onclick: () => pdfState.zoom(1 / 1.15) }, icon('minus')), pct, el('button', { class: 'x', 'aria-label': 'Zoom in', onclick: () => pdfState.zoom(1.15) }, icon('plus')), el('span', { style: 'margin-left:6px', text: `${pdf.numPages} page${pdf.numPages === 1 ? '' : 's'}` }));
+  build();
 }
 </script>
 </body>

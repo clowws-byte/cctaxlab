@@ -316,3 +316,23 @@ create policy "kb files admin update" on storage.objects for update to authentic
   using (bucket_id = 'kb-files' and public.portal_is_admin()) with check (bucket_id = 'kb-files' and public.portal_is_admin());
 create policy "kb files admin delete" on storage.objects for delete to authenticated
   using (bucket_id = 'kb-files' and public.portal_is_admin());
+
+-- Library categories (e.g. CCT.NewsLetter); documents belong to one category
+create table if not exists public.kb_categories (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null check (char_length(name) between 1 and 80),
+  description text not null default '',
+  sort        integer not null default 0,
+  created_at  timestamptz not null default now()
+);
+alter table public.kb_categories enable row level security;
+create policy "kbcat read" on public.kb_categories for select to authenticated
+  using (public.portal_is_admin() or public.portal_is_approved());
+create policy "kbcat admin write" on public.kb_categories for all to authenticated
+  using (public.portal_is_admin()) with check (public.portal_is_admin());
+revoke all on public.kb_categories from anon;
+alter table public.kb_documents add column if not exists category_id uuid references public.kb_categories(id) on delete restrict;
+create index if not exists kb_documents_category_idx on public.kb_documents (category_id);
+
+-- A workspace can go straight into its first application (used by CCT Library)
+alter table public.portal_hubs add column if not exists open_direct boolean not null default false;
