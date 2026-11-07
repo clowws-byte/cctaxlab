@@ -664,6 +664,15 @@ body[data-anim=tree] .modeswitch{display:inline-flex}
 @media(max-width:560px){.modeswitch button{min-width:26px;padding:0 6px;height:28px}}
 
 @media(max-width:1440px){body[data-anim=tree] header .motto{order:3;flex-basis:100%;min-width:0}body[data-anim=tree] header .motto span{white-space:normal}}
+
+.wrap{min-height:100vh;display:flex;flex-direction:column}
+.copyright{margin:0;font-size:12px;letter-spacing:.02em;color:var(--muted);text-align:center}
+.app-copy{margin-top:auto;padding-top:40px;text-align:left}
+body[data-anim=tree] .wrap{padding-bottom:14px}
+body[data-anim=tree] .app-copy{padding-top:70px}
+.gate{grid-template-rows:1fr auto;}
+.gate-copy{align-self:end;justify-self:start;padding:18px 0 4px 4px}
+body[data-anim=tree] .copyright{color:var(--ink);opacity:.8;text-shadow:0 0 6px var(--bg),0 0 12px var(--bg)}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
 body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-side,body[data-anim=tree] .sprig,body[data-anim=tree] .vformula{display:block}
@@ -734,6 +743,7 @@ body[data-theme=treeday] .vsun .core{box-shadow:0 0 50px 22px rgba(255,248,220,.
     <div class="herotools"><button class="btn ghost small" id="arrangeBtn" hidden></button><label class="search"><span id="searchIcon"></span><input id="q" type="search" placeholder="Search applications" aria-label="Search applications"></label></div>
   </div>
   <div class="galaxy" id="galaxy" aria-live="polite"></div>
+  <p class="copyright app-copy">&copy; <span class="cyear">2026</span> Cheng &amp; Co Taxation Sdn Bhd. All rights reserved.</p>
 </div>
 
 <div class="dock" id="dock" role="dialog" aria-modal="true" aria-labelledby="dockTitle">
@@ -759,6 +769,7 @@ body[data-theme=treeday] .vsun .core{box-shadow:0 0 50px 22px rgba(255,248,220,.
     </div>
     <div class="formside" id="gateBody"></div>
   </div>
+  <p class="copyright gate-copy">&copy; <span class="cyear">2026</span> Cheng &amp; Co Taxation Sdn Bhd. All rights reserved.</p>
 </div>
 
 <div class="fab" id="fab"><button class="btn" id="openAdmin"><span id="gearIc"></span>Admin<span class="dot" id="fabDot" hidden></span></button></div>
@@ -957,6 +968,7 @@ const sprig = () => {
   return d;
 };
 $('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 58, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
+document.querySelectorAll('.cyear').forEach(n => n.textContent = new Date().getFullYear());
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
