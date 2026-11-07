@@ -598,10 +598,48 @@ body[data-theme=tree] .sheet{background:linear-gradient(180deg,#10241e,#0a1714)}
 body[data-theme=tree] .drawer{background:#0c1b17}
 body[data-theme=tree] .toast{background:#173129}
 body[data-theme=tree] .side{background:linear-gradient(165deg,#12291f,#08130f)}
-body[data-theme=tree] .hero h2,body[data-theme=tree] .side h2,body[data-theme=tree] .brandtext h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.2px}
-body[data-theme=tree] .hero h2{font-size:clamp(30px,4.2vw,42px)}
-body[data-theme=tree] .side h2{font-size:34px}
-body[data-theme=tree] .brandtext h1{font-size:clamp(28px,3.4vw,34px)}
+body[data-theme^=tree] .hero h2,body[data-theme^=tree] .side h2,body[data-theme^=tree] .brandtext h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.2px}
+body[data-theme^=tree] .hero h2{font-size:clamp(30px,4.2vw,42px)}
+body[data-theme^=tree] .side h2{font-size:34px}
+body[data-theme^=tree] .brandtext h1{font-size:clamp(28px,3.4vw,34px)}
+
+/* tree colours: night = gold line art under a moon-like sun */
+.vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{stroke:#c9a96a;stroke-opacity:.45}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-lf{fill:#e7d4a6;fill-opacity:.75}
+body[data-theme=tree] .vsun::after{background:radial-gradient(circle at 46% 42%,rgba(250,246,232,.34),rgba(214,214,200,.12) 55%,rgba(214,214,200,.03) 70%);box-shadow:inset 0 0 0 1px rgba(236,232,214,.32)}
+body[data-theme=tree] .vsun::before{background:radial-gradient(circle,rgba(236,236,220,.16),rgba(200,200,180,.06) 35%,transparent 65%)}
+/* ---------- Vision Tree · Morning (white) ---------- */
+body[data-theme=treeday]{--gold:#b8924a;--gold2:#8a6a2c;--acc-rgb:184,146,74;--acc2-rgb:160,120,50;--btn-ink:#fffaf0;--neb1:rgba(255,196,110,.30);--neb2:rgba(150,200,140,.16);--bg:#fdfbf6;--bg-b:#f2eee3;--planet:#cfe0c4;
+  --ink:#1f2a24;--muted:#5d6a62;--dim:#8a958d;--panel:rgba(255,255,255,.74);--panel2:rgba(255,255,255,.92);--line:rgba(60,64,40,.12);--line2:rgba(60,64,40,.22);--red:#c8473f;--teal:#1e8f7d}
+body[data-theme=treeday] .drawer,body[data-theme=treeday] .lookpanel{--gold:#c9a96a;--gold2:#e7d4a6;--acc-rgb:201,169,106;--acc2-rgb:231,212,166;--btn-ink:#14120a;--ink:#f3efe4;--muted:#a9b5ac;--dim:#7a8a80;
+  --panel:rgba(16,34,29,.62);--panel2:rgba(22,44,38,.78);--line:rgba(231,212,166,.12);--line2:rgba(231,212,166,.22);--red:#f07178;--teal:#4fd1c5;color:var(--ink)}
+body[data-theme=treeday] .drawer{background:#0c1b17}
+body[data-theme=treeday] .lookpanel{background:rgba(12,27,23,.97)}
+body[data-theme=treeday] .btn{background:linear-gradient(180deg,#c9a45c,#a9853f);box-shadow:0 6px 18px rgba(169,133,63,.28)}
+body[data-theme=treeday] .drawer .btn,body[data-theme=treeday] .lookpanel .btn{background:linear-gradient(180deg,var(--gold2),var(--gold))}
+body[data-theme=treeday] .btn.ghost{background:transparent;color:var(--ink);box-shadow:none}
+body[data-theme=treeday] .sheet{background:linear-gradient(180deg,#fffdf8,#f6f2e8);box-shadow:-20px 0 60px rgba(60,50,20,.12)}
+body[data-theme=treeday] .dock{background:rgba(60,55,40,.18)}
+body[data-theme=treeday] .side{background:linear-gradient(165deg,#fffaf0,#f1ecdf)}
+body[data-theme=treeday] .pass{background:rgba(255,255,255,.82);box-shadow:0 30px 80px rgba(80,64,20,.14),0 0 0 1px rgba(184,146,74,.10)}
+body[data-theme=treeday] .toast{background:#fffdf8;color:var(--ink);box-shadow:0 10px 30px rgba(60,50,20,.15)}
+body[data-theme=treeday] .who{background:rgba(255,255,255,.7);border-color:var(--line2)}
+body[data-theme=treeday] .signout,body[data-theme=treeday] .bellbtn{background:rgba(255,255,255,.9);color:var(--ink);border-color:var(--line2)}
+body[data-theme=treeday] input.i,body[data-theme=treeday] textarea.i,body[data-theme=treeday] .sel,body[data-theme=treeday] .statusbox,body[data-theme=treeday] .search input{background-color:rgba(255,255,255,.9);color:var(--ink)}
+body[data-theme=treeday] .drawer input.i,body[data-theme=treeday] .drawer textarea.i,body[data-theme=treeday] .drawer .sel,body[data-theme=treeday] .lookpanel .sel{background-color:rgba(6,10,24,.55);color:var(--ink)}
+body[data-theme=treeday] .planet:hover,body[data-theme=treeday] .planet:focus-visible{box-shadow:0 18px 40px rgba(80,64,20,.12),0 0 0 1px color-mix(in srgb,var(--c) 25%,transparent)}
+body[data-theme=treeday] .avatar{background:#f3ead6;color:#6b5220}
+body[data-theme=treeday] .vtree{opacity:.62}
+body[data-theme=treeday] .vtsvg .t-hz{stroke:#8a6a2c;stroke-opacity:.25}
+body[data-theme=treeday] .vtsvg .t-rt{stroke:#9b7b45;stroke-opacity:.45}
+body[data-theme=treeday] .vtsvg .t-br{stroke:#8f7445}
+body[data-theme=treeday] .vtsvg .t-lf{fill:#6e9e4a;fill-opacity:.8}
+body[data-theme=treeday] .vsun::before{background:radial-gradient(circle,rgba(255,214,130,.30),rgba(255,196,110,.10) 35%,transparent 66%)}
+body[data-theme=treeday] .vsun::after{background:radial-gradient(circle at 46% 42%,rgba(255,248,226,.95),rgba(255,226,160,.75) 50%,rgba(248,200,110,.55) 71%,rgba(248,200,110,0) 72%);box-shadow:0 0 70px 10px rgba(255,206,120,.22)}
+body[data-theme=treeday] .motto{text-shadow:none}
+body[data-theme=treeday] .vsun{width:min(28vmax,430px);right:11vw;top:11vh}
+body[data-theme=treeday] .vsun i{border-color:rgba(214,160,60,.22)}
+body[data-theme=treeday] .vsun i+i{border-color:rgba(214,160,60,.12)}
+body[data-theme=treeday] .sprig{color:color-mix(in srgb,var(--c) 60%,#7a5c22)}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
 body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-side,body[data-anim=tree] .sprig,body[data-anim=tree] .vformula{display:block}
@@ -634,7 +672,7 @@ body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme)document.body.dataset.theme=l.theme;if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours();document.body.dataset.theme=l.theme==='treeauto'?(h>=7&&h<19?'treeday':'tree'):l.theme;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i></i><i></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -819,9 +857,9 @@ const treeSVG = (depth = 9, seed = 7) => {
   grow(300, 600, -1.5708, 120, 7, 1, 0);
   for (const a of [.35, .9, 1.57, 2.24, 2.79]) root(300, 600, a, 46 + rnd() * 18, 3.4, 1, .1);
   return `<svg class="vtsvg" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg">
-  <line x1="80" y1="600" x2="520" y2="600" stroke="#e7d4a6" stroke-opacity=".22" stroke-width=".8"/>
-  <g fill="none" stroke="#c9a96a" stroke-opacity=".45" stroke-linecap="round">${rt.join('')}</g>
-  <g class="crown"><g fill="none" stroke="#d9be86" stroke-linecap="round">${br.join('')}</g><g fill="#e7d4a6" fill-opacity=".75">${lf.join('')}</g></g></svg>`;
+  <line class="t-hz" x1="80" y1="600" x2="520" y2="600" stroke-width=".8"/>
+  <g class="t-rt" fill="none" stroke-linecap="round">${rt.join('')}</g>
+  <g class="crown"><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g><g class="t-lf">${lf.join('')}</g></g></svg>`;
 };
 const sprig = () => {
   const d = document.createElement('div'); d.className = 'sprig'; d.setAttribute('aria-hidden', 'true');
@@ -834,13 +872,16 @@ $('.vtree').innerHTML = treeSVG(9, 7); $('.vt-side').innerHTML = treeSVG(8, 11);
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
-const THEMES = { tree: ['Vision Tree', '#8cc63f', '#0a1912'], blue: ['Cheng Blue', '#00aeef', '#071229'], gold: ['Navy & Gold', '#c9a54c', '#081028'], teal: ['Emerald', '#2ec4a0', '#06191c'], violet: ['Royal Violet', '#9b8cff', '#0e0a2a'], silver: ['Graphite', '#c3cede', '#0d1118'], copper: ['Copper', '#e8875a', '#140b14'] };
+const THEMES = { treeday: ['Vision Tree · Morning', '#f6b94e', '#fdfbf6'], tree: ['Vision Tree · Night', '#c9a96a', '#0a1613'], treeauto: ['Vision Tree · Auto', '#f6b94e', '#0a1613'], blue: ['Cheng Blue', '#00aeef', '#071229'], gold: ['Navy & Gold', '#c9a54c', '#081028'], teal: ['Emerald', '#2ec4a0', '#06191c'], violet: ['Royal Violet', '#9b8cff', '#0e0a2a'], silver: ['Graphite', '#c3cede', '#0d1118'], copper: ['Copper', '#e8875a', '#140b14'] };
 const ANIMS = { tree: ['Growing tree', 'A fine-line tree growing beneath a rising sun'], calm: ['Calm orbit', 'Gentle stars and slow orbit rings'], meteor: ['Meteor shower', 'Frequent shooting stars'], constellation: ['Constellation', 'Linked stars that follow your pointer'], nebula: ['Nebula drift', 'Soft glowing clouds drifting'], galaxy: ['Spiral galaxy', 'A slowly turning galaxy'], solar: ['Solar system', 'Planets orbiting a glowing sun'] };
 let look = { theme: document.body.dataset.theme || 'blue', anim: document.body.dataset.anim || 'calm' };
 let accRGB = '0,174,239', acc2RGB = '111,211,255';
+// Vision Tree · Auto: morning look from 7am to 7pm, night look otherwise (viewer's own clock)
+const effTheme = t => t === 'treeauto' ? ((h => h >= 7 && h < 19)(new Date().getHours()) ? 'treeday' : 'tree') : t;
+setInterval(() => { if (look.theme === 'treeauto' && document.body.dataset.theme !== effTheme('treeauto')) applyLook(look, false); }, 300000);
 function applyLook(l, remember = true) {
   look = { theme: THEMES[l && l.theme] ? l.theme : 'blue', anim: ANIMS[l && l.anim] ? l.anim : 'calm' };
-  document.body.dataset.theme = look.theme; document.body.dataset.anim = look.anim;
+  document.body.dataset.theme = effTheme(look.theme); document.body.dataset.anim = look.anim;
   const cs = getComputedStyle(document.body);
   accRGB = cs.getPropertyValue('--acc-rgb').trim() || accRGB; acc2RGB = cs.getPropertyValue('--acc2-rgb').trim() || acc2RGB;
   initScene();
@@ -853,8 +894,8 @@ function lookPicker(cur, onPick) {
     const c = cur();
     box.replaceChildren(
       el('div', { class: 'section-t', text: 'Colour theme' }),
-      el('div', { class: 'themes' }, Object.entries(THEMES).map(([k, [name, a, bg]]) => el('button', { class: 'thm' + (c.theme === k ? ' on' : ''), onclick: () => onPick({ theme: k, anim: k === 'tree' ? 'tree' : c.anim === 'tree' ? 'calm' : c.anim }) },
-        el('span', { class: 'swc', style: `background:radial-gradient(circle at 35% 30%,${a},${bg} 85%);border:2px solid ${a}` }), name))),
+      el('div', { class: 'themes' }, Object.entries(THEMES).map(([k, [name, a, bg]]) => el('button', { class: 'thm' + (c.theme === k ? ' on' : ''), onclick: () => onPick({ theme: k, anim: k.startsWith('tree') ? 'tree' : c.anim === 'tree' ? 'calm' : c.anim }) },
+        el('span', { class: 'swc', style: k === 'treeauto' ? 'background:linear-gradient(90deg,#fdfbf6 50%,#0a1613 50%);border:2px solid #c9a96a' : `background:radial-gradient(circle at 35% 30%,${a},${bg} 85%);border:2px solid ${a}` }), name))),
       el('div', { class: 'section-t', text: 'Background animation' }),
       el('div', { class: 'anims' }, Object.entries(ANIMS).map(([k, [name, d]]) => el('button', { class: 'anm' + (c.anim === k ? ' on' : ''), onclick: () => onPick({ theme: c.theme, anim: k }) }, el('b', { text: name }), d))));
   };
