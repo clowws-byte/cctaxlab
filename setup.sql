@@ -336,3 +336,10 @@ create index if not exists kb_documents_category_idx on public.kb_documents (cat
 
 -- A workspace can go straight into its first application (used by CCT Library)
 alter table public.portal_hubs add column if not exists open_direct boolean not null default false;
+
+-- 10. Selected by branch, and View / Edit levels ---------------------------------------
+alter table public.portal_tools add column if not exists default_level text not null default 'edit' check (default_level in ('view','edit'));
+create table if not exists public.portal_tool_branch_access (tool_id uuid not null references public.portal_tools(id) on delete cascade, branch text not null references public.portal_branches(code) on update cascade on delete cascade, primary key (tool_id, branch));
+create table if not exists public.portal_tool_levels (tool_id uuid not null references public.portal_tools(id) on delete cascade, user_id uuid not null references public.portal_profiles(id) on delete cascade, level text not null check (level in ('view','edit')), primary key (tool_id, user_id));
+-- portal_my_branch(), portal_has_grant() (user OR branch), RLS policies, and portal_my_access(p_tool, p_url)
+-- are defined in migration "cctaxlab_branch_grants_and_levels". Apps call portal_my_access via access.js.
