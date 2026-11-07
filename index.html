@@ -626,12 +626,13 @@ body[data-theme=treeday] input.i,body[data-theme=treeday] textarea.i,body[data-t
 body[data-theme=treeday] .drawer input.i,body[data-theme=treeday] .drawer textarea.i,body[data-theme=treeday] .drawer .sel,body[data-theme=treeday] .lookpanel .sel{background-color:rgba(6,10,24,.55);color:var(--ink)}
 body[data-theme=treeday] .planet:hover,body[data-theme=treeday] .planet:focus-visible{box-shadow:0 18px 40px rgba(80,64,20,.12),0 0 0 1px color-mix(in srgb,var(--c) 25%,transparent)}
 body[data-theme=treeday] .avatar{background:#f3ead6;color:#6b5220}
-body[data-theme=treeday] .vtree{opacity:.62}
+body[data-theme=treeday] .vtree{opacity:.85}
 body[data-theme=treeday] .vtsvg .t-hz{stroke:#8a6a2c;stroke-opacity:.25}
 body[data-theme=treeday] .vtsvg .t-rt{stroke:#9b7b45;stroke-opacity:.45}
 body[data-theme=treeday] .vtsvg .t-br{stroke:#8f7445}
 body[data-theme=treeday] .vtsvg .t-lf{fill:#6e9e4a;fill-opacity:.8}
-body[data-theme=treeday] .motto{text-shadow:none}
+body[data-theme=treeday] .motto,body[data-theme=treeday] .hero h2,body[data-theme=treeday] .hero p{text-shadow:0 0 6px #fbf8f1,0 0 14px #fbf8f1,0 0 24px #fbf8f1}
+body[data-theme=tree] .motto,body[data-theme=tree] .hero h2,body[data-theme=tree] .hero p{text-shadow:0 0 6px #0b1814,0 0 14px #0b1814,0 0 24px #0b1814}
 body[data-theme=treeday] .sprig{color:color-mix(in srgb,var(--c) 60%,#7a5c22)}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
@@ -651,11 +652,11 @@ body[data-theme=treeday] .vtsvg .t-br{stroke:#8a7046}
 body[data-theme=treeday] .vsun .bloom{background:radial-gradient(circle,#fffef8 0 3%,rgba(255,238,180,.97) 7%,rgba(255,214,128,.66) 15%,rgba(255,196,104,.32) 27%,rgba(255,190,100,.12) 41%,transparent 58%)}
 body[data-theme=treeday] .vsun .rays{background:repeating-conic-gradient(from 0deg,rgba(255,190,90,.17) 0 2.2deg,transparent 2.2deg 9deg,rgba(255,200,110,.09) 9deg 10deg,transparent 10deg 17deg)}
 body[data-theme=treeday] .vsun .core{box-shadow:0 0 50px 22px rgba(255,248,220,.95),0 0 160px 70px rgba(255,200,110,.5)}
-.vtree{position:fixed;right:-2vw;bottom:0;height:min(86vh,840px);aspect-ratio:3/4;z-index:0;pointer-events:none;opacity:.55}
+.vtree{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.8;-webkit-mask-image:linear-gradient(100deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.28) 28%,rgba(0,0,0,.75) 52%,#000 66%);mask-image:linear-gradient(100deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.28) 28%,rgba(0,0,0,.75) 52%,#000 66%)}
 .vtree svg,.vt-side svg{width:100%;height:100%;overflow:visible}
 .vtsvg .br{stroke-dasharray:1;animation:grow 1.4s cubic-bezier(.4,0,.2,1) backwards}
 .vtsvg .lf{animation:bud 1.6s ease-out backwards}
-.vtsvg .crown{transform-box:view-box;transform-origin:300px 600px;animation:sway 16s ease-in-out 6s infinite}
+.vtsvg .crown{transform-box:view-box;animation:sway 18s ease-in-out 6s infinite}
 @keyframes grow{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes bud{from{opacity:0}}
 @keyframes sway{0%,100%{transform:rotate(0)}30%{transform:rotate(.7deg)}70%{transform:rotate(-.6deg)}}
@@ -668,7 +669,7 @@ body[data-theme=treeday] .vsun .core{box-shadow:0 0 50px 22px rgba(255,248,220,.
 .vformula{position:relative;z-index:1;margin:18px 0 0;font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;letter-spacing:.06em;color:var(--gold2)}
 .vformula span{color:var(--ink)}
 .vformula small{display:block;margin-top:2px;font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
-@media(max-width:760px){.vtree{opacity:.22;right:-30vw}.vsun{right:-40vw;top:-40vw;width:110vw}.vt-side{width:160px;height:212px;opacity:.45}.sprig{width:44px;height:44px}}
+@media(max-width:760px){.vtree{opacity:.35}.vsun{right:-40vw;top:-40vw;width:110vw}.vt-side{width:160px;height:212px;opacity:.45}.sprig{width:44px;height:44px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -833,7 +834,8 @@ const orb = (c, ring = true) => { const o = el('div', { class: 'orb', style: c ?
 $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $('.bigplanet').append(orb(null, false)); $('.moon2').append(orb(null, false)); $('#sysOrb').replaceWith(orb('var(--gold)'));
 
 /* ================= Vision Tree drawings ================= */
-const treeSVG = (depth = 9, seed = 7) => {
+const treeSVG = (depth = 9, seed = 7, o = {}) => {
+  const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
   const br = [], lf = [], rt = [];
   const f = n => n.toFixed(1);
@@ -845,22 +847,22 @@ const treeSVG = (depth = 9, seed = 7) => {
     if (d >= depth) { lf.push(`<ellipse class="lf" cx="${f(x2)}" cy="${f(y2)}" rx="${f(2.2 + rnd() * 1.6)}" ry="${f(1.2 + rnd() * .8)}" transform="rotate(${f(ang * 57.3)} ${f(x2)} ${f(y2)})" style="animation-delay:${f(t1 + rnd() * .8)}s"/>`); return; }
     const n = d < 3 ? 2 : rnd() < .25 ? 3 : 2;
     for (let i = 0; i < n; i++) {
-      const spread = (n === 2 ? (i ? 1 : -1) : (i - 1)) * (.32 + rnd() * .22) + (rnd() - .5) * .12;
-      grow(x2, y2, Math.min(-.3, Math.max(-2.84, ang + spread - (ang + 1.38) * .2)), len * (.72 + rnd() * .1), Math.max(.5, w * .7), d + 1, t1);
+      const spread = (n === 2 ? (i ? 1 : -1) : (i - 1)) * (.32 + rnd() * .22) * SP + (rnd() - .5) * .12;
+      grow(x2, y2, Math.min(-.3, Math.max(-2.84, ang + spread - (ang + LEAN) * .2)), len * (LF + rnd() * .1), Math.max(.5, w * .7), d + 1, t1);
     }
   }
   function root(x, y, ang, len, w, d, t0) {
     const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
     rt.push(`<path class="br" pathLength="1" d="M${f(x)} ${f(y)}Q${f((x + x2) / 2 + (rnd() - .5) * 10)} ${f((y + y2) / 2)} ${f(x2)} ${f(y2)}" stroke-width="${f(w)}" style="animation-delay:${f(t0)}s"/>`);
     if (d >= 5) return;
-    for (let i = 0; i < 2; i++) root(x2, y2, ang + (i ? 1 : -1) * (.3 + rnd() * .3), len * .72, Math.max(.4, w * .65), d + 1, t0 + .3);
+    for (let i = 0; i < 2; i++) root(x2, y2, ang + (i ? 1 : -1) * (.3 + rnd() * .3), len * .72, Math.max(.4, w * .8), d + 1, t0 + .3);
   }
-  grow(300, 600, -1.5708, 120, 7, 1, 0);
-  for (const a of [.35, .9, 1.57, 2.24, 2.79]) root(300, 600, a, 46 + rnd() * 18, 3.4, 1, .1);
-  return `<svg class="vtsvg" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg">
-  <line class="t-hz" x1="80" y1="600" x2="520" y2="600" stroke-width=".8"/>
+  grow(X0, Y0, -1.5708, L0, W0, 1, 0);
+  for (const a of [.25, .7, 1.2, 1.57, 1.94, 2.44, 2.89]) root(X0, Y0, a, RL + rnd() * RL * .4, W0 * .22, 1, .1);
+  return `<svg class="vtsvg" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="${o.par || 'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg">
+  <line class="t-hz" x1="${o.vw ? 0 : 80}" y1="${Y0}" x2="${o.vw ? VW : 520}" y2="${Y0}" stroke-width=".8"/>
   <g class="t-rt" fill="none" stroke-linecap="round">${rt.join('')}</g>
-  <g class="crown"><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g><g class="t-lf">${lf.join('')}</g></g></svg>`;
+  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g><g class="t-lf">${lf.join('')}</g></g></svg>`;
 };
 const sprig = () => {
   const d = document.createElement('div'); d.className = 'sprig'; d.setAttribute('aria-hidden', 'true');
@@ -869,7 +871,7 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-$('.vtree').innerHTML = treeSVG(10, 7); $('.vt-side').innerHTML = treeSVG(8, 11);
+$('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1130, y: 905, len: 250, w: 30, spread: 1.32, lenf: .76, lean: 1.62, rootLen: 70, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
