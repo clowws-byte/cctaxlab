@@ -186,7 +186,6 @@ body.locked input,body.locked textarea{-webkit-user-select:text;user-select:text
 .vframe{width:100%;max-width:1000px;margin:0 auto;display:block;border:0;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.45);min-height:70vh}
 .vmsg{max-width:520px;margin:12vh auto;text-align:center;color:var(--muted);background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:30px}
 .vmsg h3{color:var(--ink);margin:0 0 8px}
-.wm{position:fixed;left:0;right:0;top:57px;bottom:0;pointer-events:none;z-index:5;background-repeat:repeat}
 @media print{body *{display:none!important}body::after{content:"Printing is disabled for the CCT Library.";display:block;padding:40px;font:16px sans-serif;color:#000}}
 </style>
 </head>
@@ -711,14 +710,6 @@ async function deleteCat(c) {
 
 /* ---------- view-only document viewer ---------- */
 let viewerOpen = false, pdfState = null;
-function watermark() {
-  const cv = document.createElement('canvas'); cv.width = 420; cv.height = 240;
-  const g = cv.getContext('2d'); g.translate(210, 120); g.rotate(-0.42);
-  g.font = '600 15px "Plus Jakarta Sans", sans-serif'; g.fillStyle = 'rgba(90,100,130,.16)'; g.textAlign = 'center';
-  g.fillText(`${me.full_name || ''} · ${me.email}`, 0, -6);
-  g.fillText(`CCT Library · ${new Date().toLocaleDateString('en-GB')} · View only`, 0, 16);
-  return cv.toDataURL();
-}
 function closeViewer() {
   viewerOpen = false; pdfState = null; const v = $('#viewer'); v.classList.remove('open');
   setTimeout(() => { if (!viewerOpen) v.replaceChildren(); }, 200);
@@ -739,7 +730,7 @@ async function viewDoc(d) {
   const v = $('#viewer'), body = el('div', { class: 'vbody' }), zoomBox = el('div', { class: 'zoom' });
   v.replaceChildren(
     el('div', { class: 'vbar' }, el('h2', { text: d.title }), zoomBox, el('span', { class: 'vtag', text: 'VIEW ONLY' }), el('button', { class: 'x', 'aria-label': 'Close viewer', onclick: closeViewer }, icon('x'))),
-    body, el('div', { class: 'wm', style: `background-image:url(${watermark()})` }));
+    body);
   v.classList.add('open');
   const msg = (h, p) => body.replaceChildren(el('div', { class: 'vmsg' }, el('h3', { text: h }), el('p', { text: p })));
   if (!d.file_path) return msg('No file', 'This entry has no file attached.');
