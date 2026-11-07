@@ -606,7 +606,7 @@ body[data-theme^=tree] .company{color:#00aeef;letter-spacing:.14em}
 body[data-theme=treeday] .company{color:#0096cf}
 
 /* tree colours: night = gold line art under a moon-like sun */
-.vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{fill:#c9a96a;fill-opacity:.6}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-tr{fill:#d9be86}
+.vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{fill:#c9a96a;fill-opacity:1;opacity:.75}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-tr{fill:#d9be86}
 .vtsvg .l1{fill:#5e9150}.vtsvg .l2{fill:#82ad64}.vtsvg .l3{fill:#a9c47a}.vtsvg .t-lf{opacity:.92}
 .vtsvg .r1{animation:rustle 4.6s ease-in-out infinite}.vtsvg .r2{animation:rustle 6.2s ease-in-out -2s infinite}.vtsvg .r3{animation:rustle 5.3s ease-in-out -1s infinite reverse}.vtsvg .r4{animation:rustle 7.1s ease-in-out -3s infinite}
 
@@ -645,7 +645,7 @@ body[data-theme=treeday] .planet:hover,body[data-theme=treeday] .planet:focus-vi
 body[data-theme=treeday] .avatar{background:#f3ead6;color:#6b5220}
 body[data-theme=treeday] .vtree{opacity:1}
 body[data-theme=treeday] .vtsvg .t-hz{stroke:#8a6a2c;stroke-opacity:.25}
-body[data-theme=treeday] .vtsvg .t-rt{fill:#8f7445;fill-opacity:.72}
+body[data-theme=treeday] .vtsvg .t-rt{fill:#8f7445;fill-opacity:1;opacity:.85}
 body[data-theme=treeday] .vtsvg .t-tr{fill:#8a7046}
 body[data-theme=treeday] .vtsvg .t-br{stroke:#8f7445}
 body[data-theme=treeday] .vtsvg .t-lf{opacity:.9}
@@ -909,19 +909,26 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     }
     return 'M' + L.join('L') + 'L' + R.reverse().join('L') + 'Z';
   }
-  function rootPts(x, y, ang, len, steps) {
+  function rootPts(x, y, ang, len, steps, pull) {
     const pts = [[x, y]], st = len / steps;
-    for (let i = 0; i < steps; i++) { ang += (1.5708 - ang) * .035 + (rnd() - .5) * .14; x += Math.cos(ang) * st; y += Math.sin(ang) * st; pts.push([x, y]); }
-    return pts;
+    for (let i = 0; i < steps; i++) { ang += (1.5708 - ang) * pull + (rnd() - .5) * .16; if (ang < .1) ang = .1; if (ang > 3.04) ang = 3.04; if (ang < -1.5708) ang += 6.2832; x += Math.cos(ang) * st; y = Math.max(Y0 + 3, y + Math.sin(ang) * st); pts.push([x, y]); }
+    return { pts, ang };
   }
-  const roots = o.grass ? [.08, .3, .7, 1.25, 1.89, 2.44, 2.84, 3.06] : [.06, .26, .62, 1.12, 2.02, 2.52, 2.88, 3.08];
+  // poster-style roots: fan out wide and shallow from the trunk, forking again and again into fine tips
+  function rootFork(x, y, ang, len, w, d, dl) {
+    const { pts, ang: a2 } = rootPts(x, y, ang, len, 9, .008 + d * .008), w1 = Math.max(.5, w * .62);
+    rt.push(`<path class="lf" d="${ribbon(pts, w, w1)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
+    if (d >= (o.grass ? 5 : 4)) return;
+    const end = pts[pts.length - 1], k = d < 2 ? 2 : rnd() < .3 ? 3 : 2;
+    for (let i = 0; i < k; i++) {
+      const sp = (k === 2 ? (i ? 1 : -1) : (i - 1)) * (.32 + rnd() * .28);
+      rootFork(end[0], end[1], a2 + sp, len * (.66 + rnd() * .14), w1, d + 1, dl + .12);
+    }
+  }
+  const roots = [.06, .3, .72, 1.57, 2.42, 2.84, 3.08];
   roots.forEach((a, i) => {
-    const shallow = a < .4 || a > 2.74, len = RL * (shallow ? 2.4 : 1.5) * (.85 + rnd() * .3), w = W0 * (shallow ? .42 : .5);
-    const pts = rootPts(X0 + Math.cos(a) * W0 * .45, Y0 + 1, a, len, 16), dl = (.15 + i * .06).toFixed(2);
-    rt.push(`<path class="lf" d="${ribbon(pts, w, .6)}" style="animation-delay:${dl}s"/>`);
-    for (const j of (o.grass ? [5, 9] : [5, 9, 12])) { if (rnd() < .4) continue;
-      const p0 = pts[j], sa = a + (rnd() < .5 ? -1 : 1) * (.45 + rnd() * .4), sw = w * (1 - j / 16) * .55;
-      rt.push(`<path class="lf" d="${ribbon(rootPts(p0[0], p0[1], sa, len * (.22 + rnd() * .2), 8), sw, .4)}" style="animation-delay:${dl}s"/>`); }
+    const side = Math.abs(a - 1.5708) / 1.5708, len = RL * (.7 + side * 1.2) * (.9 + rnd() * .2), w = W0 * (.34 + (1 - side) * .12);
+    rootFork(X0 + Math.cos(a) * W0 * .4, Y0 + 1, a, len, w, 1, .15 + i * .04);
   });
   const fl = W0 * 2.1, fh = W0 * 3.2;
   const flare = `<path class="lf" d="M${f(X0 - fl)} ${f(Y0 + 2)}C${f(X0 - W0 * .7)} ${f(Y0 - 2)} ${f(X0 - W0 * .46)} ${f(Y0 - fh * .35)} ${f(X0 - W0 * .38)} ${f(Y0 - fh)}L${f(X0 + W0 * .38)} ${f(Y0 - fh)}C${f(X0 + W0 * .46)} ${f(Y0 - fh * .35)} ${f(X0 + W0 * .7)} ${f(Y0 - 2)} ${f(X0 + fl)} ${f(Y0 + 2)}Z"/>`;
@@ -950,7 +957,7 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-$('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1000, y: 850, len: 172, w: 56, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 60, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
+$('.vtree').innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1000, y: 850, len: 172, w: 56, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 70, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' }); $('.vt-side').innerHTML = treeSVG(8, 11);
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
