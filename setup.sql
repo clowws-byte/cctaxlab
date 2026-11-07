@@ -238,3 +238,81 @@ declare t timestamptz := now();
 begin update public.portal_profiles set updates_seen_at = t where id = (select auth.uid()); return t; end $$;
 revoke execute on function public.portal_mark_updates_seen() from anon, public;
 grant execute on function public.portal_mark_updates_seen() to authenticated;
+
+-- =====================================================================
+-- Tax Knowledge Library (library.html, in the CCT Library workspace)
+-- Admins upload and tag; approved staff search and read.
+-- =====================================================================
+create table if not exists public.kb_documents (
+  id           uuid primary key default gen_random_uuid(),
+  title        text not null check (char_length(title) between 1 and 300),
+  doc_type     text not null default 'Newsletter',
+  issue_date   date,
+  tax_types    text[] not null default '{}',
+  topics       text[] not null default '{}',
+  legislation  text[] not null default '{}',
+  summary      text not null default '',
+  body_text    text not null default '',
+  file_path    text,
+  file_name    text,
+  file_type    text,
+  file_size    bigint,
+  status       text not null default 'published' check (status in ('draft','published')),
+  created_by   uuid references public.portal_profiles(id) on delete set null default auth.uid(),
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  fts          tsvector
+);
+create index if not exists kb_documents_fts_idx on public.kb_documents using gin (fts);
+create index if not exists kb_documents_date_idx on public.kb_documents (issue_date desc nulls last);
+create index if not exists kb_documents_created_by_idx on public.kb_documents (created_by);
+
+create or replace function public.kb_documents_fts() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  new.fts :=
+      setweight(to_tsvector('english', coalesce(new.title,'')), 'A')
+   || setweight(to_tsvector('english', array_to_string(new.tax_types,' ') || ' ' || array_to_string(new.topics,' ') || ' ' || array_to_string(new.legislation,' ') || ' ' || coalesce(new.doc_type,'')), 'B')
+   || setweight(to_tsvector('english', coalesce(new.summary,'')), 'C')
+   || setweight(to_tsvector('english', left(coalesce(new.body_text,''), 300000)), 'D');
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists kb_documents_fts_trg on public.kb_documents;
+create trigger kb_documents_fts_trg before insert or update on public.kb_documents
+  for each row execute function public.kb_documents_fts();
+
+alter table public.kb_documents enable row level security;
+create policy "kb read" on public.kb_documents for select to authenticated
+  using (public.portal_is_admin() or (public.portal_is_approved() and status = 'published'));
+create policy "kb admin insert" on public.kb_documents for insert to authenticated with check (public.portal_is_admin());
+create policy "kb admin update" on public.kb_documents for update to authenticated using (public.portal_is_admin()) with check (public.portal_is_admin());
+create policy "kb admin delete" on public.kb_documents for delete to authenticated using (public.portal_is_admin());
+revoke all on public.kb_documents from anon;
+
+create or replace function public.kb_search(q text, lim int default 100)
+returns table (id uuid, rank real, snippet text)
+language sql stable security invoker set search_path = '' as $$
+  with query as (select websearch_to_tsquery('english', q) as tq)
+  select d.id,
+         ts_rank_cd(d.fts, query.tq) as rank,
+         ts_headline('english', left(d.summary || ' ' || d.body_text, 200000), query.tq,
+                     'StartSel=<<,StopSel=>>,MaxWords=40,MinWords=15,MaxFragments=2,FragmentDelimiter= … ') as snippet
+  from public.kb_documents d, query
+  where d.fts @@ query.tq
+  order by rank desc
+  limit least(coalesce(lim,100), 200);
+$$;
+revoke execute on function public.kb_search(text,int) from anon, public;
+grant execute on function public.kb_search(text,int) to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('kb-files', 'kb-files', false, 52428800) on conflict (id) do nothing;
+create policy "kb files read" on storage.objects for select to authenticated
+  using (bucket_id = 'kb-files' and (public.portal_is_admin() or public.portal_is_approved()));
+create policy "kb files admin insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'kb-files' and public.portal_is_admin());
+create policy "kb files admin update" on storage.objects for update to authenticated
+  using (bucket_id = 'kb-files' and public.portal_is_admin()) with check (bucket_id = 'kb-files' and public.portal_is_admin());
+create policy "kb files admin delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'kb-files' and public.portal_is_admin());

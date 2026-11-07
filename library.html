@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Knowledge Library · CCTaxLab</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230b1430' stroke='%2300aeef' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='%2300aeef'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#081631; --bg-b:#10264f; --ink:#eef1f8; --muted:#97a3bf; --dim:#6b7899;
+  --panel:rgba(16,26,56,.62); --panel2:rgba(22,34,72,.78); --line:rgba(160,180,230,.14); --line2:rgba(160,180,230,.26);
+  --acc:#00aeef; --acc2:#6fd3ff; --acc-rgb:0,174,239; --btn-ink:#04142b; --teal:#4fd1c5; --red:#f07178; --amber:#f5c26b;
+  --neb1:rgba(20,130,225,.36); --neb2:rgba(79,209,197,.14);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(55vmax 45vmax at 100% 0%,rgba(255,196,120,.18),transparent 60%),radial-gradient(70vmax 50vmax at 85% -10%,var(--neb1),transparent 60%),radial-gradient(60vmax 45vmax at -10% 110%,var(--neb2),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg-b));background-attachment:fixed}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+svg.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+a{color:var(--acc2)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:22px 22px 100px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand img{height:38px;display:block}
+.divline{width:1px;height:38px;background:var(--line2)}
+.brand h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
+.brand .sub{margin:2px 0 0;font-size:12px;color:var(--acc2);font-weight:600;letter-spacing:1.2px;text-transform:uppercase}
+.who{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600}
+.tag{font-size:10.5px;padding:3px 8px;border-radius:6px;background:rgba(var(--acc-rgb),.14);color:var(--acc2);font-weight:700;letter-spacing:.6px;border:1px solid rgba(var(--acc-rgb),.3)}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;border:1px solid var(--line2);padding:7px 12px;border-radius:8px}
+.back:hover{color:var(--ink);border-color:var(--muted)}
+@media(max-width:620px){.brand img{height:26px}.divline{display:none}}
+
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:28px 0 16px}
+.hero h2{margin:0;font-size:clamp(22px,3.4vw,32px);font-weight:700;letter-spacing:-.5px}
+.hero h2 span{background:linear-gradient(90deg,var(--acc2),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:6px 0 0;color:var(--muted);font-size:14px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:11px 18px;font-weight:700;font-size:14px;color:var(--btn-ink);background:linear-gradient(135deg,var(--acc2),var(--acc));box-shadow:0 4px 18px rgba(var(--acc-rgb),.25)}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2);box-shadow:none}
+.btn.ghost:hover{background:rgba(255,255,255,.05)}
+.btn.small{padding:7px 12px;font-size:12.5px;border-radius:8px}
+.btn.danger{background:rgba(240,113,120,.12);color:#ffb3b8;border:1px solid rgba(240,113,120,.35);box-shadow:none}
+
+.searchbar{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line2);border-radius:14px;padding:6px 6px 6px 16px;backdrop-filter:blur(10px)}
+.searchbar svg{color:var(--muted)}
+.searchbar input{flex:1;background:none;border:0;color:var(--ink);font-size:16px;padding:10px 4px;outline:none;min-width:0}
+.searchbar input::placeholder{color:var(--dim)}
+.hint{color:var(--dim);font-size:12px;margin:8px 2px 0}
+
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0 6px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--muted);font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;display:inline-flex;gap:6px;align-items:center}
+.chip b{font-weight:700;color:var(--dim);font-size:11px}
+.chip.on{background:rgba(var(--acc-rgb),.16);border-color:rgba(var(--acc-rgb),.55);color:var(--acc2)}
+.chip.on b{color:var(--acc2)}
+select.sel,input.inp,textarea.inp{background:rgba(6,12,30,.55);border:1px solid var(--line2);color:var(--ink);border-radius:9px;padding:8px 10px;font-size:13.5px;outline:none}
+select.sel:focus,input.inp:focus,textarea.inp:focus{border-color:rgba(var(--acc-rgb),.6)}
+select.sel option{background:#0b1430}
+.spacer{flex:1}
+.count{color:var(--muted);font-size:13px;margin:14px 2px 10px}
+
+.results{display:grid;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 18px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start;cursor:pointer;transition:border-color .15s,transform .15s;backdrop-filter:blur(8px)}
+.card:hover{border-color:rgba(var(--acc-rgb),.45);transform:translateY(-1px)}
+.ficon{width:44px;height:52px;border-radius:8px;display:grid;place-items:center;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#fff;background:#3b4a72;position:relative}
+.ficon.pdf{background:#c2410c}.ficon.doc{background:#1d4ed8}.ficon.xls{background:#15803d}.ficon.ppt{background:#b45309}.ficon.img{background:#7c3aed}.ficon.txt{background:#475569}.ficon.web{background:#0e7490}
+.card h3{margin:0 0 4px;font-size:15.5px;font-weight:700;line-height:1.35}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:12.5px}
+.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(79,209,197,.12);color:#8be9df;border:1px solid rgba(79,209,197,.28)}
+.pill.type{background:rgba(var(--acc-rgb),.12);color:var(--acc2);border-color:rgba(var(--acc-rgb),.3)}
+.pill.draft{background:rgba(245,194,107,.12);color:var(--amber);border-color:rgba(245,194,107,.35)}
+.snip{margin:8px 0 0;color:#c4cde2;font-size:13.5px;line-height:1.55}
+mark{background:rgba(var(--acc-rgb),.28);color:#fff;border-radius:3px;padding:0 2px}
+.date{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:60px 20px;border:1px dashed var(--line2);border-radius:16px}
+.empty h3{color:var(--ink);margin:0 0 6px}
+
+/* drawer + modal */
+.dim{position:fixed;inset:0;background:rgba(2,6,18,.6);backdrop-filter:blur(3px);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.dim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:linear-gradient(180deg,#0c1838,#0a1430);border-left:1px solid var(--line2);z-index:21;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dhead{display:flex;align-items:flex-start;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dhead h2{margin:0;font-size:18px;line-height:1.35;flex:1}
+.x{background:none;border:1px solid var(--line2);color:var(--muted);border-radius:8px;width:34px;height:34px;display:grid;place-items:center;flex:none}
+.x:hover{color:var(--ink)}
+.dbody{padding:18px 20px 30px;overflow:auto;flex:1}
+.dfoot{padding:12px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:13.5px;margin:0 0 18px}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{margin:0}
+.sect{margin:18px 0 8px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--acc2);font-weight:700}
+.summary{line-height:1.6;color:#d5dcec;font-size:14px;white-space:pre-wrap}
+.fulltext{white-space:pre-wrap;font-size:13px;line-height:1.6;color:#c4cde2;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:none}
+.ftbar{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+
+/* upload */
+.modal{position:fixed;inset:4vh 0 auto;margin:0 auto;width:min(980px,96vw);max-height:92vh;background:linear-gradient(180deg,#0c1838,#0a1430);border:1px solid var(--line2);border-radius:18px;z-index:22;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.5);opacity:0;pointer-events:none;transform:translateY(10px);transition:all .2s}
+.modal.open{opacity:1;pointer-events:auto;transform:none}
+.drop{border:2px dashed var(--line2);border-radius:14px;padding:30px 20px;text-align:center;color:var(--muted);transition:all .15s}
+.drop.over{border-color:var(--acc);background:rgba(var(--acc-rgb),.07);color:var(--ink)}
+.drop strong{color:var(--ink);display:block;font-size:15px;margin-bottom:4px}
+.item{border:1px solid var(--line2);border-radius:14px;padding:14px 16px;margin-top:12px;background:rgba(255,255,255,.02)}
+.ihead{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ihead .fn{flex:1;min-width:0;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.state{font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.state.work{color:var(--amber);background:rgba(245,194,107,.1)}
+.state.ok{color:#8be9df;background:rgba(79,209,197,.1)}
+.state.warn{color:#ffb3b8;background:rgba(240,113,120,.1)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.grid .full{grid-column:1/-1}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:1fr}.card{grid-template-columns:36px 1fr}.card .date{display:none}}
+label.f{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.f-in{width:100%}
+.tagbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:rgba(6,12,30,.55);border:1px solid var(--line2);border-radius:9px;padding:6px 8px;min-height:40px}
+.tagbox input{flex:1;min-width:120px;background:none;border:0;color:var(--ink);outline:none;font-size:13px;padding:3px}
+.tk{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;background:rgba(var(--acc-rgb),.14);border:1px solid rgba(var(--acc-rgb),.35);color:var(--acc2);padding:3px 4px 3px 9px;border-radius:6px}
+.tk button{background:none;border:0;color:inherit;padding:0 3px;font-size:14px;line-height:1}
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pick .chip{font-size:12px;padding:5px 10px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#13224a;border:1px solid var(--line2);padding:11px 18px;border-radius:10px;font-size:13.5px;font-weight:600;opacity:0;transition:all .2s;z-index:40;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.gate{max-width:440px;margin:14vh auto;text-align:center;background:var(--panel2);border:1px solid var(--line2);border-radius:18px;padding:34px 28px}
+.gate h3{margin:0 0 8px;font-size:20px}
+.gate p{color:var(--muted);margin:0 0 20px}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--acc2);border-radius:50%;animation:sp 0.8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <img src="data:image/png;base64,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" alt="Cheng &amp; Co Group">
+      <div class="divline"></div>
+      <div><h1>Tax Knowledge Library</h1><p class="sub">CCT Library · CCTaxLab</p></div>
+    </div>
+    <div class="who">
+      <span id="whoName"></span><span class="tag" id="whoTag" hidden>ADMIN</span>
+      <a class="back" href="./">← Portal</a>
+    </div>
+  </header>
+  <main id="app"><div class="gate"><span class="spin"></span><p style="margin-top:14px">Loading library…</p></div></main>
+</div>
+
+<div class="dim" id="dim"></div>
+<aside class="drawer" id="drawer" aria-label="Document"></aside>
+<section class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Upload"></section>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const SUPABASE_URL = 'https://orszbsqshrzhjgtlihzc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_by4wqCu53U9son8u0kp1qA_Uij0ysHW';
+const BUCKET = 'kb-files';
+const MAX_TEXT = 1000000;
+
+const DOC_TYPES = ['Newsletter', 'Tax Alert', 'Budget Commentary', 'Article', 'Technical Note', 'Training Material', 'Legislation / Ruling', 'Other'];
+// tax types and the words that suggest them (auto-tagging)
+const TAX_TYPES = [
+  ['Corporate Income Tax', /\b(corporate (income )?tax|company tax|form c\b|borang c|cp204|cp 204|capital allowance|chargeable income of (a )?compan|basis period|section 33\b|s\.?\s?33\b|tax estimate)/gi],
+  ['Personal Income Tax', /\b(individual|form be\b|form b\b|borang be|personal relief|tax relief|pcb\b|mtd\b|monthly tax deduction|resident individual|employment income|form ea\b)/gi],
+  ['Transfer Pricing', /\b(transfer pricing|arm'?s[- ]length|tnmm|ctpd|tp documentation|related part(y|ies)|controlled transaction|benchmarking|section 140a|s\.?\s?140a|mtpg)/gi],
+  ['Sales & Service Tax', /\b(sales tax|service tax|\bsst\b|taxable service|registered manufacturer)/gi],
+  ['Real Property Gains Tax', /\b(rpgt|real property gains|chargeable asset|disposal of real property)/gi],
+  ['Stamp Duty', /\b(stamp duty|stamp act|stamping|instrument of transfer)/gi],
+  ['Withholding Tax', /\b(withholding tax|section 107a|section 109b?|s\.?\s?109b?\b|s\.?\s?107a|cp37)/gi],
+  ['Capital Gains Tax', /\b(capital gains tax|\bcgt\b|unlisted shares)/gi],
+  ['e-Invoicing', /\b(e-?invoic(e|ing)|myinvois)/gi],
+  ['Tax Incentives', /\b(pioneer status|investment tax allowance|reinvestment allowance|tax incentive|double deduction|special deduction|mida|green technology)/gi],
+  ['Tax Audit & Investigation', /\b(tax audit|tax investigation|audit framework|investigation framework|penalt(y|ies)|voluntary disclosure|tax compromise)/gi],
+  ['Budget & Finance Act', /\b(budget 20\d\d|finance act|finance bill|finance \(no\.? ?2\) act)/gi],
+  ['Global Minimum Tax', /\b(pillar two|global minimum tax|qdmtt|top-?up tax|globe rules|iir\b)/gi],
+  ['Labuan', /\b(labuan)/gi],
+  ['Customs & Excise', /\b(customs duty|excise duty|import duty|customs act)/gi]
+];
+const TOPIC_WORDS = ['capital allowance', 'deductibility', 'double deduction', 'tax estimate', 'CP204', 'e-invoicing', 'MyInvois', 'penalty', 'late payment', 'tax audit', 'tax investigation', 'voluntary disclosure', 'public ruling', 'transfer pricing documentation', 'arm\'s length range', 'interquartile range', 'withholding tax', 'royalty', 'interest restriction', 'thin capitalisation', 'dividend', 'foreign-sourced income', 'tax residence', 'permanent establishment', 'double tax agreement', 'reinvestment allowance', 'pioneer status', 'investment tax allowance', 'stamp duty', 'RPGT', 'capital gains tax', 'service tax', 'sales tax', 'SME', 'partnership', 'LLP', 'trust', 'Labuan', 'Pillar Two', 'budget', 'finance act', 'tax rate', 'unabsorbed losses', 'group relief', 'leasing', 'ESG', 'digital services', 'self assessment', 'objection', 'appeal', 'Special Commissioners', 'court case', 'donation', 'zakat', 'employment income', 'benefits in kind', 'MTD'];
+const ACTS = [['Income Tax Act 1967', /income tax act,? 1967|\bITA 1967\b/i], ['Sales Tax Act 2018', /sales tax act,? 2018/i], ['Service Tax Act 2018', /service tax act,? 2018/i], ['Stamp Act 1949', /stamp act,? 1949/i], ['Real Property Gains Tax Act 1976', /real property gains tax act,? 1976/i], ['Labuan Business Activity Tax Act 1990', /labuan business activity tax act/i], ['Customs Act 1967', /customs act,? 1967/i], ['Petroleum (Income Tax) Act 1967', /petroleum \(income tax\) act/i], ['Malaysian Transfer Pricing Guidelines', /transfer pricing guidelines/i], ['Income Tax (Transfer Pricing) Rules', /transfer pricing\) rules/i], ['Tax Audit Framework', /tax audit framework/i]];
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
+  return n;
+};
+const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>' };
+const icon = k => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.innerHTML = ICONS[k]; return s; };
+let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); };
+const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+const fmtSize = b => b == null ? '' : b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+const ext = n => (String(n || '').match(/\.([a-z0-9]+)$/i) || [, ''])[1].toLowerCase();
+const fileKind = n => { const e = ext(n); if (e === 'pdf') return ['pdf', 'PDF']; if (['doc', 'docx', 'odt', 'rtf'].includes(e)) return ['doc', e.toUpperCase()]; if (['xls', 'xlsx', 'csv', 'ods'].includes(e)) return ['xls', e.toUpperCase()]; if (['ppt', 'pptx', 'odp'].includes(e)) return ['ppt', e.toUpperCase()]; if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'heic'].includes(e)) return ['img', e.toUpperCase()]; if (['html', 'htm', 'eml', 'mht', 'msg'].includes(e)) return ['web', e.toUpperCase()]; if (['txt', 'md', 'json', 'xml'].includes(e)) return ['txt', e.toUpperCase()]; return ['', (e || 'FILE').toUpperCase().slice(0, 4)]; };
+const uniq = a => [...new Set(a.filter(Boolean))];
+const loaded = {};
+const loadScript = src => loaded[src] ||= new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.append(s); });
+// renders text containing <<hit>> markers as safe nodes with <mark>
+const marked = s => { const f = document.createDocumentFragment(); String(s || '').split(/(<<|>>)/).reduce((on, part) => { if (part === '<<') return true; if (part === '>>') return false; if (part) f.append(on ? el('mark', { text: part }) : document.createTextNode(part)); return on; }, false); return f; };
+
+/* ---------- state ---------- */
+let sb, me = null, isAdmin = false, docs = [], hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'relevance';
+
+/* ---------- boot ---------- */
+(async function boot() {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return gate('Please sign in', 'Sign in to the CCTaxLab portal first, then open the library from CCT Library.', true);
+  const { data: prof } = await sb.from('portal_profiles').select('full_name,email,status,is_admin').eq('id', session.user.id).maybeSingle();
+  if (!prof || prof.status !== 'approved') return gate('Access pending', 'Your account has not been approved yet. Please contact an administrator.', true);
+  me = prof; isAdmin = !!prof.is_admin;
+  $('#whoName').textContent = prof.full_name || prof.email; $('#whoTag').hidden = !isAdmin;
+  renderShell(); await loadDocs();
+})().catch(e => gate('Something went wrong', e.message, true));
+
+function gate(title, msg, link) {
+  $('#app').replaceChildren(el('div', { class: 'gate' }, el('h3', { text: title }), el('p', { text: msg }), link ? el('a', { class: 'btn', href: './' }, 'Go to CCTaxLab portal') : null));
+}
+
+async function loadDocs() {
+  const { data, error } = await sb.from('kb_documents').select('id,title,doc_type,issue_date,tax_types,topics,legislation,summary,file_path,file_name,file_type,file_size,status,created_at').order('issue_date', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false });
+  if (error) { toast('Could not load: ' + error.message); return; }
+  docs = data || []; renderFilters(); renderResults();
+}
+
+/* ---------- main page ---------- */
+function renderShell() {
+  let t;
+  const input = el('input', { type: 'search', placeholder: 'Search newsletters… e.g. "capital allowance" or s.140A surcharge', 'aria-label': 'Search', oninput: e => { clearTimeout(t); t = setTimeout(() => runSearch(e.target.value), 300); } });
+  $('#app').replaceChildren(
+    el('div', { class: 'hero' },
+      el('div', {}, el('h2', {}, 'Tax ', el('span', { text: 'Knowledge Library' })), el('p', { text: 'Newsletters, alerts and technical notes from Cheng & Co, searchable down to every word inside.' })),
+      isAdmin ? el('button', { class: 'btn', onclick: openUpload }, icon('upload'), 'Upload documents') : null),
+    el('div', { class: 'searchbar' }, icon('search'), input),
+    el('p', { class: 'hint', text: 'Tip: use quotes for an exact phrase, OR for alternatives, and - to exclude a word (e.g. "e-invoice" -penalty).' }),
+    el('div', { class: 'filters', id: 'filters' }),
+    el('div', { class: 'count', id: 'count' }),
+    el('div', { class: 'results', id: 'results' }));
+}
+
+async function runSearch(v) {
+  q = v.trim();
+  if (!q) { hits = null; renderResults(); return; }
+  const { data, error } = await sb.rpc('kb_search', { q, lim: 200 });
+  if (error) { toast('Search error: ' + error.message); return; }
+  hits = new Map((data || []).map(r => [r.id, r]));
+  renderResults();
+}
+
+function renderFilters() {
+  const counts = {}; docs.forEach(d => d.tax_types.forEach(t => counts[t] = (counts[t] || 0) + 1));
+  const years = uniq(docs.map(d => d.issue_date && d.issue_date.slice(0, 4))).sort().reverse();
+  const types = TAX_TYPES.map(x => x[0]).filter(t => counts[t]).concat(Object.keys(counts).filter(t => !TAX_TYPES.some(x => x[0] === t)));
+  const chips = el('div', { class: 'chips' }, types.map(t => el('button', { class: 'chip' + (fType.has(t) ? ' on' : ''), onclick: () => { fType.has(t) ? fType.delete(t) : fType.add(t); renderFilters(); renderResults(); } }, t, el('b', { text: counts[t] }))));
+  const sel = (val, opts, set, label) => { const s = el('select', { class: 'sel', 'aria-label': label, onchange: e => { set(e.target.value); renderResults(); } }, opts.map(([v, l]) => el('option', { value: v, text: l }))); s.value = val; return s; };
+  $('#filters').replaceChildren(chips, el('span', { class: 'spacer' }),
+    sel(fDoc, [['', 'All document types'], ...DOC_TYPES.map(x => [x, x])], v => fDoc = v, 'Document type'),
+    sel(fYear, [['', 'All years'], ...years.map(y => [y, y])], v => fYear = v, 'Year'),
+    sel(sort, [['relevance', 'Best match / newest'], ['newest', 'Newest first'], ['oldest', 'Oldest first'], ['title', 'Title A–Z']], v => sort = v, 'Sort'));
+}
+
+function renderResults() {
+  let list = docs.filter(d => (!hits || hits.has(d.id)) && (!fType.size || d.tax_types.some(t => fType.has(t))) && (!fDoc || d.doc_type === fDoc) && (!fYear || (d.issue_date || '').startsWith(fYear)));
+  const byDate = (a, b) => (b.issue_date || '').localeCompare(a.issue_date || '') || b.created_at.localeCompare(a.created_at);
+  if (sort === 'relevance' && hits) list.sort((a, b) => hits.get(b.id).rank - hits.get(a.id).rank);
+  else if (sort === 'oldest') list.sort((a, b) => -byDate(a, b)); else if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title)); else list.sort(byDate);
+  $('#count').textContent = docs.length ? `${list.length} of ${docs.length} document${docs.length === 1 ? '' : 's'}${q ? ` matching “${q}”` : ''}` : '';
+  const box = $('#results');
+  if (!docs.length) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'The library is empty' }), el('p', { text: isAdmin ? 'Upload your first newsletters with the Upload documents button. Any file type works; text is extracted automatically so it can be searched.' : 'No documents have been published yet.' }))); return; }
+  if (!list.length) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'No matches' }), el('p', { text: 'Try fewer words, or clear the filters.' }))); return; }
+  box.replaceChildren(...list.map(d => {
+    const [k, lab] = fileKind(d.file_name); const h = hits && hits.get(d.id);
+    return el('div', { class: 'card', tabindex: '0', onclick: () => openDoc(d.id), onkeydown: e => { if (e.key === 'Enter') openDoc(d.id); } },
+      el('div', { class: 'ficon ' + k, text: d.file_name ? lab : '—' }),
+      el('div', {},
+        el('h3', { text: d.title }),
+        el('div', { class: 'meta' }, el('span', { class: 'pill type', text: d.doc_type }), d.status === 'draft' ? el('span', { class: 'pill draft', text: 'Draft (admins only)' }) : null, d.tax_types.map(t => el('span', { class: 'pill', text: t }))),
+        h && h.snippet ? el('p', { class: 'snip' }, marked(h.snippet)) : d.summary ? el('p', { class: 'snip', text: d.summary.length > 260 ? d.summary.slice(0, 260) + '…' : d.summary }) : null),
+      el('div', { class: 'date', text: fmtDate(d.issue_date) }));
+  }));
+}
+
+/* ---------- document drawer ---------- */
+function closeAll() { $('#drawer').classList.remove('open'); $('#modal').classList.remove('open'); $('#dim').classList.remove('open'); }
+$('#dim').onclick = () => { if ($('#modal').classList.contains('open') && pending.some(p => p.state !== 'saved')) { if (!confirm('Close without saving the uploads?')) return; pending = []; } closeAll(); };
+addEventListener('keydown', e => { if (e.key === 'Escape') $('#dim').onclick(); });
+
+async function signed(path, download) {
+  const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(path, 3600, download ? { download } : undefined);
+  if (error) throw error; return data.signedUrl;
+}
+async function openFile(d, download) {
+  const w = download ? null : window.open('', '_blank');
+  try { const u = await signed(d.file_path, download ? d.file_name : null); if (w) w.location = u; else location.href = u; }
+  catch (e) { if (w) w.close(); toast('Could not open file: ' + e.message); }
+}
+
+async function openDoc(id) {
+  const d = docs.find(x => x.id === id); if (!d) return;
+  const dr = $('#drawer');
+  const body = el('div', { class: 'dbody' });
+  dr.replaceChildren(el('div', { class: 'dhead' }, el('h2', { text: d.title }), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeAll }, icon('x'))), body,
+    el('div', { class: 'dfoot' },
+      d.file_path ? el('button', { class: 'btn small', onclick: () => openFile(d) }, icon('ext'), 'Open file') : null,
+      d.file_path ? el('button', { class: 'btn ghost small', onclick: () => openFile(d, true) }, icon('down'), 'Download') : null,
+      el('span', { class: 'spacer' }),
+      isAdmin ? el('button', { class: 'btn ghost small', onclick: () => editDoc(d) }, icon('edit'), 'Edit') : null,
+      isAdmin ? el('button', { class: 'btn danger small', onclick: () => deleteDoc(d) }, icon('trash'), 'Delete') : null));
+  const lst = (a, cls) => a.length ? el('div', { class: 'pick' }, a.map(t => el('span', { class: cls || 'pill', text: t }))) : el('span', { style: 'color:var(--dim)', text: '—' });
+  body.append(el('dl', { class: 'kv' },
+    el('dt', { text: 'Type' }), el('dd', { text: d.doc_type + (d.status === 'draft' ? ' · Draft' : '') }),
+    el('dt', { text: 'Issue date' }), el('dd', { text: fmtDate(d.issue_date) || '—' }),
+    el('dt', { text: 'Tax type' }), el('dd', {}, lst(d.tax_types)),
+    el('dt', { text: 'Legislation' }), el('dd', {}, lst(d.legislation, 'pill type')),
+    el('dt', { text: 'Topics' }), el('dd', {}, lst(d.topics, 'chip')),
+    el('dt', { text: 'File' }), el('dd', { text: d.file_name ? `${d.file_name} · ${fmtSize(d.file_size)}` : '—' })));
+  if (d.summary) body.append(el('div', { class: 'sect', text: 'Summary' }), el('div', { class: 'summary', text: d.summary }));
+  const ftWrap = el('div', {}, el('span', { class: 'spin' }));
+  body.append(el('div', { class: 'sect', text: 'Full text' }), ftWrap);
+  $('#dim').classList.add('open'); dr.classList.add('open'); dr.querySelector('.dbody').scrollTop = 0;
+  const { data } = await sb.from('kb_documents').select('body_text').eq('id', id).maybeSingle();
+  const text = (data && data.body_text) || '';
+  if (!text) { ftWrap.replaceChildren(el('p', { class: 'note', text: 'No text was extracted from this file. Open the file to read it.' })); return; }
+  const pre = el('div', { class: 'fulltext' });
+  const find = el('input', { class: 'inp', type: 'search', placeholder: 'Find in this document', value: q.replace(/["()]/g, '').replace(/\s-\S+/g, '').replace(/\bOR\b/g, ' ') });
+  const info = el('span', { class: 'note', style: 'margin:0' });
+  const paint = () => {
+    const words = find.value.trim().split(/\s+/).filter(w => w.length > 1).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (!words.length) { pre.textContent = text; info.textContent = ''; return; }
+    const re = new RegExp('(' + words.join('|') + ')', 'gi'); const parts = text.split(re); let n = 0;
+    pre.replaceChildren(...parts.map((p, i) => i % 2 ? (n++, el('mark', { text: p })) : document.createTextNode(p)));
+    info.textContent = n ? `${n} match${n === 1 ? '' : 'es'}` : 'No matches';
+    const first = pre.querySelector('mark'); if (first) first.scrollIntoView({ block: 'center' });
+  };
+  let t; find.oninput = () => { clearTimeout(t); t = setTimeout(paint, 250); };
+  ftWrap.replaceChildren(el('div', { class: 'ftbar' }, find, info), pre); paint();
+}
+
+async function deleteDoc(d) {
+  if (!confirm(`Delete “${d.title}” and its file? This cannot be undone.`)) return;
+  if (d.file_path) { const { error } = await sb.storage.from(BUCKET).remove([d.file_path]); if (error) return toast('Could not delete file: ' + error.message); }
+  const { error } = await sb.from('kb_documents').delete().eq('id', d.id);
+  if (error) return toast('Could not delete: ' + error.message);
+  docs = docs.filter(x => x.id !== d.id); if (hits) hits.delete(d.id); closeAll(); renderFilters(); renderResults(); toast('Deleted');
+}
+
+/* ---------- text extraction (any format) ---------- */
+async function extractText(file, onStatus) {
+  const e = ext(file.name), buf = () => file.arrayBuffer();
+  if (e === 'pdf') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data: await buf() }).promise; let out = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      onStatus(`Reading page ${i} of ${pdf.numPages}…`);
+      const c = await (await pdf.getPage(i)).getTextContent();
+      let line = '', lastY = null; const lines = [];
+      for (const it of c.items) { const y = it.transform[5]; if (lastY !== null && Math.abs(y - lastY) > 2) { lines.push(line); line = ''; } line += it.str + (it.hasEOL ? '\n' : ''); lastY = y; }
+      lines.push(line); out.push(lines.join('\n'));
+    }
+    let meta = {}; try { meta = (await pdf.getMetadata()).info || {}; } catch {}
+    return { text: out.join('\n\n'), pages: pdf.numPages, pdf, metaTitle: meta.Title };
+  }
+  if (e === 'docx') { await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js'); return { text: (await mammoth.extractRawText({ arrayBuffer: await buf() })).value }; }
+  if (['xlsx', 'xls', 'xlsm', 'ods', 'csv'].includes(e)) {
+    await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+    const wb = XLSX.read(await buf(), { type: 'array' });
+    return { text: wb.SheetNames.map(n => `[${n}]\n` + XLSX.utils.sheet_to_csv(wb.Sheets[n], { blankrows: false })).join('\n\n') };
+  }
+  if (['pptx', 'odt', 'odp'].includes(e)) {
+    await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+    const z = await JSZip.loadAsync(await buf());
+    if (e === 'pptx') {
+      const slides = Object.keys(z.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0]);
+      const out = []; for (const [i, n] of slides.entries()) { const x = await z.file(n).async('string'); out.push(`[Slide ${i + 1}]\n` + x.replace(/<\/a:p>/g, '\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'")); }
+      return { text: out.join('\n\n') };
+    }
+    const x = await z.file('content.xml').async('string');
+    return { text: new DOMParser().parseFromString(x.replace(/<\/text:p>|<\/text:h>/g, '\n'), 'text/xml').documentElement.textContent };
+  }
+  if (['html', 'htm', 'mht'].includes(e)) { const doc = new DOMParser().parseFromString(await file.text(), 'text/html'); doc.querySelectorAll('script,style').forEach(n => n.remove()); return { text: doc.body ? doc.body.innerText || doc.body.textContent : '' }; }
+  if (e === 'eml') { const raw = await file.text(); const doc = new DOMParser().parseFromString(raw.replace(/=\r?\n/g, ''), 'text/html'); return { text: (doc.body.textContent || raw).replace(/^[A-Za-z0-9+/=]{60,}$/gm, '') }; }
+  if (e === 'rtf') { const r = await file.text(); return { text: r.replace(/\\par[d]?/g, '\n').replace(/\{\\\*[^{}]*\}/g, '').replace(/\\'[0-9a-f]{2}/gi, '').replace(/\\[a-z]+-?\d* ?/gi, '').replace(/[{}]/g, '') }; }
+  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tif', 'tiff'].includes(e)) return { text: '', image: true };
+  // anything else: keep as text only if it looks like text
+  const head = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
+  if (!head.includes(0)) return { text: await file.text() };
+  return { text: '', unsupported: true };
+}
+
+async function ocr(item, onStatus) {
+  await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+  const worker = await Tesseract.createWorker('eng'); const out = [];
+  try {
+    if (item.ex.pdf) {
+      const pdf = item.ex.pdf, n = Math.min(pdf.numPages, 40);
+      for (let i = 1; i <= n; i++) {
+        onStatus(`Scanning page ${i} of ${n} (OCR)…`);
+        const page = await pdf.getPage(i), vp = page.getViewport({ scale: 2 }), cv = document.createElement('canvas');
+        cv.width = vp.width; cv.height = vp.height; await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+        out.push((await worker.recognize(cv)).data.text);
+      }
+    } else { onStatus('Scanning image (OCR)…'); out.push((await worker.recognize(item.file)).data.text); }
+  } finally { await worker.terminate(); }
+  return out.join('\n\n');
+}
+
+/* ---------- auto-tagging ---------- */
+function suggest(file, text, metaTitle) {
+  const t = text || '', lower = t.toLowerCase(), name = file.name.replace(/\.[^.]+$/, '');
+  // title
+  let title = name.replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (metaTitle && metaTitle.length > 8 && metaTitle.length < 200 && !/^(microsoft|untitled|document)/i.test(metaTitle)) title = metaTitle.trim();
+  // date: filename first, then text
+  let date = null;
+  const fm = name.match(/(20\d{2})[-_. ]?(0[1-9]|1[0-2])(?:[-_. ]?(0[1-9]|[12]\d|3[01]))?/);
+  if (fm) date = `${fm[1]}-${fm[2]}-${fm[3] || '01'}`;
+  if (!date || !fm[3]) {
+    const fileYm = date && date.slice(0, 7); date = null;
+    const src = (name + ' ' + t.slice(0, 4000)).toLowerCase();
+    const m1 = src.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(' + MONTHS.join('|') + '|' + MONTHS.map(m => m.slice(0, 3)).join('|') + ')\\.?,?\\s+(20\\d{2})'));
+    const m2 = src.match(new RegExp('\\b(' + MONTHS.join('|') + '|' + MONTHS.map(m => m.slice(0, 3)).join('|') + ')\\.?\\s+(20\\d{2})'));
+    const mi = s => MONTHS.findIndex(m => m.startsWith(s.slice(0, 3))) + 1;
+    if (m1) date = `${m1[3]}-${String(mi(m1[2])).padStart(2, '0')}-${m1[1].padStart(2, '0')}`;
+    else if (m2) date = `${m2[2]}-${String(mi(m2[1])).padStart(2, '0')}-01`;
+    if (fileYm && (!date || date.slice(0, 7) !== fileYm)) date = fileYm + '-01';
+  }
+  if (date) { const [y, mo, dd] = date.split('-').map(Number); if (!(mo >= 1 && mo <= 12 && dd >= 1 && dd <= new Date(y, mo, 0).getDate())) date = null; }
+  // tax types: keyword frequency
+  const scored = TAX_TYPES.map(([n, re]) => [n, ((title + ' ' + t).match(re) || []).length]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  let taxTypes = scored.filter(x => x[1] >= 2).map(x => x[0]).slice(0, 4);
+  if (!taxTypes.length && scored.length) taxTypes = [scored[0][0]];
+  // legislation references
+  const leg = [];
+  ACTS.forEach(([n, re]) => { if (re.test(t)) leg.push(n); });
+  for (const m of t.matchAll(/public ruling\s*(?:no\.?)?\s*(\d{1,2})\s*\/\s*(\d{4})/gi)) leg.push(`Public Ruling ${m[1]}/${m[2]}`);
+  for (const m of t.matchAll(/P\.\s?U\.\s?\(\s?([AB])\s?\)\s?(\d{1,4})\s?\/\s?(\d{4})/g)) leg.push(`P.U.(${m[1]}) ${m[2]}/${m[3]}`);
+  const secCount = {};
+  for (const m of t.matchAll(/\b(?:section|sections|s\.|ss\.)\s?(\d{1,3}[A-Z]{0,3}(?:\(\d{1,2}[A-Za-z]?\))?(?:\([a-z]{1,4}\))?)/gi)) { const k = 's.' + m[1].toUpperCase().replace(/\(([A-Z]{1,4})\)$/, (x, y) => '(' + y.toLowerCase() + ')'); secCount[k] = (secCount[k] || 0) + 1; }
+  Object.entries(secCount).sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([k]) => leg.push(k));
+  // topics
+  const topics = TOPIC_WORDS.filter(w => lower.includes(w.toLowerCase())).map(w => ({ w, n: lower.split(w.toLowerCase()).length - 1 })).sort((a, b) => b.n - a.n).slice(0, 8).map(x => x.w);
+  // summary: first meaningful sentences
+  const sentences = t.replace(/\s+/g, ' ').match(/[^.!?]{40,400}[.!?]/g) || [];
+  let summary = ''; for (const s of sentences) { if (/copyright|all rights reserved|disclaimer|www\.|@|tel[:.]|fax/i.test(s)) continue; if ((summary + s).length > 480) break; summary += s.trim() + ' '; if (summary.length > 260) break; }
+  // doc type guess
+  const docType = /budget/i.test(title) ? 'Budget Commentary' : /alert/i.test(title) ? 'Tax Alert' : /newsletter|bulletin|issue/i.test(title + ' ' + lower.slice(0, 2000)) ? 'Newsletter' : 'Newsletter';
+  return { title: title.slice(0, 300), date, taxTypes, legislation: uniq(leg).slice(0, 16), topics, summary: summary.trim(), docType };
+}
+
+/* ---------- form widgets ---------- */
+function tagInput(arr, placeholder) {
+  const box = el('div', { class: 'tagbox' });
+  const input = el('input', { placeholder });
+  const draw = () => { box.replaceChildren(...arr.map((v, i) => el('span', { class: 'tk' }, v, el('button', { type: 'button', 'aria-label': 'Remove ' + v, onclick: () => { arr.splice(i, 1); draw(); } }, '×'))), input); };
+  const add = () => { input.value.split(/[;,]/).map(s => s.trim()).filter(Boolean).forEach(v => { if (!arr.some(a => a.toLowerCase() === v.toLowerCase())) arr.push(v.slice(0, 80)); }); input.value = ''; draw(); input.focus(); };
+  input.onkeydown = e => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(); } else if (e.key === 'Backspace' && !input.value && arr.length) { arr.pop(); draw(); input.focus(); } };
+  input.onblur = () => { if (input.value.trim()) add(); };
+  box.onclick = e => { if (e.target === box) input.focus(); };
+  draw(); return box;
+}
+function taxPicker(arr) {
+  const box = el('div', { class: 'pick' });
+  const draw = () => box.replaceChildren(...TAX_TYPES.map(([n]) => el('button', { type: 'button', class: 'chip' + (arr.includes(n) ? ' on' : ''), onclick: () => { const i = arr.indexOf(n); i >= 0 ? arr.splice(i, 1) : arr.push(n); draw(); } }, n)));
+  draw(); return box;
+}
+function metaForm(m) {
+  const typeSel = el('select', { class: 'sel f-in', onchange: e => m.docType = e.target.value }, DOC_TYPES.map(x => el('option', { value: x, text: x }))); typeSel.value = m.docType;
+  const stSel = el('select', { class: 'sel f-in', onchange: e => m.status = e.target.value }, el('option', { value: 'published', text: 'Published (all staff)' }), el('option', { value: 'draft', text: 'Draft (admins only)' })); stSel.value = m.status || 'published';
+  return el('div', { class: 'grid' },
+    el('div', { class: 'full' }, el('label', { class: 'f', text: 'Title' }), el('input', { class: 'inp f-in', value: m.title, maxlength: '300', oninput: e => m.title = e.target.value })),
+    el('div', {}, el('label', { class: 'f', text: 'Document type' }), typeSel),
+    el('div', {}, el('label', { class: 'f', text: 'Issue date' }), el('input', { class: 'inp f-in', type: 'date', value: m.date || '', oninput: e => m.date = e.target.value || null })),
+    el('div', { class: 'full' }, el('label', { class: 'f', text: 'Tax type' }), taxPicker(m.taxTypes)),
+    el('div', {}, el('label', { class: 'f', text: 'Legislation cited (Enter to add)' }), tagInput(m.legislation, 'e.g. s.140A, Public Ruling 5/2024')),
+    el('div', {}, el('label', { class: 'f', text: 'Topics (Enter to add)' }), tagInput(m.topics, 'e.g. capital allowance')),
+    el('div', { class: 'full' }, el('label', { class: 'f', text: 'Summary' }), el('textarea', { class: 'inp f-in', rows: '3', oninput: e => m.summary = e.target.value }, m.summary || '')),
+    el('div', {}, el('label', { class: 'f', text: 'Visibility' }), stSel));
+}
+
+/* ---------- upload ---------- */
+let pending = [];
+function openUpload() {
+  pending = []; const md = $('#modal');
+  const list = el('div', { id: 'uplist' });
+  const fileIn = el('input', { type: 'file', multiple: true, hidden: true, onchange: e => { addFiles(e.target.files); e.target.value = ''; } });
+  const drop = el('div', { class: 'drop' }, el('strong', { text: 'Drop files here, or click to choose' }), 'Any format: PDF, Word, Excel, PowerPoint, email, web pages, images and more (up to 50 MB each). Text is extracted and tags are suggested; check them before saving.', fileIn);
+  drop.onclick = () => fileIn.click();
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); }; drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+  const saveBtn = el('button', { class: 'btn', id: 'saveAll', onclick: saveAll, disabled: true }, 'Save to library');
+  md.replaceChildren(
+    el('div', { class: 'dhead' }, el('h2', { text: 'Upload documents' }), el('button', { class: 'x', 'aria-label': 'Close', onclick: () => $('#dim').onclick() }, icon('x'))),
+    el('div', { class: 'dbody' }, drop, list),
+    el('div', { class: 'dfoot' }, el('span', { class: 'note', id: 'upnote', style: 'margin:0', text: '' }), el('span', { class: 'spacer' }), el('button', { class: 'btn ghost', onclick: () => $('#dim').onclick() }, 'Cancel'), saveBtn));
+  $('#dim').classList.add('open'); md.classList.add('open');
+}
+
+function refreshSave() {
+  const ready = pending.filter(p => p.state === 'ready').length, busy = pending.some(p => p.state === 'work');
+  $('#saveAll').disabled = !ready || busy;
+  $('#saveAll').textContent = ready ? `Save ${ready} to library` : 'Save to library';
+  $('#upnote').textContent = busy ? 'Reading files…' : '';
+}
+
+function addFiles(files) {
+  for (const file of files) {
+    if (file.size > 52428800) { toast(`${file.name} is over 50 MB and was skipped`); continue; }
+    const item = { file, state: 'work', meta: null, text: '', ex: {} };
+    pending.push(item);
+    const st = el('span', { class: 'state work', text: 'Reading…' });
+    const [k, lab] = fileKind(file.name);
+    const node = el('div', { class: 'item' }, el('div', { class: 'ihead' }, el('div', { class: 'ficon ' + k, text: lab, style: 'width:34px;height:40px;font-size:9.5px' }), el('div', { class: 'fn', text: `${file.name} · ${fmtSize(file.size)}` }), st,
+      el('button', { class: 'x', 'aria-label': 'Remove', onclick: () => { pending = pending.filter(p => p !== item); node.remove(); refreshSave(); } }, icon('x'))));
+    item.node = node; item.st = st;
+    $('#uplist').append(node); refreshSave();
+    processItem(item);
+  }
+}
+
+async function processItem(item) {
+  const status = m => { item.st.textContent = m; };
+  try { item.ex = await extractText(item.file, status); item.text = (item.ex.text || '').replace(/\u0000/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); }
+  catch (e) { item.ex = { error: e.message }; item.text = ''; }
+  item.meta = suggest(item.file, item.text, item.ex.metaTitle); item.meta.status = 'published';
+  item.state = 'ready'; drawItem(item); refreshSave();
+}
+
+function drawItem(item) {
+  const n = item.text.length, scanned = item.ex.pdf && n < 40 * Math.max(1, item.ex.pages || 1);
+  let msg, cls = 'ok';
+  if (n) msg = `${n.toLocaleString()} characters extracted`; else { cls = 'warn'; msg = item.ex.image ? 'Image: no text yet' : item.ex.unsupported ? 'Stored as file only' : item.ex.error ? 'Could not read text' : 'No text found'; }
+  item.st.className = 'state ' + cls; item.st.textContent = msg;
+  const extra = [];
+  if (item.ex.image || scanned) extra.push(el('div', { class: 'note' }, (scanned && n ? 'Very little text found; this PDF may be scanned. ' : item.ex.image ? 'This is an image. ' : 'This PDF looks scanned. ') + 'You can read the text with OCR (may take a minute). ',
+    el('button', { class: 'btn ghost small', type: 'button', onclick: async e => { e.target.disabled = true; item.state = 'work'; refreshSave(); item.st.className = 'state work'; try { const t = await ocr(item, m => item.st.textContent = m); item.text = (item.text + '\n\n' + t).trim(); const keep = item.meta; const s = suggest(item.file, item.text, item.ex.metaTitle); item.meta = { ...s, title: keep.title, status: keep.status }; } catch (er) { toast('OCR failed: ' + er.message); } item.state = 'ready'; drawItem(item); refreshSave(); } }, 'Run OCR')));
+  if (item.ex.unsupported || ['doc', 'ppt', 'msg'].includes(ext(item.file.name))) extra.push(el('div', { class: 'note', text: 'Text cannot be read from this older/binary format in the browser, so only the title, tags and summary will be searchable. Saving it as PDF or the newer Office format (.docx/.pptx) makes the full text searchable.' }));
+  [...item.node.children].slice(1).forEach(c => c.remove());
+  item.node.append(...extra, metaForm(item.meta));
+}
+
+async function saveAll() {
+  const btn = $('#saveAll'); btn.disabled = true;
+  const todo = pending.filter(p => p.state === 'ready'); let ok = 0;
+  for (const item of todo) {
+    const m = item.meta;
+    if (!m.title.trim()) { toast('Every document needs a title'); item.node.scrollIntoView({ block: 'center' }); btn.disabled = false; return; }
+    item.st.className = 'state work'; item.st.textContent = 'Uploading…';
+    const id = crypto.randomUUID();
+    const safe = item.file.name.normalize('NFKD').replace(/[^\w.\-]+/g, '_').replace(/_+/g, '_').slice(-120) || 'file';
+    const path = `${id}/${safe}`;
+    const up = await sb.storage.from(BUCKET).upload(path, item.file, { contentType: item.file.type || 'application/octet-stream', upsert: false });
+    if (up.error) { item.st.className = 'state warn'; item.st.textContent = 'Upload failed: ' + up.error.message; continue; }
+    const row = { id, title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), body_text: item.text.slice(0, MAX_TEXT), file_path: path, file_name: item.file.name, file_type: item.file.type || ext(item.file.name), file_size: item.file.size, status: m.status };
+    const { error } = await sb.from('kb_documents').insert(row);
+    if (error) { await sb.storage.from(BUCKET).remove([path]); item.st.className = 'state warn'; item.st.textContent = 'Save failed: ' + error.message; continue; }
+    item.state = 'saved'; item.st.className = 'state ok'; item.st.textContent = 'Saved ✓'; ok++;
+  }
+  refreshSave();
+  if (ok) { toast(`${ok} document${ok === 1 ? '' : 's'} added to the library`); await loadDocs(); if (q) runSearch(q); }
+  if (pending.every(p => p.state === 'saved')) { pending = []; closeAll(); }
+}
+
+/* ---------- edit ---------- */
+function editDoc(d) {
+  const m = { title: d.title, docType: d.doc_type, date: d.issue_date, taxTypes: [...d.tax_types], topics: [...d.topics], legislation: [...d.legislation], summary: d.summary, status: d.status };
+  const dr = $('#drawer');
+  const save = el('button', { class: 'btn small', onclick: async () => {
+    if (!m.title.trim()) return toast('Title is required');
+    save.disabled = true;
+    const patch = { title: m.title.trim(), doc_type: m.docType, issue_date: m.date || null, tax_types: m.taxTypes, topics: m.topics, legislation: m.legislation, summary: (m.summary || '').trim(), status: m.status };
+    const { error } = await sb.from('kb_documents').update(patch).eq('id', d.id);
+    if (error) { save.disabled = false; return toast('Could not save: ' + error.message); }
+    Object.assign(d, patch); renderFilters(); renderResults(); toast('Saved'); openDoc(d.id);
+  } }, 'Save changes');
+  dr.replaceChildren(el('div', { class: 'dhead' }, el('h2', { text: 'Edit document' }), el('button', { class: 'x', 'aria-label': 'Close', onclick: closeAll }, icon('x'))),
+    el('div', { class: 'dbody' }, metaForm(m)),
+    el('div', { class: 'dfoot' }, el('span', { class: 'spacer' }), el('button', { class: 'btn ghost small', onclick: () => openDoc(d.id) }, 'Cancel'), save));
+}
+</script>
+</body>
+</html>
