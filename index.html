@@ -660,6 +660,16 @@ body[data-anim=tree] .modeswitch{display:inline-flex}
 .modeswitch button:hover{color:var(--ink)}
 .modeswitch button.on{background:var(--gold);color:var(--btn-ink)}
 @media(max-width:560px){.modeswitch button{min-width:26px;padding:0 6px;height:28px}}
+
+/* Vision Tree: frosted panels keep the header and greeting readable over the canopy */
+body[data-anim=tree] header{margin-top:14px;padding:14px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(253,251,246,.80);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);box-shadow:0 10px 30px rgba(60,50,20,.08)}
+body[data-anim=tree] .hero>div:first-child{padding:12px 18px 14px;margin-left:-18px;border-radius:16px;background:rgba(253,251,246,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+body[data-theme=tree] header{background:rgba(10,24,20,.74);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+body[data-theme=tree] .hero>div:first-child{background:rgba(10,24,20,.62)}
+body[data-anim=tree] .motto,body[data-anim=tree] .hero h2,body[data-anim=tree] .hero p{text-shadow:none!important}
+body[data-anim=tree] .who{background:transparent;border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+@media(max-width:560px){body[data-anim=tree] .hero>div:first-child{margin-left:0}}
+@media(max-width:1440px){body[data-anim=tree] .motto{order:3;flex-basis:100%;min-width:0}body[data-anim=tree] .motto span{white-space:normal}}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
 body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-side,body[data-anim=tree] .sprig,body[data-anim=tree] .vformula{display:block}
