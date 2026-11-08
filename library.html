@@ -298,9 +298,14 @@ body:not(.dark) .crumbs a,body:not(.dark) .brand .sub{color:#6d28d9}
 .libbg::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 40%,transparent 45%,rgba(60,35,15,.35)),linear-gradient(180deg,rgba(250,240,222,.10),rgba(250,240,222,.30))}
 body.dark .libbg{background-color:#1a110b;background-image:url("library-bg-dark.svg")}
 body.dark .libbg::after{background:radial-gradient(120% 90% at 50% 40%,transparent 40%,rgba(0,0,0,.6)),linear-gradient(180deg,rgba(2,6,16,.15),rgba(2,6,16,.45))}
-.wrap{margin:28px auto 40px;max-width:1220px;border-radius:22px;padding:22px 30px 60px;background:rgba(252,247,238,.84);border:1px solid rgba(160,120,75,.35);box-shadow:0 30px 80px rgba(40,20,5,.35),inset 0 1px 0 rgba(255,255,255,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-body.dark .wrap{background:rgba(7,14,30,.8);border-color:rgba(94,240,255,.22);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(94,240,255,.06),inset 0 1px 0 rgba(255,255,255,.04)}
-@media(max-width:700px){.wrap{margin:0;border-radius:0;padding:16px 16px 60px}}
+/* no frame box: content sits directly on a softened library wall */
+.libbg{inset:-12px;filter:blur(1.2px) saturate(.85)}
+.libbg::after{background:radial-gradient(120% 90% at 50% 35%,rgba(252,248,240,.55),rgba(250,244,234,.72) 70%),linear-gradient(180deg,rgba(252,248,240,.25),rgba(250,244,234,.45))!important}
+body.dark .libbg{filter:blur(1.2px) saturate(.9)}
+body.dark .libbg::after{background:radial-gradient(120% 90% at 50% 35%,rgba(4,10,24,.55),rgba(3,8,20,.78) 75%)!important}
+body:not(.dark) .brand h1,body:not(.dark) .brand .sub,body:not(.dark) .who>span,body:not(.dark) .hero h2,body:not(.dark) .hero p,body:not(.dark) .crumbs,body:not(.dark) .hint,body:not(.dark) .count{text-shadow:0 0 4px #faf5ec,0 0 10px #faf5ec,0 0 18px #faf5ec}
+body.dark .brand h1,body.dark .brand .sub,body.dark .who>span,body.dark .hero p,body.dark .crumbs,body.dark .hint,body.dark .count{text-shadow:0 0 6px rgba(3,8,20,.9),0 0 14px rgba(3,8,20,.8)}
+body:not(.dark) .hero h2 span{text-shadow:none;filter:drop-shadow(0 0 6px #faf5ec) drop-shadow(0 0 12px #faf5ec)}
 /* light mode palette: Cheng blue + library gold */
 body:not(.dark){--bg:#efe6d6;--bg-b:#e6dac5;--panel:rgba(255,253,248,.9);--panel2:#fffdf8;--line:#e2d4bc;--line2:#d3c09f;--field:#fffdf8;--sheet:#fbf6ec;--soft:#f3eadb;--soft2:#f7f0e3;--acc:#0a8fca;--acc2:#0a6f9e;--acc-rgb:10,143,202;--violet:#b8862b;--glow:rgba(10,143,202,.22);--iri:linear-gradient(120deg,#00aeef,#0a6f9e)}
 body:not(.dark) .card,body:not(.dark) .cat,body:not(.dark) .searchbar{background:linear-gradient(#fffdf8,#fffdf8) padding-box,linear-gradient(120deg,rgba(0,174,239,.5),rgba(184,134,43,.55)) border-box;box-shadow:0 6px 20px rgba(80,50,15,.08)}
