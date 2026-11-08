@@ -650,7 +650,7 @@ body[data-theme=treeday] .vtsvg .t-tr{fill:#8a7046}
 body[data-theme=treeday] .vtsvg .t-br{stroke:#8f7445}
 body[data-theme=treeday] .vtsvg .t-lf{opacity:.9}
 body[data-theme=treeday] .vtsvg .l1{fill:#4f8f34}body[data-theme=treeday] .vtsvg .l2{fill:#76b043}body[data-theme=treeday] .vtsvg .l3{fill:#a3c95e}
-body[data-theme=treeday] .motto,body[data-theme=treeday] .hero h2,body[data-theme=treeday] .hero p{text-shadow:0 0 6px #fbf8f1,0 0 14px #fbf8f1,0 0 24px #fbf8f1}
+body[data-theme=treeday] .motto,body[data-theme=treeday] .hero h2,body[data-theme=treeday] .hero p{text-shadow:0 0 6px rgba(225,240,251,.95),0 0 14px rgba(225,240,251,.9),0 0 24px rgba(225,240,251,.8)}
 body[data-theme=tree] .motto,body[data-theme=tree] .hero h2,body[data-theme=tree] .hero p{text-shadow:0 0 6px #0b1814,0 0 14px #0b1814,0 0 24px #0b1814}
 body[data-theme=treeday] .sprig{color:color-mix(in srgb,var(--c) 60%,#7a5c22)}
 
@@ -673,6 +673,9 @@ body[data-anim=tree] .app-copy{padding-top:70px}
 .gate{grid-template-rows:1fr auto;}
 .gate-copy{align-self:end;justify-self:start;padding:18px 0 4px 4px}
 body[data-anim=tree] .copyright{color:var(--ink);opacity:.8;text-shadow:0 0 6px var(--bg),0 0 12px var(--bg)}
+
+/* Morning: blue sky, deeper at the top, paler toward the horizon, warm glow around the sun */
+body[data-theme=treeday]{--bg:#d6eaf8;--bg-b:#eef6f3;background-image:radial-gradient(48vmax 40vmax at 100% 0%,rgba(255,226,160,.55),rgba(255,226,160,.18) 45%,transparent 70%),linear-gradient(180deg,#7fb9e8 0%,#a6d0f1 28%,#cfe5f7 56%,#e9f4f8 80%,#f3f6ee 100%)!important;background-attachment:fixed}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
 body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-side,body[data-anim=tree] .sprig,body[data-anim=tree] .vformula{display:block}
