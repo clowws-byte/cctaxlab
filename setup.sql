@@ -393,3 +393,6 @@ create or replace function public.portal_folder_open(f uuid) returns boolean lan
   select exists (select 1 from chain)
      and not exists (select 1 from chain where access <> 'everyone' and not (access = 'selected' and public.portal_has_folder_grant(id)));
 $$;
+
+-- Manual order of documents within a category (Arrange mode)
+alter table public.kb_documents add column if not exists sort integer not null default 0;
