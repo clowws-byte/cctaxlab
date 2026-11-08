@@ -1,0 +1,23 @@
+{
+  "name": "digital-vision-tree",
+  "version": "1.0.0",
+  "description": "Digital Vision Tree: the CCTaxLab artwork brought to life with React and Three.js",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "esbuild demo/main.jsx --bundle --minify --jsx=automatic --loader:.js=jsx --target=es2019 --outfile=demo/demo.js --legal-comments=none"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "react": ">=18",
+    "three": ">=0.160"
+  }
+}
