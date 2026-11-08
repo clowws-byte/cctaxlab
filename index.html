@@ -781,6 +781,26 @@ body[data-theme=treeday] .vtsvg .pl.lv,body[data-theme=treeday] .vtsvg .plr{stro
 body[data-theme=treeday] .vtsvg .nd{fill:#fff6c8}body[data-theme=treeday] .vtsvg .ndr{stroke:#fff3b8;stroke-width:1.6}
 body[data-theme=treeday] .vtsvg .rip{stroke:#a98a4c}
 body[data-theme=treeday] .vtsvg .dm{fill:#fff8d6}
+/* Tech Green (fiber): fibre-optic strands in green-teal light, glowing green leaves, bokeh, light pulses */
+.vtsvg.ts-fiber .t-br{stroke:#4fd69a;stroke-opacity:.5}
+.vtsvg.ts-fiber .t-br .fs0{stroke:#7cf0bd;stroke-opacity:.55}.vtsvg.ts-fiber .t-br .fs2{stroke:#2fb7a0;stroke-opacity:.45}
+.vtsvg.ts-fiber .t-rt .fsr{stroke:#4fd69a;stroke-opacity:.4}.vtsvg.ts-fiber .t-rt{opacity:1}
+.vtsvg.ts-fiber .t-hz{stroke:#4fd69a;stroke-opacity:.3}
+.vtsvg.ts-fiber .l1{fill:#1f9a55}.vtsvg.ts-fiber .l2{fill:#34c46e}.vtsvg.ts-fiber .l3{fill:#72e69c}.vtsvg.ts-fiber .l4{fill:#d8ffe6}.vtsvg.ts-fiber .l5{fill:#1aa58f}
+.vtsvg.ts-fiber .t-lf{opacity:.92}.vtsvg.ts-fiber .bk{opacity:.32}
+body .vtsvg.ts-fiber .apl{fill:#f2c14e}body .vtsvg.ts-fiber .apl-h{fill-opacity:.8}
+.vtsvg.ts-fiber .t-grass{display:none}
+.vtsvg .pl.fpl{stroke:#eafff3;stroke-dasharray:.07 .93;animation-duration:3.6s}
+.vtsvg .fdm{fill:#bfffd9}
+body[data-tree=fiber] .vtsvg .r3{animation:rustle 5.3s ease-in-out -1s infinite reverse,glint 4s ease-in-out infinite}
+body[data-tree=fiber] .vtsvg .r4{animation:rustle 7.1s ease-in-out -3s infinite,glint 5.5s ease-in-out -2s infinite}
+body[data-theme=treeday] .vtsvg.ts-fiber .t-br{stroke:#17905a;stroke-opacity:.55}
+body[data-theme=treeday] .vtsvg.ts-fiber .t-br .fs0{stroke:#2fb070;stroke-opacity:.6}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .fs2{stroke:#0f8a7c;stroke-opacity:.5}
+body[data-theme=treeday] .vtsvg.ts-fiber .t-rt .fsr{stroke:#17905a;stroke-opacity:.45}
+body[data-theme=treeday] .vtsvg.ts-fiber .l1{fill:#137a40}body[data-theme=treeday] .vtsvg.ts-fiber .l2{fill:#1f9e55}body[data-theme=treeday] .vtsvg.ts-fiber .l3{fill:#3fbf72}body[data-theme=treeday] .vtsvg.ts-fiber .l4{fill:#8fe0ad}body[data-theme=treeday] .vtsvg.ts-fiber .l5{fill:#0f8a7c}
+body[data-theme=treeday] .vtsvg .pl.fpl{stroke:#fff}
+body[data-theme=treeday] .vtsvg .fdm{fill:#fff}
+body[data-theme=treeday] .vtsvg.ts-fiber .apl{fill:#e0a526}
 @media (prefers-reduced-motion:reduce){.vtsvg .plr,.vtsvg .ndr,.vtsvg .rip,.vtsvg .dm{display:none}}
 .sprig{position:absolute;right:16px;top:16px;width:58px;height:58px;color:color-mix(in srgb,var(--c) 45%,var(--gold2));opacity:.75;transition:opacity .4s,transform .6s ease}
 .sprig svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round}
@@ -796,7 +816,7 @@ body[data-theme=treeday] .vtsvg .dm{fill:#fff8d6}
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -963,7 +983,7 @@ $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $
 
 /* ================= Vision Tree drawings ================= */
 const treeSVG = (depth = 9, seed = 7, o = {}) => {
-  const ST = o.style || 'classic', LIV = ST === 'living', TECH = ST === 'tech', GEO = ST === 'premium', MAJ = ST === 'majestic';
+  const ST = o.style || 'classic', LIV = ST === 'living', FIB = ST === 'fiber', TECH = ST === 'tech' || FIB, GEO = ST === 'premium', MAJ = ST === 'majestic';
   const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46, LS = o.leaf || .4, ID = 'lf' + seed;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
   const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [], rpl = [];
@@ -972,8 +992,17 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = d === 1 || GEO ? 0 : (rnd() - .5) * len * (d < 4 ? .38 : .5) * (TECH ? .5 : 1);
     const mx = (x + x2) / 2 + Math.cos(ang + 1.57) * bend, my = (y + y2) / 2 + Math.sin(ang + 1.57) * bend;
     const dP = `M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}`, sw = TECH ? Math.max(.8, w * (d < 3 ? .34 : .24)) : GEO ? w * .9 : w;
-    br.push(`<path class="br" pathLength="1" d="${dP}" stroke-width="${f(sw)}" style="animation-delay:${f(t0)}s"/>`);
-    if (TECH && d <= depth - 1 && (d < 5 || rnd() < .45)) pulse.push(`<path class="pl" pathLength="1" d="${dP}" stroke-width="${f(Math.max(1.4, sw * 1.6))}" style="animation-delay:${f(d * .32 + 4)}s"/>`);
+    if (FIB && d <= 5) {
+      const fw = w * (d === 1 ? 1.25 : d === 2 ? 1 : .7), n = Math.max(2, Math.min(80, Math.round(fw / 1.3))), nx = Math.cos(ang + 1.57), ny = Math.sin(ang + 1.57);
+      for (let i = 0; i < n; i++) {
+        const u = i / (n - 1) - .5, a0 = u * fw * (d === 1 ? 1.15 : 1), a1 = u * fw * (d === 1 ? .62 : .7), ac = u * fw * (d === 1 ? .55 + rnd() * .2 : .55 + rnd() * .5) + (rnd() - .5) * fw * (d === 1 ? .12 : .25);
+        const sp = d === 1 ? `M${f(x + nx * a0 * 1.9)} ${f(Y0 + 2 + rnd() * 14)}C${f(x + nx * a0 * .95)} ${f(Y0 - W0 * .9)} ${f(mx + nx * ac)} ${f(my + len * .1)} ${f(x2 + nx * a1)} ${f(y2 + ny * a1)}` : `M${f(x + nx * a0)} ${f(y + ny * a0)}Q${f(mx + nx * ac)} ${f(my + ny * ac)} ${f(x2 + nx * a1)} ${f(y2 + ny * a1)}`;
+        br.push(`<path class="br fs${i % 3}" pathLength="1" d="${sp}" stroke-width="${(.55 + rnd() * .7).toFixed(2)}" style="animation-delay:${f(t0)}s"/>`);
+        if (rnd() < (d < 3 ? .12 : .2)) pulse.push(`<path class="pl fpl" pathLength="1" d="${sp}" stroke-width="${(1.3 + rnd()).toFixed(1)}" style="animation-delay:${f(d * .32 + 4 + rnd() * 2.4)}s"/>`);
+      }
+    } else br.push(`<path class="br${FIB ? ' fs1' : ''}" pathLength="1" d="${dP}" stroke-width="${f(FIB ? .6 + rnd() * .6 : sw)}" style="animation-delay:${f(t0)}s"/>`);
+    if (TECH && !FIB && d <= depth - 1 && (d < 5 || rnd() < .45)) pulse.push(`<path class="pl" pathLength="1" d="${dP}" stroke-width="${f(Math.max(1.4, sw * 1.6))}" style="animation-delay:${f(d * .32 + 4)}s"/>`);
+    if (FIB && d > 5 && d <= depth - 1 && rnd() < .35) pulse.push(`<path class="pl fpl" pathLength="1" d="${dP}" stroke-width="1.5" style="animation-delay:${f(d * .32 + 4 + rnd() * 2.4)}s"/>`);
     if (LIV && d <= depth - 1 && (d < 5 || rnd() < .4)) pulse.push(`<path class="pl lv" pathLength="1" d="${dP}" stroke-width="${f(Math.min(9, Math.max(1.3, sw * .16)))}" style="animation-delay:${f(4 + 1.3 + d * .3)}s"/>`);
     if (MAJ && d >= depth - 3 && rnd() < .5) { const bx = x2 + (rnd() - .5) * 20 * LS, by = y2 + (rnd() - .3) * 14 * LS, sh = (bx - X0) / VW * 1.4 - (by - Y0) / VH * .6 + rnd() * .5; blob.push(`<ellipse class="lf cb${sh > .9 ? 2 : 1}" cx="${f(bx)}" cy="${f(by)}" rx="${f(LS * (12 + rnd() * 9))}" ry="${f(LS * (9 + rnd() * 6))}" style="animation-delay:${f(t0 + .3)}s"/>`); }
     if (d >= depth - 1) tips.push([x2, y2, ang]);
@@ -985,7 +1014,8 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
         const lx = x + (x2 - x) * t + Math.cos(ang + 1.57) * off, ly = y + (y2 - y) * t + Math.sin(ang + 1.57) * off;
         const rot = ang * 57.3 + side * (25 + rnd() * 45) + (rnd() - .5) * 30, sc = LS * (.75 + rnd() * .6);
         const sun = (lx - X0) / VW * 1.4 - (ly - Y0) / VH * .6 + rnd() * .9, shade = sun > 1.15 ? 4 : sun > .85 ? 3 : sun > .5 ? 2 : rnd() < .5 ? 1 : 5;
-        lf[Math.floor(rnd() * 4)].push(`<use href="#${ID}" class="lf l${shade}" transform="translate(${f(lx)} ${f(ly)}) rotate(${f(rot)}) scale(${sc.toFixed(2)})" style="animation-delay:${f(t1 + rnd() * .9)}s"/>`);
+        const big = FIB && rnd() < .09;
+        lf[Math.floor(rnd() * 4)].push(`<use href="#${ID}" class="lf l${shade}${big ? ' bk' : ''}" transform="translate(${f(lx)} ${f(ly)}) rotate(${f(rot)}) scale(${(sc * (big ? 2.6 + rnd() * 1.5 : 1)).toFixed(2)})" style="animation-delay:${f(t1 + rnd() * .9)}s"/>`);
       }
       if (d >= depth - 2 && rnd() < (o.apples || 0)) {
         const ax = x2 + (rnd() - .5) * 8 * LS, ay = y2 + (2 + rnd() * 4) * LS, ar = LS * (2.5 + rnd() * .6);
@@ -1018,7 +1048,8 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   function rootFork(x, y, ang, len, w, d, dl) {
     const { pts, ang: a2 } = rootPts(x, y, ang, len, GEO ? 2 : 9, .008 + d * .008), w1 = Math.max(.5, w * .62), wk = TECH ? .3 : 1;
     if (LIV) rpl.push(`<path class="plr" pathLength="1" d="M${pts.map(q => f(q[0]) + ' ' + f(q[1])).join('L')}" stroke-width="${f(Math.max(1.2, w * .14))}" style="animation-delay:${f(4 + (4 - d) * .3)}s"/>`);
-    rt.push(`<path class="lf" d="${ribbon(pts, w * wk, w1 * wk)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
+    if (FIB) { const m = d < 2 ? 5 : d < 3 ? 3 : 1; for (let j = 0; j < m; j++) { const jo = (j - (m - 1) / 2) * w * .09; rt.push(`<path class="lf fsr" fill="none" stroke-width="${(.5 + rnd() * .6).toFixed(2)}" d="M${pts.map((q, qi) => f(q[0]) + ' ' + f(q[1] + jo * (1 - qi / pts.length) + (rnd() - .5) * 1.5)).join('L')}" style="animation-delay:${dl.toFixed(2)}s"/>`); } }
+    else rt.push(`<path class="lf" d="${ribbon(pts, w * wk, w1 * wk)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
     if (d >= 4) return;
     const end = pts[pts.length - 1], k = d < 2 ? 2 : rnd() < .3 ? 3 : 2;
     for (let i = 0; i < k; i++) {
@@ -1044,7 +1075,21 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     soil = `<defs><linearGradient id="soil${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="s0"/><stop offset="1" class="s1"/></linearGradient></defs><rect x="0" y="${Y0}" width="${VW}" height="${VH - Y0}" fill="url(#soil${seed})"/>`;
   }
   grow(X0, Y0 - W0 * .5, -1.5708, L0, W0, 1, 0);
+  let fbase = '';
+  if (FIB) {
+    const fw = W0 * 1.25 * 1.15, bs = [];
+    for (let i = 0; i < 90; i++) {
+      const u = (i + rnd() * .8) / 90 - .5, h = W0 * (.6 + rnd() * 1.8), sy = Y0 - W0 * .5 - h, sx = X0 + u * fw * (1 - h / L0 * .4);
+      const ex = X0 + u * W0 * (2.6 + rnd() * 3) * (1 + Math.abs(u) * 2), ey = Y0 + 2 + rnd() * 26;
+      bs.push(`<path class="br fs${i % 3}" pathLength="1" d="M${f(sx)} ${f(sy)}C${f(sx)} ${f(Y0 - W0 * .3)} ${f(X0 + u * fw * 1.5)} ${f(Y0 - 2)} ${f(ex)} ${f(ey)}" stroke-width="${(.5 + rnd() * .7).toFixed(2)}" style="animation-delay:.1s"/>`);
+    }
+    fbase = `<g class="t-br t-fb" fill="none" stroke-linecap="round">${bs.join('')}</g>`;
+  }
   let nodes = '', ripple = '', motes = '';
+  if (FIB) {
+    const ms = []; for (let i = 0; i < (o.vw ? 60 : 16); i++) { const mx = X0 + (rnd() - .5) * VW * .7, my = Y0 - (VH * .3 + rnd() * VH * .6); ms.push(`<circle class="dm fdm" cx="${f(mx)}" cy="${f(my)}" r="${f(LS * (.7 + rnd() * 1.4))}" style="animation-delay:${f(rnd() * 9)}s;animation-duration:${f(6 + rnd() * 7)}s"/>`); }
+    motes = `<g class="t-dm">${ms.join('')}</g>`;
+  }
   if (LIV) {
     const pick = tips.filter(() => rnd() < (o.vw ? .07 : .12));
     nodes = `<g class="t-nd">${pick.map(([x, y]) => { const dl = f(5 + rnd() * 6); return `<circle class="ndr" cx="${f(x)}" cy="${f(y)}" r="${f(LS * 5)}" style="animation-delay:${dl}s"/><circle class="nd" cx="${f(x)}" cy="${f(y)}" r="${f(LS * 1.5)}" style="animation-delay:${dl}s"/>`; }).join('')}</g>`;
@@ -1060,7 +1105,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   ${MAJ || GEO ? `<ellipse class="t-gsh" cx="${f(X0 - W0)}" cy="${f(Y0 + 4)}" rx="${f(W0 * 9)}" ry="${f(W0 * .9)}" fill="url(#gsh${seed})"/>` : ''}
   <line class="t-hz" x1="${o.vw ? 0 : 60}" y1="${Y0}" x2="${o.vw ? VW : 540}" y2="${Y0}" stroke-width=".8"/>
   ${soil}<g class="t-rt">${rt.join('')}</g>${rpl.length ? `<g class="t-plr" fill="none" stroke-linecap="round">${rpl.join('')}</g>` : ''}${ripple}${grass}
-  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g><g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}>${br.join('')}</g>${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
+  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g>${fbase}<g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}>${br.join('')}</g>${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
   <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}<g class="r2">${ap.join('')}</g></g>${nodes}<g class="sprouts"></g></g>${motes}</svg>`;
 };
 const sprig = () => {
@@ -1070,7 +1115,7 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Fibre-optic tree: bundled light strands, glowing green leaves, rising light'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
 let treeTimers = [];
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
