@@ -396,3 +396,127 @@ $$;
 
 -- Manual order of documents within a category (Arrange mode)
 alter table public.kb_documents add column if not exists sort integer not null default 0;
+
+-- =====================================================================
+-- SOP Hub (sop.html, in the CCT Protocol workspace)
+-- Admins upload and version SOPs; approved staff read current and superseded versions.
+-- =====================================================================
+create table if not exists public.sop_sections (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null check (char_length(name) between 1 and 80),
+  description text not null default '',
+  sort        int not null default 0,
+  created_at  timestamptz not null default now()
+);
+alter table public.sop_sections enable row level security;
+create policy "sopsec read" on public.sop_sections for select to authenticated
+  using (public.portal_is_admin() or public.portal_is_approved());
+create policy "sopsec admin write" on public.sop_sections for all to authenticated
+  using (public.portal_is_admin()) with check (public.portal_is_admin());
+revoke all on public.sop_sections from anon;
+
+create table if not exists public.sop_documents (
+  id             uuid primary key default gen_random_uuid(),
+  section_id     uuid references public.sop_sections(id) on delete restrict,
+  sop_no         text not null check (char_length(sop_no) between 1 and 40),
+  title          text not null check (char_length(title) between 1 and 300),
+  version        text not null default '1.0' check (char_length(version) between 1 and 20),
+  effective_date date,
+  review_date    date,
+  status         text not null default 'draft' check (status in ('draft','current','superseded')),
+  change_note    text not null default '',
+  summary        text not null default '',
+  body_text      text not null default '',
+  file_path      text,
+  file_name      text,
+  file_type      text,
+  file_size      bigint,
+  sort           int not null default 0,
+  created_by     uuid references public.portal_profiles(id) on delete set null default auth.uid(),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
+  fts            tsvector
+);
+create unique index if not exists sop_one_current_idx on public.sop_documents (lower(sop_no)) where status = 'current';
+create index if not exists sop_documents_sopno_idx on public.sop_documents (lower(sop_no));
+create index if not exists sop_documents_section_idx on public.sop_documents (section_id);
+create index if not exists sop_documents_created_by_idx on public.sop_documents (created_by);
+create index if not exists sop_documents_fts_idx on public.sop_documents using gin (fts);
+
+create or replace function public.sop_documents_fts() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  new.fts :=
+      setweight(to_tsvector('simple', coalesce(new.sop_no,'')), 'A')
+   || setweight(to_tsvector('english', coalesce(new.title,'')), 'A')
+   || setweight(to_tsvector('english', coalesce(new.summary,'') || ' ' || coalesce(new.change_note,'')), 'C')
+   || setweight(to_tsvector('english', left(coalesce(new.body_text,''), 300000)), 'D');
+  new.updated_at := now();
+  return new;
+end $$;
+drop trigger if exists sop_documents_fts_trg on public.sop_documents;
+create trigger sop_documents_fts_trg before insert or update on public.sop_documents
+  for each row execute function public.sop_documents_fts();
+
+alter table public.sop_documents enable row level security;
+create policy "sop read" on public.sop_documents for select to authenticated
+  using (public.portal_is_admin() or (public.portal_is_approved() and status in ('current','superseded')));
+create policy "sop admin insert" on public.sop_documents for insert to authenticated with check (public.portal_is_admin());
+create policy "sop admin update" on public.sop_documents for update to authenticated using (public.portal_is_admin()) with check (public.portal_is_admin());
+create policy "sop admin delete" on public.sop_documents for delete to authenticated using (public.portal_is_admin());
+revoke all on public.sop_documents from anon;
+
+-- make one version the current one; any other current version of the same SOP no. becomes superseded
+create or replace function public.sop_make_current(p_id uuid) returns void
+language plpgsql security invoker set search_path = '' as $$
+declare v_no text;
+begin
+  if not public.portal_is_admin() then raise exception 'Admins only'; end if;
+  select sop_no into v_no from public.sop_documents where id = p_id;
+  if v_no is null then raise exception 'SOP not found'; end if;
+  update public.sop_documents set status = 'superseded'
+    where lower(sop_no) = lower(v_no) and status = 'current' and id <> p_id;
+  update public.sop_documents set status = 'current' where id = p_id;
+end $$;
+revoke execute on function public.sop_make_current(uuid) from anon, public;
+grant execute on function public.sop_make_current(uuid) to authenticated;
+
+create or replace function public.sop_search(q text, lim int default 100)
+returns table (id uuid, rank real, snippet text)
+language sql stable security invoker set search_path = '' as $$
+  with query as (select websearch_to_tsquery('english', q) || websearch_to_tsquery('simple', q) as tq)
+  select d.id,
+         ts_rank_cd(d.fts, query.tq) as rank,
+         ts_headline('english', left(d.summary || ' ' || d.body_text, 200000), query.tq,
+                     'StartSel=<<,StopSel=>>,MaxWords=40,MinWords=15,MaxFragments=2,FragmentDelimiter= … ') as snippet
+  from public.sop_documents d, query
+  where d.fts @@ query.tq
+  order by rank desc
+  limit least(coalesce(lim,100), 200);
+$$;
+revoke execute on function public.sop_search(text,int) from anon, public;
+grant execute on function public.sop_search(text,int) to authenticated;
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('sop-files', 'sop-files', false, 52428800) on conflict (id) do nothing;
+create policy "sop files read" on storage.objects for select to authenticated
+  using (bucket_id = 'sop-files' and (public.portal_is_admin() or public.portal_is_approved()));
+create policy "sop files admin insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'sop-files' and public.portal_is_admin());
+create policy "sop files admin update" on storage.objects for update to authenticated
+  using (bucket_id = 'sop-files' and public.portal_is_admin()) with check (bucket_id = 'sop-files' and public.portal_is_admin());
+create policy "sop files admin delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'sop-files' and public.portal_is_admin());
+
+-- first section, plus the SOP Hub application inside the CCT Protocol workspace (opened straight from the card)
+insert into public.sop_sections (name, description, sort)
+select 'General', 'Firm-wide standard operating procedures', 0
+where not exists (select 1 from public.sop_sections);
+insert into public.portal_tools (hub_id, name, emoji, url, description, access, sort)
+select h.id, 'SOP Hub', 'shield', 'https://clowws-byte.github.io/cctaxlab/sop.html', 'Standard operating procedures with version control', 'everyone', 0
+from public.portal_hubs h where h.name = 'CCT Protocol'
+  and not exists (select 1 from public.portal_tools t where t.url like '%/sop.html');
+update public.portal_hubs set open_direct = true where name = 'CCT Protocol';
+insert into public.portal_updates (title, body, kind, audience, announce)
+select 'SOP Hub in CCT Protocol', 'All firm SOPs in one place: open CCT Protocol to search and read the current version of every SOP, with its version history, effective date and what changed.', 'new', 'everyone', false
+where not exists (select 1 from public.portal_updates where title = 'SOP Hub in CCT Protocol');
