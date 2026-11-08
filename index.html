@@ -430,6 +430,9 @@ textarea.i{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(
 .vrow{padding-left:calc(12px + var(--d,0) * 18px)}
 .vrow .t-icon{margin-left:0}
 .vrow.folderv{background:rgba(var(--acc-rgb),.04)}
+.vrow .sel.stsel.isclosed{border-color:rgba(255,92,92,.55);color:#ff8f8f}
+body[data-theme=treeday] .vrow .sel.stsel.isclosed{color:#c0392b}
+@media(max-width:600px){.vrow .sel.stsel{margin-left:0}}
 .userpick{padding-left:calc(58px + var(--d,0) * 18px)}
 @media(max-width:600px){.vrow{padding-left:calc(10px + var(--d,0) * 10px)}.folderbody{padding-left:10px}}
 
@@ -2088,6 +2091,8 @@ function renderVis(b) {
         el('div', { class: 'vn' }, el('b', { text: t.name || 'Untitled application' }),
           el('small', { text: [t.access === 'selected' ? (sel ? sel + ' selected' : 'Nobody selected yet') : (!chain.every(x => x.access === 'everyone') ? 'Inside a closed level' : ''), t.status === 'closed' ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
         select(ACCESS_APP, t.access, v => { t.access = v; t.users = t.users || []; t.branches = t.branches || []; if (v === 'selected') expanded.add('u:' + t.id); markDirty(); renderAdmin(); }, { 'aria-label': 'Application access' }),
+        (() => { const sl = select({ active: 'Active', closed: 'Closed' }, t.status || 'active', v => { t.status = v; if (v === 'closed' && !t.note) t.note = 'No longer in use'; markDirty(); renderAdmin(); }, { 'aria-label': 'Application status', title: 'Closed: stays on the dashboard marked Closed; staff can no longer open it, admins still can' });
+          sl.classList.add('stsel'); if (t.status === 'closed') sl.classList.add('isclosed'); return sl; })(),
         badge(visibleFor(previewAs, chain, t))));
       if (t.access === 'selected') {
         const uopen = expanded.has('u:' + t.id);
