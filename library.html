@@ -338,6 +338,40 @@ body:not(.dark) .cat.add{background:rgba(255,253,248,.6);border:1px dashed rgba(
 .movebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px;font-size:13px;color:var(--muted);font-weight:600}
 .droptgt{border:1.5px dashed var(--acc);color:var(--acc2);background:var(--panel);padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;transition:all .15s}
 .droptgt.over{background:var(--acc);color:#fff;transform:scale(1.05)}
+/* sidebar layout */
+.layout{display:grid;grid-template-columns:250px 1fr;gap:28px;align-items:start;margin-top:22px}
+.side{position:sticky;top:16px;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:12px;box-shadow:0 6px 20px var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);max-height:calc(100vh - 32px);overflow:auto}
+.shead{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:600;margin:12px 6px 6px}
+.shead:first-child{margin-top:2px}
+.slink{background:none;border:0;color:var(--acc2);font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;padding:2px 4px}
+.slink.on{background:var(--acc);color:#fff;border-radius:5px;padding:2px 8px}
+.slist{display:flex;flex-direction:column;gap:2px}
+.sitem{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink);border:1px solid transparent;transition:background .12s}
+.sitem:hover{background:var(--soft)}
+.sitem.on{background:rgba(var(--acc-rgb),.12);border-color:rgba(var(--acc-rgb),.35);color:var(--acc2)}
+.sitem .sic{color:var(--acc2);display:grid}
+.sitem .sname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sitem .scount{font-family:var(--mono);font-size:11.5px;color:var(--dim);background:var(--soft2);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.sitem .sadm{display:none;gap:3px}
+.sitem:hover .sadm,.sitem .sadm.show{display:flex}
+.sitem:hover .sadm:not(.show)~.scount{display:none}
+.sitem .sadm button{background:var(--panel);border:1px solid var(--line2);color:var(--muted);border-radius:6px;width:26px;height:24px;display:grid;place-items:center;font-size:13px;padding:0}
+.sitem .sadm button svg{width:14px;height:14px}
+.sitem .sadm button:disabled{opacity:.3}
+.sitem .grip{color:var(--acc2);font-weight:800;letter-spacing:-2px;cursor:grab;width:18px;text-align:center}
+.sitem.over{background:var(--acc);color:#fff;border-color:var(--acc)}
+body.dragdoc .slist .sitem{outline:1.5px dashed rgba(var(--acc-rgb),.6);outline-offset:-2px}
+.sadd{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;background:none;border:1px dashed var(--line2);color:var(--muted);border-radius:9px;padding:9px 10px;font-weight:600;font-size:13px}
+.sadd:hover{color:var(--acc2);border-color:var(--acc)}
+.stip{font-size:11.5px;color:var(--dim);margin:10px 6px 2px;line-height:1.45}
+.main{min-width:0}
+.main .hero{margin-top:0}
+.mhead{display:flex;align-items:center;gap:12px;margin:14px 2px 2px;font-family:var(--mono);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc2);font-weight:700}
+.mhead::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+.mhead:first-child{margin-top:0}
+.card .date{text-align:right;line-height:1.5}
+.card .date .issued{color:var(--dim);font-size:11.5px}
+@media(max-width:860px){.layout{grid-template-columns:1fr;gap:14px}.side{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px}.side .shead:first-child,.side .stip{display:none}.side .shead{width:100%;margin:4px 4px 0}.slist{flex-direction:row;flex-wrap:wrap;gap:6px}.sitem{padding:7px 10px;border-color:var(--line2)}.sadd{width:auto;margin:0}}
 </style>
 </head>
 <body>
@@ -405,7 +439,7 @@ const el = (tag, attrs = {}, ...kids) => {
   for (const k of kids.flat()) if (k != null && k !== false) n.append(k instanceof Node ? k : document.createTextNode(String(k)));
   return n;
 };
-const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>', move: '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/>', plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>' };
+const ICONS = { search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>', upload: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>', ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>', down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>', stack: '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/>', move: '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M9 7h7M9 11h5"/>', plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>' };
 const icon = k => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.innerHTML = ICONS[k]; return s; };
 let toastT; const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3200); };
 const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -430,7 +464,7 @@ setTheme(savedTheme);
 $('#themeBtn').onclick = () => setTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
 
 /* ---------- state ---------- */
-let sb, me = null, isAdmin = false, docs = [], cats = [], curCat = null, hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'custom', arranging = false;
+let sb, me = null, isAdmin = false, docs = [], cats = [], curCat = null, hits = null, q = '', fType = new Set(), fDoc = '', fYear = '', sort = 'upload', arranging = false;
 
 
 /* ---------- automatic sign-out after inactivity (shared with the portal) ---------- */
@@ -491,36 +525,36 @@ async function loadDocs() {
 /* ---------- main page ---------- */
 function renderShell() {
   let t;
-  const input = el('input', { type: 'search', placeholder: 'Search newsletters… e.g. "capital allowance" or s.140A surcharge', 'aria-label': 'Search', oninput: e => { clearTimeout(t); t = setTimeout(() => runSearch(e.target.value), 300); } });
   const c = cats.find(x => x.id === curCat);
-  input.placeholder = c ? `Search ${c.name}…` : 'Search all categories… e.g. "capital allowance" or s.140A surcharge';
-  $('#app').replaceChildren(...[
-    c ? el('div', { class: 'crumbs' }, el('a', { onclick: () => goCat(null), text: 'CCT Library' }), '›', el('span', { text: c.name })) : null,
-    el('div', { class: 'hero' },
-      c ? el('div', {}, el('h2', {}, el('span', { text: c.name })), el('p', { text: c.description || 'Double-click a document to read it.' }), el('div', { class: 'status' }, el('i'), el('span', { id: 'statusN', text: 'Connecting…' })))
-        : el('div', {}, el('h2', {}, 'CCT ', el('span', { text: 'Library' })), el('p', { text: 'Choose a category, or search across everything.' }), el('div', { class: 'status' }, el('i'), el('span', { id: 'statusN', text: 'Connecting…' }))),
-      isAdmin ? el('div', { class: 'hbtns' },
-        el('button', { class: 'btn ghost' + (arranging ? ' on' : ''), onclick: toggleArrange, title: c ? 'Drag documents to reorder them, or drop one on another category to move it' : 'Drag categories to reorder them' }, icon('move'), arranging ? 'Done arranging' : 'Arrange'),
-        c && !arranging ? el('button', { class: 'btn', onclick: openUpload }, icon('upload'), 'Upload documents') : null) : null),
-    el('div', { class: 'searchbar' }, icon('search'), input),
-    el('p', { class: 'hint', text: 'Tip: use quotes for an exact phrase, OR for alternatives, and - to exclude a word (e.g. "e-invoice" -penalty).' }),
-    el('div', { class: 'filters', id: 'filters' }),
-    el('div', { class: 'count', id: 'count' }),
-    el('div', { class: 'results', id: 'results' })].filter(Boolean));
+  const input = el('input', { type: 'search', 'aria-label': 'Search', placeholder: c ? `Search ${c.name}…` : 'Search all documents… e.g. "capital allowance" or s.140A surcharge', oninput: e => { clearTimeout(t); t = setTimeout(() => runSearch(e.target.value), 300); } });
+  $('#app').replaceChildren(el('div', { class: 'layout' },
+    el('aside', { class: 'side', id: 'side', 'aria-label': 'Categories' }),
+    el('section', { class: 'main' },
+      el('div', { class: 'hero' },
+        el('div', {}, el('h2', {}, c ? el('span', { text: c.name }) : ['All ', el('span', { text: 'documents' })]),
+          el('p', { text: c ? (c.description || 'Newest uploads first. Double-click a document to read it.') : 'Every document in the library, newest uploads first. Double-click to read.' }),
+          el('div', { class: 'status' }, el('i'), el('span', { id: 'statusN', text: 'Connecting…' }))),
+        isAdmin ? el('div', { class: 'hbtns' }, el('button', { class: 'btn', onclick: openUpload }, icon('upload'), 'Upload documents')) : null),
+      el('div', { class: 'searchbar' }, icon('search'), input),
+      el('p', { class: 'hint', text: 'Tip: use quotes for an exact phrase, OR for alternatives, and - to exclude a word (e.g. "e-invoice" -penalty).' }),
+      el('div', { class: 'filters', id: 'filters' }),
+      el('div', { class: 'count', id: 'count' }),
+      el('div', { class: 'results', id: 'results' }))));
+  renderSide();
 }
 
 async function runSearch(v) {
   q = v.trim();
-  if (!q) { hits = null; renderResults(); return; }
+  if (!q) { hits = null; if (sort === 'relevance') sort = 'upload'; renderFilters(); renderResults(); return; }
   const { data, error } = await sb.rpc('kb_search', { q, lim: 200 });
   if (error) { toast('Search error: ' + error.message); return; }
   hits = new Map((data || []).map(r => [r.id, r]));
-  renderResults();
+  if (sort === 'upload') sort = 'relevance';
+  renderFilters(); renderResults();
 }
 
 function renderFilters() {
   const scope = docs.filter(d => !curCat || d.category_id === curCat);
-  $('#filters').hidden = !curCat && !q;
   const counts = {}; scope.forEach(d => d.tax_types.forEach(t => counts[t] = (counts[t] || 0) + 1));
   const years = uniq(scope.map(d => d.issue_date && d.issue_date.slice(0, 4))).sort().reverse();
   const types = TAX_TYPES.map(x => x[0]).filter(t => counts[t]).concat(Object.keys(counts).filter(t => !TAX_TYPES.some(x => x[0] === t)));
@@ -529,24 +563,41 @@ function renderFilters() {
   $('#filters').replaceChildren(chips, el('span', { class: 'spacer' }),
     sel(fDoc, [['', 'All document types'], ...DOC_TYPES.map(x => [x, x])], v => fDoc = v, 'Document type'),
     sel(fYear, [['', 'All years'], ...years.map(y => [y, y])], v => fYear = v, 'Year'),
-    sel(sort, [['custom', 'Arranged order'], ['relevance', 'Best match'], ['newest', 'Newest first'], ['oldest', 'Oldest first'], ['title', 'Title A–Z']], v => sort = v, 'Sort'));
+    sel(sort, [['upload', 'Latest uploaded'], ['upold', 'Oldest uploaded'], ['issue', 'Issue date'], ['title', 'Title A–Z'], ['relevance', 'Best match (search)']], v => sort = v, 'Sort'));
 }
 
-function renderCats() {
-  $('#filters').hidden = true; $('#count').textContent = '';
-  const n = id => docs.filter(d => d.category_id === id).length;
-  const last = id => docs.filter(d => d.category_id === id && d.issue_date).map(d => d.issue_date).sort().pop();
-  const box = el('div', { class: 'cats' + (arranging ? ' arranging' : '') }, cats.map((c, i) => el('div', { class: 'cat', tabindex: '0', role: 'button', 'data-id': c.id, draggable: arranging ? 'true' : null, onclick: () => { if (!arranging) goCat(c.id); }, onkeydown: e => { if (e.key === 'Enter' && !arranging) goCat(c.id); } },
-    arranging ? el('div', { class: 'cadm' }, el('span', { class: 'grip', title: 'Drag to move' }, '⋮⋮'),
-      el('button', { 'aria-label': 'Move earlier', title: 'Move earlier', disabled: i === 0, onclick: e => { e.stopPropagation(); moveCat(i, -1); } }, '←'),
-      el('button', { 'aria-label': 'Move later', title: 'Move later', disabled: i === cats.length - 1, onclick: e => { e.stopPropagation(); moveCat(i, 1); } }, '→'))
-    : isAdmin ? el('div', { class: 'cadm' }, el('button', { 'aria-label': 'Edit category', title: 'Edit category', onclick: e => { e.stopPropagation(); editCat(c); } }, icon('edit')), el('button', { 'aria-label': 'Delete category', title: 'Delete category', onclick: e => { e.stopPropagation(); deleteCat(c); } }, icon('trash'))) : null,
-    el('div', { class: 'cicon' }, icon('book')),
-    el('h3', { text: c.name }), el('p', { text: c.description || '' }),
-    el('div', { class: 'cfoot' }, el('span', {}, el('b', { text: n(c.id) }), ` document${n(c.id) === 1 ? '' : 's'}`), el('span', { text: last(c.id) ? 'Latest ' + fmtDate(last(c.id)) : '' })))),
-    isAdmin && !arranging ? el('button', { class: 'cat add', onclick: () => editCat(null) }, icon('plus'), 'Add category') : null);
-  $('#results').replaceChildren(...[arranging ? el('p', { class: 'arrhint', text: 'Drag the category cards (or use the arrows) to change their order. It saves automatically.' }) : null, cats.length || isAdmin ? box : el('div', { class: 'empty' }, el('h3', { text: 'No categories yet' }))].filter(Boolean));
-  if (arranging) sortable(box, '.cat[data-id]', ids => saveCatOrder(ids));
+function renderSide() {
+  const side = $('#side'); if (!side) return;
+  const n = id => docs.filter(d => id ? d.category_id === id : true).length;
+  const item = (c, i) => {
+    const on = (c ? c.id : null) === curCat;
+    const node = el('div', { class: 'sitem' + (on ? ' on' : ''), tabindex: '0', role: 'button', 'data-id': c ? c.id : null, draggable: arranging && c ? 'true' : null,
+      onclick: () => { if (!arranging || !c) goCat(c ? c.id : null); }, onkeydown: e => { if (e.key === 'Enter') goCat(c ? c.id : null); } },
+      arranging && c ? el('span', { class: 'grip', text: '⋮⋮' }) : el('span', { class: 'sic' }, icon(c ? 'book' : 'stack')),
+      el('span', { class: 'sname', text: c ? c.name : 'All documents' }),
+      isAdmin && c && !arranging ? el('span', { class: 'sadm' },
+        el('button', { 'aria-label': 'Edit category', title: 'Edit category', onclick: e => { e.stopPropagation(); editCat(c); } }, icon('edit')),
+        el('button', { 'aria-label': 'Delete category', title: 'Delete category', onclick: e => { e.stopPropagation(); deleteCat(c); } }, icon('trash'))) : null,
+      arranging && c ? el('span', { class: 'sadm show' },
+        el('button', { 'aria-label': 'Move up', disabled: i === 0, onclick: e => { e.stopPropagation(); moveCat(i, -1); } }, '↑'),
+        el('button', { 'aria-label': 'Move down', disabled: i === cats.length - 1, onclick: e => { e.stopPropagation(); moveCat(i, 1); } }, '↓')) : el('span', { class: 'scount', text: n(c && c.id) }));
+    if (isAdmin && c) {
+      node.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('application/x-kbdoc')) { e.preventDefault(); node.classList.add('over'); } });
+      node.addEventListener('dragleave', () => node.classList.remove('over'));
+      node.addEventListener('drop', e => { const id = e.dataTransfer.getData('application/x-kbdoc'); node.classList.remove('over'); if (id) { e.preventDefault(); moveDocToCat(id, c.id); } });
+    }
+    return node;
+  };
+  const list = el('div', { class: 'slist' }, cats.map((c, i) => item(c, i)));
+  side.replaceChildren(...[
+    el('div', { class: 'shead' }, el('span', { text: 'Library' })),
+    item(null),
+    el('div', { class: 'shead' }, el('span', { text: 'Categories' }),
+      isAdmin ? el('button', { class: 'slink' + (arranging ? ' on' : ''), onclick: toggleArrange, title: 'Change the order of categories' }, arranging ? 'Done' : 'Arrange') : null),
+    list,
+    isAdmin && !arranging ? el('button', { class: 'sadd', onclick: () => editCat(null) }, icon('plus'), 'Add category') : null,
+    isAdmin ? el('p', { class: 'stip', text: arranging ? 'Drag categories or use the arrows. Saves automatically.' : 'Tip: drag a document onto a category to move it.' }) : null].filter(Boolean));
+  if (arranging) sortable(list, '.sitem[data-id]', ids => saveCatOrder(ids));
 }
 
 let clickT;
@@ -558,43 +609,40 @@ function renderStatus() {
   if (st) st.textContent = `Online · ${n} document${n === 1 ? '' : 's'} indexed${curCat ? '' : ` · ${cats.length} categor${cats.length === 1 ? 'y' : 'ies'}`}`;
 }
 function renderResults() {
-  renderStatus();
-  if (!curCat && !q) return renderCats();
-  $('#filters').hidden = arranging;
+  renderStatus(); renderSide();
   let list = docs.filter(d => (!curCat || d.category_id === curCat) && (!hits || hits.has(d.id)) && (!fType.size || d.tax_types.some(t => fType.has(t))) && (!fDoc || d.doc_type === fDoc) && (!fYear || (d.issue_date || '').startsWith(fYear)));
-  const byDate = (a, b) => (b.issue_date || '').localeCompare(a.issue_date || '') || b.created_at.localeCompare(a.created_at);
-  const byArr = (a, b) => (a.sort || 0) - (b.sort || 0) || byDate(a, b);
-  if (arranging) list.sort(byArr);
-  else if ((sort === 'relevance' || sort === 'custom') && hits) list.sort((a, b) => hits.get(b.id).rank - hits.get(a.id).rank);
-  else if (sort === 'custom') list.sort(byArr);
-  else if (sort === 'oldest') list.sort((a, b) => -byDate(a, b)); else if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title)); else list.sort(byDate);
+  const byUp = (a, b) => b.created_at.localeCompare(a.created_at);
+  const byIssue = (a, b) => (b.issue_date || '').localeCompare(a.issue_date || '') || byUp(a, b);
+  if (sort === 'relevance' && hits) list.sort((a, b) => hits.get(b.id).rank - hits.get(a.id).rank);
+  else if (sort === 'upold') list.sort((a, b) => -byUp(a, b));
+  else if (sort === 'issue') list.sort(byIssue);
+  else if (sort === 'title') list.sort((a, b) => a.title.localeCompare(b.title));
+  else list.sort(byUp);
   const total = docs.filter(d => !curCat || d.category_id === curCat).length;
-  $('#count').textContent = total ? `${list.length} of ${total} document${total === 1 ? '' : 's'}${q ? ` matching “${q}”` : ''}${curCat ? '' : ' in all categories'} · double-click to read` : '';
+  $('#count').textContent = total ? `${list.length} of ${total} document${total === 1 ? '' : 's'}${q ? ` matching “${q}”` : ''} · double-click to read` : '';
   const box = $('#results');
-  if (!total) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'The library is empty' }), el('p', { text: isAdmin ? 'Upload your first newsletters with the Upload documents button. Any file type works; text is extracted automatically so it can be searched.' : 'No documents have been published yet.' }))); return; }
+  if (!total) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: curCat ? 'No documents in this category yet' : 'The library is empty' }), el('p', { text: isAdmin ? 'Use Upload documents to add files. Any file type works; text is extracted automatically so it can be searched.' : 'No documents have been published yet.' }))); return; }
   if (!list.length) { box.replaceChildren(el('div', { class: 'empty' }, el('h3', { text: 'No matches' }), el('p', { text: 'Try fewer words, or clear the filters.' }))); return; }
-  const cardsEl = list.map((d, i) => {
+  const grouped = sort === 'upload' || sort === 'upold' || (sort === 'relevance' && !hits);
+  const monthOf = d => new Date(d.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const out = []; let lastM = null;
+  for (const d of list) {
+    if (grouped) { const m = monthOf(d); if (m !== lastM) { out.push(el('div', { class: 'mhead' }, el('span', { text: m }))); lastM = m; } }
     const [k, lab] = fileKind(d.file_name); const h = hits && hits.get(d.id);
-    return el('div', { class: 'card' + (arranging ? ' arr' : ''), tabindex: '0', 'data-id': d.id, draggable: arranging ? 'true' : null, title: arranging ? 'Drag to reorder, or drop on a category above to move it' : 'Double-click to read', onclick: () => { if (!arranging) cardClick(d.id); }, ondblclick: () => { if (!arranging) cardDbl(d.id); }, onkeydown: e => { if (e.key === 'Enter' && !arranging) viewDoc(d); } },
-      arranging ? el('div', { class: 'arrctl' }, el('span', { class: 'grip', text: '⋮⋮' }),
-        el('button', { 'aria-label': 'Move up', disabled: i === 0, onclick: e => { e.stopPropagation(); moveDoc(list, i, -1); } }, '↑'),
-        el('button', { 'aria-label': 'Move down', disabled: i === list.length - 1, onclick: e => { e.stopPropagation(); moveDoc(list, i, 1); } }, '↓'))
-      : el('div', { class: 'ficon ' + k, text: d.file_name ? lab : '—' }),
+    const card = el('div', { class: 'card', tabindex: '0', 'data-id': d.id, draggable: isAdmin ? 'true' : null, title: 'Double-click to read', onclick: () => cardClick(d.id), ondblclick: () => cardDbl(d.id), onkeydown: e => { if (e.key === 'Enter') viewDoc(d); } },
+      el('div', { class: 'ficon ' + k, text: d.file_name ? lab : '—' }),
       el('div', {},
         el('h3', { text: d.title }),
         el('div', { class: 'meta' }, !curCat ? el('span', { class: 'pill cat-pill', text: catName(d.category_id) }) : null, el('span', { class: 'pill type', text: d.doc_type }), d.status === 'draft' ? el('span', { class: 'pill draft', text: 'Draft (admins only)' }) : null, d.tax_types.map(t => el('span', { class: 'pill', text: t }))),
         h && h.snippet ? el('p', { class: 'snip' }, marked(h.snippet)) : d.summary ? el('p', { class: 'snip', text: d.summary.length > 260 ? d.summary.slice(0, 260) + '…' : d.summary }) : null),
-      el('div', { class: 'date', text: fmtDate(d.issue_date) }));
-  });
-  if (!arranging) { box.replaceChildren(...cardsEl); return; }
-  const targets = el('div', { class: 'movebar' }, el('span', { text: 'Move to:' }), cats.filter(c => c.id !== curCat).map(c => {
-    const t = el('div', { class: 'droptgt', 'data-cat': c.id, text: c.name });
-    t.ondragover = e => { e.preventDefault(); t.classList.add('over'); }; t.ondragleave = () => t.classList.remove('over');
-    t.ondrop = e => { e.preventDefault(); t.classList.remove('over'); const id = e.dataTransfer.getData('text/plain'); if (id) { pendingMove = id; moveDocToCat(id, c.id); } };
-    return t; }), cats.length < 2 ? el('span', { class: 'note', style: 'margin:0', text: 'Add another category to move documents between categories.' }) : null);
-  const listEl = el('div', { class: 'results' }, cardsEl);
-  box.replaceChildren(el('p', { class: 'arrhint', text: 'Drag documents (or use the arrows) to change their order. To move a document to another category, drag it onto a category name below. Changes save automatically.' }), targets, listEl);
-  sortable(listEl, '.card[data-id]', ids => saveDocOrder(ids));
+      el('div', { class: 'date' }, el('div', { text: 'Uploaded ' + new Date(d.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) }), d.issue_date ? el('div', { class: 'issued', text: 'Issued ' + fmtDate(d.issue_date) }) : null));
+    if (isAdmin) {
+      card.addEventListener('dragstart', e => { e.dataTransfer.setData('application/x-kbdoc', d.id); e.dataTransfer.effectAllowed = 'move'; card.classList.add('dragging'); document.body.classList.add('dragdoc'); });
+      card.addEventListener('dragend', () => { card.classList.remove('dragging'); document.body.classList.remove('dragdoc'); });
+    }
+    out.push(card);
+  }
+  box.replaceChildren(...out);
 }
 
 /* ---------- document drawer ---------- */
@@ -1028,12 +1076,7 @@ async function viewPdf(blob, body, zoomBox) {
 }
 
 /* ---------- arrange (admins): reorder categories and documents, move documents ---------- */
-function toggleArrange() {
-  arranging = !arranging;
-  if (arranging) { q = ''; hits = null; fType.clear(); fDoc = ''; fYear = ''; }
-  renderShell(); renderFilters(); renderResults();
-  if (arranging) $('#filters').hidden = true;
-}
+function toggleArrange() { arranging = !arranging; renderSide(); }
 function sortable(container, sel, onDone) {
   let dragEl = null;
   container.querySelectorAll(sel).forEach(it => {
