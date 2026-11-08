@@ -308,6 +308,10 @@ textarea.i{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(
 .tool.closed .t-go{color:#ffb3b8}
 .tool.closed .t-desc.note{font-style:italic}
 .tool.closed.nolink{cursor:not-allowed}
+.planet.closed{opacity:.62;filter:grayscale(.55)}
+.planet.closed .go{color:#ffb3b8}
+.planet .pnote{font-size:12px;font-style:italic;color:var(--muted);margin:-2px 0 6px}
+.planet .pname .closedtag{font-size:9.5px}
 .statusrow{display:flex;gap:8px;flex-wrap:wrap}
 .statusrow .sel{min-width:240px}
 .statusrow .i{flex:1;min-width:200px}
@@ -1729,14 +1733,14 @@ async function loadDataInner() {
   const mkTool = y => ({ id: y.id, name: y.name, emoji: iconKey(y.emoji), url: y.url, desc: y.description, access: y.access || 'everyone',
     users: grants.filter(r => r.tool_id === y.id).map(r => r.user_id), branches: bgr.filter(r => r.tool_id === y.id).map(r => r.branch),
     status: y.status === 'closed' ? 'closed' : 'active', note: y.closed_note || '' });
-  const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone',
+  const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone', status: x.status === 'closed' ? 'closed' : 'active', note: x.closed_note || '',
     folders: fl.filter(c => c.parent_id === x.id).map(mkFolder), tools: tl.filter(y => y.folder_id === x.id).map(mkTool) });
   if (s.data && s.data.idle_minutes != null) setIdleMinutes(s.data.idle_minutes);
   if (s.data && s.data.tree_style) setTreeStyle(s.data.tree_style);
   cfg = {
     title: (s.data && s.data.title) || 'CCTaxLab', subtitle: (s.data && s.data.subtitle) || '', theme: (s.data && s.data.theme) || look.theme, anim: (s.data && s.data.animation) || look.anim,
     idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30, tree: 'fiber',
-    hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone', direct: !!x.open_direct,
+    hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone', direct: !!x.open_direct, status: x.status === 'closed' ? 'closed' : 'active', note: x.closed_note || '',
       folders: fl.filter(c => c.hub_id === x.id && !c.parent_id).map(mkFolder),
       tools: tl.filter(y => y.hub_id === x.id && !y.folder_id).map(mkTool) }))
   };
@@ -1752,6 +1756,22 @@ const canSee = item => isAdmin || item.access === 'everyone' || (item.access ===
 const STATUS = { hidden: 'Hidden', admins: 'Admins only', selected: 'Selected users' };
 const status = item => STATUS[item.access] || null;
 const pill = st => el('span', { class: 'pill' }, icon(st === 'Hidden' ? 'eyeoff' : st === 'Selected users' ? 'users' : 'lock'), st);
+// Active / Closed status: the same for workspaces, folders and applications.
+// Closed items stay on the dashboard, marked Closed with a note; staff cannot open them (or anything inside); admins can.
+const isClosed = n => !!n && n.status === 'closed';
+const closedMsg = n => n.note || 'No longer in use';
+const setStatus = (n, v) => { n.status = v; if (v === 'closed' && !n.note) n.note = 'No longer in use'; markDirty(); renderAdmin(); };
+function statusSelect(n, what) {   // compact choice used in the Visibility tab
+  const sl = select({ active: 'Active', closed: 'Closed' }, n.status || 'active', v => setStatus(n, v), { 'aria-label': what + ' status', title: 'Closed: stays on the dashboard marked Closed; staff can no longer open it, admins still can' });
+  sl.classList.add('stsel'); if (isClosed(n)) sl.classList.add('isclosed'); return sl;
+}
+function statusFields(n, what) {   // full field used in the Applications editor
+  return [el('label', { class: 'f', text: 'Status' }),
+    el('div', { class: 'statusrow' },
+      select({ active: 'Active — staff can open it', closed: 'Closed — no longer in use' }, n.status || 'active', v => setStatus(n, v), { 'aria-label': what + ' status' }),
+      isClosed(n) ? input(n.note, v => n.note = v, { maxlength: 200, placeholder: 'Note shown to staff, e.g. FYE Dec 2025 completed', 'aria-label': 'Closed note' }) : null),
+    isClosed(n) ? el('p', { class: 'hintline', text: `Stays on the dashboard, marked Closed. Staff can no longer open this ${what.toLowerCase()}${what === 'Application' ? '' : ' or anything inside it'}; admins still can.` }) : null];
+}
 // tree helpers
 function walkTools(node, fn, chain = []) { const c = chain.concat(node); (node.tools || []).forEach(t => fn(t, c)); (node.folders || []).forEach(f => walkTools(f, fn, c)); }
 function walkFolders(node, fn, chain = []) { const c = chain.concat(node); (node.folders || []).forEach(f => { fn(f, c); walkFolders(f, fn, c); }); }
@@ -1800,12 +1820,13 @@ function renderGalaxy() {
     return;
   }
   hubs.forEach((h, i) => {
-    const n = countVisible(h), nf = (h.folders || []).filter(canSee).length, st = status(h);
-    const b = el('button', { class: 'planet' + (st ? ' hidden-item' : ''), 'data-id': h.id, style: `--c:${h.color};animation-delay:${arranging ? 0 : i * 60}ms`, 'aria-label': `${h.name}, ${n} applications`, onclick: () => enterHub(h) },
+    const n = countVisible(h), nf = (h.folders || []).filter(canSee).length, st = status(h), closed = isClosed(h), locked = closed && !isAdmin;
+    const b = el('button', { class: 'planet' + (st ? ' hidden-item' : '') + (closed ? ' closed' : ''), 'data-id': h.id, style: `--c:${h.color};animation-delay:${arranging ? 0 : i * 60}ms`, 'aria-label': `${h.name}${closed ? ', closed' : ''}, ${n} applications`, title: closed ? (isAdmin ? 'Closed for staff. Admins can still open it.' : closedMsg(h)) : null, onclick: () => locked && !arranging ? toast(`${h.name}: ${closedMsg(h)}`) : enterHub(h) },
       orb(h.color, i % 2 === 0), sprig(),
       el('div', { class: 'p-icon' }, icon(h.emoji)),
-      el('div', { class: 'pname', text: h.name }),
-      el('div', { class: 'pcount' }, el('span', { text: plural(n, 'application') + (nf ? ' · ' + plural(nf, 'folder') : '') }), el('span', { class: 'go' }, 'Open', icon('arrow'))),
+      el('div', { class: 'pname' }, h.name, closed ? el('span', { class: 'closedtag', text: 'Closed' }) : null),
+      closed ? el('div', { class: 'pnote', text: closedMsg(h) }) : null,
+      el('div', { class: 'pcount' }, el('span', { text: plural(n, 'application') + (nf ? ' · ' + plural(nf, 'folder') : '') }), el('span', { class: 'go' }, locked ? [icon('lock'), 'Closed'] : [closed ? 'Open (admin)' : 'Open', icon('arrow')])),
       st ? pill(st) : null);
     if (arranging) b.prepend(el('span', { class: 'dragtag' }, icon('grip')));
     g.append(b);
@@ -1820,16 +1841,17 @@ function openHub(id) { dockPath = [id]; openHubId = id; warp(500); renderDock();
 // workspaces set to "open directly" go straight into their first visible application
 function firstTool(node) {
   for (const t of (node.tools || [])) if (canSee(t) && safeUrl(t.url) && (t.status !== 'closed' || isAdmin)) return t;
-  for (const f of (node.folders || [])) if (canSee(f)) { const t = firstTool(f); if (t) return t; }
+  for (const f of (node.folders || [])) if (canSee(f) && (!isClosed(f) || isAdmin)) { const t = firstTool(f); if (t) return t; }
   return null;
 }
 function enterHub(h) {
+  if (isClosed(h) && !isAdmin && !arranging) return toast(`${h.name}: ${closedMsg(h)}`);
   const t = h.direct && !arranging ? firstTool(h) : null;
   if (t) { warp(500); setTimeout(() => { location.href = safeUrl(t.url); }, 250); } else openHub(h.id);
 }
 function resolvePath() {
   const chain = []; let list = cfg ? cfg.hubs : [];
-  for (const id of dockPath) { const n = list.find(x => x.id === id); if (!n || !canSee(n)) break; chain.push(n); list = n.folders || []; }
+  for (const id of dockPath) { const n = list.find(x => x.id === id); if (!n || !canSee(n) || (isClosed(n) && !isAdmin)) break; chain.push(n); list = n.folders || []; }
   return chain;
 }
 function renderDock() {
@@ -1854,11 +1876,11 @@ function renderDock() {
   box.append(fbox, tbox);
   if (arranging && (folders.length + tools.length) > 1) box.prepend(el('p', { class: 'hintline', style: 'margin:0 0 10px', text: 'Drag folders and applications to reorder. Folders stay above applications.' }));
   folders.forEach((f, i) => {
-    const n = countVisible(f), st = status(f);
-    fbox.append(el('button', { class: 'tool folderrow' + (st ? ' hidden-item' : ''), 'data-id': f.id, style: `animation-delay:${arranging ? 0 : i * 50}ms`, onclick: () => { dockPath.push(f.id); renderDock(); } }, arranging ? el('span', { class: 'dgrip' }, icon('grip')) : null,
+    const n = countVisible(f), st = status(f), closed = isClosed(f), locked = closed && !isAdmin;
+    fbox.append(el('button', { class: 'tool folderrow' + (st ? ' hidden-item' : '') + (closed ? ' closed' : '') + (locked ? ' nolink' : ''), 'data-id': f.id, title: closed ? (isAdmin ? 'Closed for staff. Admins can still open it.' : closedMsg(f)) : null, style: `animation-delay:${arranging ? 0 : i * 50}ms`, onclick: () => { if (locked && !arranging) return toast(`${f.name}: ${closedMsg(f)}`); dockPath.push(f.id); renderDock(); } }, arranging ? el('span', { class: 'dgrip' }, icon('grip')) : null,
       el('div', { class: 't-icon' }, icon(f.emoji || 'folder')),
-      el('div', { class: 't-main' }, el('div', { class: 't-name', text: f.name }), el('div', { class: 't-desc', text: plural(n, 'application') + ((f.folders || []).filter(canSee).length ? ' · ' + plural(f.folders.filter(canSee).length, 'folder') : '') }), st ? pill(st) : null),
-      el('div', { class: 't-go' }, 'Open', icon('arrow'))));
+      el('div', { class: 't-main' }, el('div', { class: 't-name' }, f.name, closed ? el('span', { class: 'closedtag', text: 'Closed' }) : null), closed ? el('div', { class: 't-desc note', text: closedMsg(f) }) : el('div', { class: 't-desc', text: plural(n, 'application') + ((f.folders || []).filter(canSee).length ? ' · ' + plural(f.folders.filter(canSee).length, 'folder') : '') }), st ? pill(st) : null),
+      el('div', { class: 't-go' }, locked ? [icon('lock'), 'Closed'] : [closed ? 'Open (admin)' : 'Open', icon('arrow')])));
   });
   tools.forEach((t, i) => {
     const closed = t.status === 'closed', url = (!closed || isAdmin) ? safeUrl(t.url) : null, st = status(t);
@@ -1943,11 +1965,7 @@ function appRow(t, ti, parent, h) {
       el('label', { class: 'f', text: 'Location (workspace › folder)' }),
       select(Object.fromEntries(locs.map((l, i) => [String(i), l.label])), String(locs.indexOf(cur)), v => { const dest = locs[+v].node; if (dest === parent) return; parent.tools.splice(ti, 1); dest.tools.push(t); markDirty(); renderAdmin(); }),
       el('label', { class: 'f', text: 'Icon' }), iconPicker(t.emoji, k => t.emoji = k),
-      el('label', { class: 'f', text: 'Status' }),
-      el('div', { class: 'statusrow' },
-        select({ active: 'Active — staff can open it', closed: 'Closed — no longer in use' }, t.status || 'active', v => { t.status = v; if (v === 'closed' && !t.note) t.note = 'No longer in use'; markDirty(); renderAdmin(); }, { 'aria-label': 'Status' }),
-        t.status === 'closed' ? input(t.note, v => t.note = v, { maxlength: 200, placeholder: 'Note shown to staff, e.g. FYE Dec 2025 completed', 'aria-label': 'Closed note' }) : null),
-      t.status === 'closed' ? el('p', { class: 'hintline', text: 'Stays on the dashboard, marked Closed. Staff can no longer open it; admins still can.' }) : null,
+      ...statusFields(t, 'Application'),
       el('div', { class: 'toggles' }, tdel, el('span', { class: 'hintline', text: 'Who can see it: Visibility tab' }))));
   }
   return row;
@@ -1970,7 +1988,7 @@ function folderCard(f, fi, parent, h, depth) {
     el('span', { class: 'grip', title: 'Drag to move' }, icon('grip')),
     el('span', { class: 'chev' + (open ? ' down' : '') }, icon('arrow')),
     el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(f.emoji || 'folder')),
-    el('div', { class: 'am' }, el('div', { class: 'an', text: f.name || 'Untitled folder' }), el('div', { class: 'al', text: `Folder · ${plural(countAll(f), 'app')}${(f.folders || []).length ? ' · ' + plural(f.folders.length, 'sub-folder') : ''}` })),
+    el('div', { class: 'am' }, el('div', { class: 'an' }, f.name || 'Untitled folder', isClosed(f) ? el('span', { class: 'closedtag', text: 'Closed' }) : null), el('div', { class: 'al', text: `Folder · ${plural(countAll(f), 'app')}${(f.folders || []).length ? ' · ' + plural(f.folders.length, 'sub-folder') : ''}` })),
     ib('up', 'Move up', () => move(parent.folders, fi, -1), fi === 0), ib('down', 'Move down', () => move(parent.folders, fi, 1), fi === parent.folders.length - 1),
     ib(editing ? 'x' : 'edit', editing ? 'Close' : 'Rename / settings', () => { toggle('fe:' + f.id); })));
   if (editing) {
@@ -1978,6 +1996,7 @@ function folderCard(f, fi, parent, h, depth) {
     card.append(el('div', { class: 'wsbox', style: 'margin:0 12px 10px' },
       el('label', { class: 'f', style: 'margin-top:0', text: 'Folder name' }), input(f.name, v => f.name = v, { maxlength: 60 }),
       el('label', { class: 'f', text: 'Icon' }), iconPicker(f.emoji || 'folder', k => f.emoji = k),
+      ...statusFields(f, 'Folder'),
       el('div', { class: 'toggles' }, del)));
   }
   if (open) card.append(el('div', { class: 'folderbody' }, childBlock(f, h, depth)));
@@ -1992,7 +2011,7 @@ function renderApps(b) {
     card.append(el('div', { class: 'hubrow' },
       el('span', { class: 'grip', title: 'Drag to reorder workspaces' }, icon('grip')),
       el('div', { class: 'p-icon', style: `--c:${h.color}` }, icon(h.emoji)),
-      el('div', { class: 'hn' }, h.name || 'Untitled workspace', el('small', { text: plural(countAll(h), 'app') + ((h.folders || []).length ? ' · ' + plural(h.folders.length, 'folder') : '') })),
+      el('div', { class: 'hn' }, h.name || 'Untitled workspace', isClosed(h) ? el('span', { class: 'closedtag', text: 'Closed' }) : null, el('small', { text: plural(countAll(h), 'app') + ((h.folders || []).length ? ' · ' + plural(h.folders.length, 'folder') : '') })),
       ib('up', 'Move workspace up', () => move(draft.hubs, hi, -1), hi === 0),
       ib('down', 'Move workspace down', () => move(draft.hubs, hi, 1), hi === draft.hubs.length - 1),
       ib(open ? 'x' : 'edit', open ? 'Close workspace settings' : 'Edit workspace', () => toggle(h.id))));
@@ -2006,6 +2025,7 @@ function renderApps(b) {
         el('div', { class: 'swatches' }, COLORS.map(c => el('button', { class: 'sw' + (h.color === c ? ' on' : ''), style: `background:${c}`, 'aria-label': 'Colour ' + c, onclick: () => { h.color = c; markDirty(); renderAdmin(); } }))),
         el('label', { class: 'f', text: 'When staff open this workspace' }),
         select({ panel: 'Show its applications', direct: 'Go straight into its first application' }, h.direct ? 'direct' : 'panel', v => { h.direct = v === 'direct'; markDirty(); }, { 'aria-label': 'When opened' }),
+        ...statusFields(h, 'Workspace'),
         el('div', { class: 'toggles' }, del)));
     }
     body.append(childBlock(h, h, 0));
@@ -2078,8 +2098,9 @@ function renderVis(b) {
       const fc = chain.concat(f);
       card.append(el('div', { class: 'vrow folderv', style: `--d:${depth}` },
         el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(f.emoji || 'folder')),
-        el('div', { class: 'vn' }, el('b', { text: f.name || 'Untitled folder' }), el('small', { text: 'Folder' + (!chain.every(n => n.access === 'everyone') ? ' · inside a closed level' : '') })),
+        el('div', { class: 'vn' }, el('b', { text: f.name || 'Untitled folder' }), el('small', { text: ['Folder', !chain.every(n => n.access === 'everyone') ? 'inside a restricted level' : '', isClosed(f) ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
         select(ACCESS_HUB, f.access, v => { f.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Folder access' }),
+        statusSelect(f, 'Folder'),
         badge(visibleFor(previewAs, fc))));
       toolRows(card, f, fc, h, depth + 1);
     });
@@ -2089,10 +2110,9 @@ function renderVis(b) {
       card.append(el('div', { class: 'vrow', style: `--d:${depth}` },
         el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(t.emoji)),
         el('div', { class: 'vn' }, el('b', { text: t.name || 'Untitled application' }),
-          el('small', { text: [t.access === 'selected' ? (sel ? sel + ' selected' : 'Nobody selected yet') : (!chain.every(x => x.access === 'everyone') ? 'Inside a closed level' : ''), t.status === 'closed' ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
+          el('small', { text: [t.access === 'selected' ? (sel ? sel + ' selected' : 'Nobody selected yet') : (!chain.every(x => x.access === 'everyone') ? 'Inside a restricted level' : ''), t.status === 'closed' ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
         select(ACCESS_APP, t.access, v => { t.access = v; t.users = t.users || []; t.branches = t.branches || []; if (v === 'selected') expanded.add('u:' + t.id); markDirty(); renderAdmin(); }, { 'aria-label': 'Application access' }),
-        (() => { const sl = select({ active: 'Active', closed: 'Closed' }, t.status || 'active', v => { t.status = v; if (v === 'closed' && !t.note) t.note = 'No longer in use'; markDirty(); renderAdmin(); }, { 'aria-label': 'Application status', title: 'Closed: stays on the dashboard marked Closed; staff can no longer open it, admins still can' });
-          sl.classList.add('stsel'); if (t.status === 'closed') sl.classList.add('isclosed'); return sl; })(),
+        statusSelect(t, 'Application'),
         badge(visibleFor(previewAs, chain, t))));
       if (t.access === 'selected') {
         const uopen = expanded.has('u:' + t.id);
@@ -2117,8 +2137,9 @@ function renderVis(b) {
     const card = el('div', { class: 'viscard' });
     card.append(el('div', { class: 'vrow hubv' },
       el('div', { class: 'p-icon', style: `--c:${h.color}` }, icon(h.emoji)),
-      el('div', { class: 'vn' }, el('b', { text: h.name || 'Untitled workspace' }), el('small', { text: 'Workspace' })),
+      el('div', { class: 'vn' }, el('b', { text: h.name || 'Untitled workspace' }), el('small', { text: 'Workspace' + (isClosed(h) ? ' · Closed (no longer in use)' : '') })),
       select(ACCESS_HUB, h.access, v => { h.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Workspace access' }),
+      statusSelect(h, 'Workspace'),
       badge(visibleFor(previewAs, [h]))));
     toolRows(card, h, [h], h, 1);
     if (!countAll(h) && !(h.folders || []).length) card.append(el('p', { class: 'hintline', style: 'padding:6px 12px 10px', text: 'Nothing in this workspace yet.' }));
@@ -2131,9 +2152,9 @@ $('#discardBtn').onclick = () => { draft = clone(cfg); applyLook({ theme: cfg.th
 function flatten(root) {
   const now = new Date().toISOString(), hubs = [], folders = [], tools = [], grants = [], bgrants = [];
   root.hubs.forEach((h, i) => {
-    hubs.push({ id: h.id, name: (h.name || 'Workspace').slice(0, 60), emoji: iconKey(h.emoji), color: col(h.color), access: ACCESS_HUB[h.access] ? h.access : 'everyone', open_direct: !!h.direct, sort: i, updated_at: now });
+    hubs.push({ id: h.id, name: (h.name || 'Workspace').slice(0, 60), emoji: iconKey(h.emoji), color: col(h.color), access: ACCESS_HUB[h.access] ? h.access : 'everyone', open_direct: !!h.direct, status: h.status === 'closed' ? 'closed' : 'active', closed_note: (h.note || '').slice(0, 200), sort: i, updated_at: now });
     const walk = (node, parentId) => {
-      (node.folders || []).forEach((f, fi) => { folders.push({ id: f.id, hub_id: h.id, parent_id: parentId, name: (f.name || 'Folder').slice(0, 60), emoji: iconKey(f.emoji || 'folder'), access: ACCESS_HUB[f.access] ? f.access : 'everyone', sort: fi, updated_at: now }); walk(f, f.id); });
+      (node.folders || []).forEach((f, fi) => { folders.push({ id: f.id, hub_id: h.id, parent_id: parentId, name: (f.name || 'Folder').slice(0, 60), emoji: iconKey(f.emoji || 'folder'), access: ACCESS_HUB[f.access] ? f.access : 'everyone', status: f.status === 'closed' ? 'closed' : 'active', closed_note: (f.note || '').slice(0, 200), sort: fi, updated_at: now }); walk(f, f.id); });
       (node.tools || []).forEach((t, ti) => {
         tools.push({ id: t.id, hub_id: h.id, folder_id: parentId, name: (t.name || 'Application').slice(0, 60), emoji: iconKey(t.emoji), url: (t.url || '').trim().slice(0, 1000), description: (t.desc || '').slice(0, 240), access: ACCESS_APP[t.access] ? t.access : 'everyone', status: t.status === 'closed' ? 'closed' : 'active', closed_note: (t.note || '').slice(0, 200), sort: ti, updated_at: now });
         if (t.access === 'selected') { (t.users || []).forEach(u => grants.push({ tool_id: t.id, user_id: u })); (t.branches || []).forEach(b => bgrants.push({ tool_id: t.id, branch: b })); }

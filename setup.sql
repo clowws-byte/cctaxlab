@@ -359,3 +359,10 @@ alter table public.portal_settings add constraint portal_settings_tree_style_che
 -- add the Tech Green (fiber) tree style
 alter table public.portal_settings drop constraint if exists portal_settings_tree_style_check;
 alter table public.portal_settings add constraint portal_settings_tree_style_check check (tree_style in ('classic','majestic','tech','dynamic','premium','living','fiber'));
+
+-- Closed status for workspaces and folders too (added 2026-11-09). Same meaning as for applications:
+-- a closed item stays on the dashboard marked Closed; staff cannot open it or anything inside it; admins can.
+alter table public.portal_hubs add column if not exists status text not null default 'active' check (status in ('active','closed'));
+alter table public.portal_hubs add column if not exists closed_note text not null default '';
+alter table public.portal_folders add column if not exists status text not null default 'active' check (status in ('active','closed'));
+alter table public.portal_folders add column if not exists closed_note text not null default '';
