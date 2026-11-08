@@ -688,6 +688,9 @@ body[data-theme=treeday]{--bg:#dfe8ee;--bg-b:#e7ece8;background-image:radial-gra
 body[data-theme^=tree] .side-brand{color:#2bb8ee;font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.6px}
 body[data-theme=treeday] .side-brand{color:#0a8fc4}
 body[data-theme=treeday]{--panel:rgba(246,247,244,.78);--panel2:rgba(250,250,247,.9)}
+
+.idlewarn{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:14px;padding:12px 14px 12px 18px;border-radius:14px;background:var(--panel2);color:var(--ink);border:1px solid var(--line2);box-shadow:0 14px 40px rgba(0,0,0,.25);font-size:14px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.idlewarn .btn{width:auto;margin:0;padding:8px 14px}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
 body[data-anim=tree] .vtree,body[data-anim=tree] .vsun,body[data-anim=tree] .vt-side,body[data-anim=tree] .sprig,body[data-anim=tree] .vformula{display:block}
@@ -1334,8 +1337,10 @@ async function loadDataInner() {
     status: y.status === 'closed' ? 'closed' : 'active', note: y.closed_note || '' });
   const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone',
     folders: fl.filter(c => c.parent_id === x.id).map(mkFolder), tools: tl.filter(y => y.folder_id === x.id).map(mkTool) });
+  if (s.data && s.data.idle_minutes != null) setIdleMinutes(s.data.idle_minutes);
   cfg = {
     title: (s.data && s.data.title) || 'CCTaxLab', subtitle: (s.data && s.data.subtitle) || '', theme: (s.data && s.data.theme) || look.theme, anim: (s.data && s.data.animation) || look.anim,
+    idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30,
     hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone', direct: !!x.open_direct,
       folders: fl.filter(c => c.hub_id === x.id && !c.parent_id).map(mkFolder),
       tools: tl.filter(y => y.hub_id === x.id && !y.folder_id).map(mkTool) }))
@@ -1622,6 +1627,11 @@ function renderApps(b) {
   if (sopen) sc.append(el('div', { class: 'hubedit', style: 'display:block' },
     el('label', { class: 'f', style: 'margin-top:0', text: 'Portal name' }), input(draft.title, v => draft.title = v, { maxlength: 80 }),
     el('label', { class: 'f', text: 'Company name line' }), input(draft.subtitle, v => draft.subtitle = v, { maxlength: 160 }),
+    el('label', { class: 'f', text: 'Automatic sign-out when idle' }),
+    (() => { const sel = el('select', { class: 'sel', onchange: e => { draft.idle = +e.target.value; markDirty(); } });
+      [[0, 'Off'], [15, 'After 15 minutes'], [30, 'After 30 minutes'], [60, 'After 1 hour'], [120, 'After 2 hours'], [240, 'After 4 hours']].forEach(([v, t]) => sel.append(el('option', { value: v, text: t })));
+      sel.value = String(draft.idle != null ? draft.idle : 30); return sel; })(),
+    el('p', { class: 'hint', text: 'Staff are signed out after this long with no mouse, keyboard or touch activity (on this portal and CCT Library). They see a one-minute warning first.' }),
     lookPicker(() => ({ theme: draft.theme, anim: draft.anim }), l => { draft.theme = l.theme; draft.anim = l.anim; applyLook(l); markDirty(); })));
   b.append(sc);
 }
@@ -1745,7 +1755,8 @@ async function saveDraft(quiet) {
     const gone = (a, b) => { const keep = new Set(b.map(x => x.id)); return a.map(x => x.id).filter(id => !keep.has(id)); };
     const goneTools = gone(old.tools, nw.tools), goneFolders = gone(old.folders, nw.folders), goneHubs = gone(old.hubs, nw.hubs);
     const chk = r => { if (r.error) throw r.error; };
-    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim }).eq('id', 1));
+    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim, idle_minutes: +draft.idle || 0 }).eq('id', 1));
+    setIdleMinutes(+draft.idle || 0);
     if (goneTools.length) chk(await sb.from('portal_tools').delete().in('id', goneTools));
     if (goneFolders.length) chk(await sb.from('portal_folders').delete().in('id', goneFolders));
     if (nw.hubs.length) chk(await sb.from('portal_hubs').upsert(nw.hubs));
@@ -2076,6 +2087,30 @@ function updForm(u) {
     el('div', { class: 'toggles' }, save, el('button', { class: 'btn ghost small', text: 'Cancel', onclick: () => { updEditing = null; renderAdmin(); } }))));
 }
 
+
+/* ================= automatic sign-out after inactivity ================= */
+// Activity in any tab of this site (portal or CCT Library) counts; last activity is shared via localStorage.
+const IDLE_KEY = 'cctl-last-active', IDLE_MIN_KEY = 'cctl-idle-min';
+let idleMin = (() => { try { const v = localStorage.getItem(IDLE_MIN_KEY); return v === null ? 30 : +v || 0; } catch { return 30; } })();
+let lastPing = 0, idleWarnEl = null, idledOut = false, firstAuth = true;
+function setIdleMinutes(m) { idleMin = Math.max(0, +m || 0); try { localStorage.setItem(IDLE_MIN_KEY, String(idleMin)); } catch {} }
+function lastActive() { try { return +localStorage.getItem(IDLE_KEY) || 0; } catch { return 0; } }
+function markActive(force) { const n = Date.now(); if (!force && n - lastPing < 5000) return; lastPing = n; try { localStorage.setItem(IDLE_KEY, String(n)); } catch {} hideIdleWarn(); }
+['pointerdown', 'keydown', 'wheel', 'touchstart', 'mousemove', 'scroll'].forEach(ev => addEventListener(ev, () => { if (session) markActive(); }, { passive: true, capture: true }));
+function hideIdleWarn() { if (idleWarnEl) { idleWarnEl.remove(); idleWarnEl = null; } }
+function showIdleWarn(sec) {
+  if (!idleWarnEl) { idleWarnEl = el('div', { class: 'idlewarn', role: 'alert' }, el('span', { class: 'iw-t' }), el('button', { class: 'btn', onclick: () => markActive(true) }, 'Stay signed in')); document.body.append(idleWarnEl); }
+  idleWarnEl.querySelector('.iw-t').textContent = `For your security, you'll be signed out in ${sec} seconds.`;
+}
+function idleExpired() { const la = lastActive(); return idleMin > 0 && la > 0 && Date.now() - la > idleMin * 60000; }
+function idleSignOut() { hideIdleWarn(); idledOut = true; sb.auth.signOut({ scope: 'local' }); }
+setInterval(() => {
+  if (!session || !idleMin || window.__DEMO) { hideIdleWarn(); return; }
+  const la = lastActive(); if (!la) { markActive(true); return; }
+  const left = idleMin * 60000 - (Date.now() - la);
+  if (left <= 0) idleSignOut(); else if (left <= 60000) showIdleWarn(Math.ceil(left / 1000)); else hideIdleWarn();
+}, 1000);
+
 /* ================= start ================= */
 $('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
 (function start() {
@@ -2085,9 +2120,13 @@ $('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
   const wake = () => { if (document.visibilityState === 'visible') sb.auth.getSession().catch(() => {}); };
   document.addEventListener('visibilitychange', wake); addEventListener('focus', wake); addEventListener('online', wake);
   gate([el('h3', { text: 'Loading…' }), el('p', { class: 'lead', text: 'Checking your session.' })]);
-  if (!window.__DEMO) sb.from('portal_settings').select('theme,animation').eq('id', 1).maybeSingle().then(r => { if (r && r.data && r.data.theme) applyLook({ theme: r.data.theme, anim: r.data.animation }); });
+  if (!window.__DEMO) sb.from('portal_settings').select('theme,animation,idle_minutes').eq('id', 1).maybeSingle().then(r => { if (r && r.data && r.data.idle_minutes != null) setIdleMinutes(r.data.idle_minutes); if (r && r.data && r.data.theme) applyLook({ theme: r.data.theme, anim: r.data.animation }); });
   let started = false;
   sb.auth.onAuthStateChange((event, s) => {
+    if (s && firstAuth && idleExpired() && !window.__DEMO) { firstAuth = false; session = s; idleSignOut(); return; }
+    if (firstAuth) { firstAuth = false; if (s) markActive(true); }
+    else if (event === 'SIGNED_IN') markActive(true);
+    if (event === 'SIGNED_OUT' && idledOut) { idledOut = false; setTimeout(() => toast(`You were signed out after ${idleMin >= 60 ? idleMin / 60 + ' hour' + (idleMin > 60 ? 's' : '') : idleMin + ' minutes'} of inactivity.`), 400); }
     session = s;
     if (event === 'PASSWORD_RECOVERY') { recovering = true; screenNewPassword(); return; }
     if (event === 'SIGNED_OUT' || !s) { arranging = false; document.body.classList.remove('arranging'); profile = null; isAdmin = false; cfg = null; draft = null; dirty = false; closeAdmin(); closeDock(); closeAccount(); closeNews(); updates = []; $('#newsBtn').hidden = true; screenSignIn(); return; }

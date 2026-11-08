@@ -345,3 +345,6 @@ alter table public.portal_tools add column if not exists closed_note text not nu
 alter table public.portal_tools add column if not exists closed_at timestamptz;
 -- Closed applications stay on the dashboard; staff cannot open them (link hidden in the portal); admins can.
 -- Unused (View/Edit feature was reverted 2026-11-08): portal_tools.default_level, portal_tool_levels, portal_my_access().
+
+-- Automatic sign-out after inactivity (minutes, 0 = off). Added 2026-11-08.
+alter table public.portal_settings add column if not exists idle_minutes integer not null default 30 check (idle_minutes between 0 and 1440);
