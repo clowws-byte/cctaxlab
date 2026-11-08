@@ -724,6 +724,45 @@ body[data-theme=treeday] .vsun .core{box-shadow:0 0 40px 16px rgba(255,244,215,.
 @keyframes grow{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes bud{from{opacity:0}}
 @keyframes sway{0%,100%{transform:rotate(0)}30%{transform:rotate(.7deg)}70%{transform:rotate(-.6deg)}}
+
+/* ===== Tree style variants (body[data-tree]) ===== */
+/* Majestic: bark light from the sun side, deep canopy masses for volume, ground shadow */
+.vtsvg .bk0{stop-color:#2d2414}.vtsvg .bk1{stop-color:#8c7448}.vtsvg .bk2{stop-color:#e2c78e}
+body[data-theme=treeday] .vtsvg .bk0{stop-color:#3e2f1c}body[data-theme=treeday] .vtsvg .bk1{stop-color:#6e5634}body[data-theme=treeday] .vtsvg .bk2{stop-color:#a88a58}
+.vtsvg .gs0{stop-color:#000;stop-opacity:.35}.vtsvg .gs1{stop-color:#000;stop-opacity:0}
+body[data-theme=treeday] .vtsvg .gs0{stop-color:#2c3a20;stop-opacity:.28}
+.vtsvg .cb1{fill:#244a2c;opacity:.55}.vtsvg .cb2{fill:#4b7a3f;opacity:.45}
+body[data-theme=treeday] .vtsvg .cb1{fill:#25592c;opacity:.5}body[data-theme=treeday] .vtsvg .cb2{fill:#4c8c3e;opacity:.42}
+.vtsvg.ts-majestic .t-lf{opacity:.97}
+body[data-tree=majestic] .vtsvg .crown{animation-duration:24s}
+/* Tech: fine blue light-lines, glowing nodes, energy pulses running up from the roots */
+.vtsvg.ts-tech .t-br{stroke:#2bb8ee;stroke-opacity:.55}.vtsvg.ts-tech .t-tr{fill:#2bb8ee}
+.vtsvg.ts-tech .t-rt{fill:#2bb8ee;opacity:.45}.vtsvg.ts-tech .t-hz{stroke:#2bb8ee;stroke-opacity:.35}
+.vtsvg.ts-tech .l1{fill:#1e7fb0}.vtsvg.ts-tech .l2{fill:#2bb8ee}.vtsvg.ts-tech .l3{fill:#6fd3f5}.vtsvg.ts-tech .l4{fill:#d6f4ff}.vtsvg.ts-tech .l5{fill:#2c9c96}
+.vtsvg.ts-tech .t-lf{opacity:.9}
+body .vtsvg.ts-tech .apl{fill:#f2c14e}body .vtsvg.ts-tech .apl-h{fill-opacity:.8}
+.vtsvg.ts-tech .t-grass{display:none}
+.vtsvg .pl{stroke:#e9fbff;stroke-dasharray:.08 .92;stroke-dashoffset:1;opacity:0;animation:pulse-run 3.2s linear infinite}
+@keyframes pulse-run{0%{stroke-dashoffset:1;opacity:0}8%{opacity:1}55%{opacity:.9}70%,100%{stroke-dashoffset:-.1;opacity:0}}
+body[data-theme=treeday] .vtsvg.ts-tech .t-br{stroke:#0a8fc4;stroke-opacity:.6}body[data-theme=treeday] .vtsvg.ts-tech .t-rt{fill:#0a8fc4}body[data-theme=treeday] .vtsvg.ts-tech .t-tr{fill:#0a8fc4}
+body[data-theme=treeday] .vtsvg.ts-tech .l1{fill:#0b6f9c}body[data-theme=treeday] .vtsvg.ts-tech .l2{fill:#0a8fc4}body[data-theme=treeday] .vtsvg.ts-tech .l3{fill:#36b3e0}body[data-theme=treeday] .vtsvg.ts-tech .l4{fill:#7fd6f2}body[data-theme=treeday] .vtsvg.ts-tech .l5{fill:#1f8f86}
+body[data-theme=treeday] .vtsvg .pl{stroke:#fff}
+body[data-theme=treeday] .vtsvg.ts-tech .apl{fill:#e0a526}body .vtsvg.ts-premium .l5{fill:#3f7a3e}
+/* Dynamic: stronger wind, livelier leaves, falling leaves (added by script) */
+body[data-tree=dynamic] .vtsvg .crown{animation:sway-strong 9s ease-in-out 4s infinite}
+body[data-tree=dynamic] .vtsvg .r1{animation:rustle-strong 2.6s ease-in-out infinite}body[data-tree=dynamic] .vtsvg .r2{animation:rustle-strong 3.4s ease-in-out -1s infinite reverse}
+body[data-tree=dynamic] .vtsvg .r3{animation:rustle-strong 3s ease-in-out -2s infinite,glint 6s ease-in-out infinite}body[data-tree=dynamic] .vtsvg .r4{animation:rustle-strong 3.8s ease-in-out -.5s infinite,glint 8s ease-in-out -3s infinite}
+body[data-tree=dynamic] .vtsvg .gw1{animation-duration:3s}body[data-tree=dynamic] .vtsvg .gw2{animation-duration:3.6s}body[data-tree=dynamic] .vtsvg .gw3{animation-duration:3.3s}
+@keyframes sway-strong{0%,100%{transform:rotate(0)}25%{transform:rotate(1.3deg)}50%{transform:rotate(.2deg)}75%{transform:rotate(-1deg)}}
+@keyframes rustle-strong{0%,100%{transform:translate(0,0)}30%{transform:translate(4px,-3px)}65%{transform:translate(-3px,2px)}}
+@keyframes glint{0%,100%{opacity:1}50%{opacity:.72}}
+.vtsvg .fall{animation:leaf-fall 9s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes leaf-fall{0%{transform:translate(0,0) rotate(0);opacity:0}8%{opacity:1}35%{transform:translate(calc(var(--fx)*.3),calc(var(--fy)*.35)) rotate(160deg)}65%{transform:translate(calc(var(--fx)*.65),calc(var(--fy)*.7)) rotate(330deg)}90%{opacity:1}100%{transform:translate(var(--fx),var(--fy)) rotate(480deg);opacity:0}}
+/* Premium: clean geometry, straight branches, round leaf discs */
+.vtsvg.ts-premium .t-lf{opacity:.88}
+body[data-tree=premium] .vtsvg .crown{animation-duration:26s}
+body[data-tree=premium] .vtsvg .r1,body[data-tree=premium] .vtsvg .r2,body[data-tree=premium] .vtsvg .r3,body[data-tree=premium] .vtsvg .r4{animation:none}
+@media (prefers-reduced-motion:reduce){.vtsvg .pl,.vtsvg .fall{display:none}}
 .sprig{position:absolute;right:16px;top:16px;width:58px;height:58px;color:color-mix(in srgb,var(--c) 45%,var(--gold2));opacity:.75;transition:opacity .4s,transform .6s ease}
 .sprig svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round}
 .planet:hover .sprig{opacity:1;transform:translateY(-2px)}
@@ -738,7 +777,7 @@ body[data-theme=treeday] .vsun .core{box-shadow:0 0 40px 16px rgba(255,244,215,.
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree');if(ts)localStorage.setItem('cctl-tree',ts);ts=localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -905,18 +944,22 @@ $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $
 
 /* ================= Vision Tree drawings ================= */
 const treeSVG = (depth = 9, seed = 7, o = {}) => {
+  const ST = o.style || 'classic', TECH = ST === 'tech', GEO = ST === 'premium', MAJ = ST === 'majestic';
   const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46, LS = o.leaf || .4, ID = 'lf' + seed;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [];
+  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [];
   const f = n => n.toFixed(1);
   function grow(x, y, ang, len, w, d, t0) {
-    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = d === 1 ? 0 : (rnd() - .5) * len * (d < 4 ? .38 : .5);
+    const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = d === 1 || GEO ? 0 : (rnd() - .5) * len * (d < 4 ? .38 : .5) * (TECH ? .5 : 1);
     const mx = (x + x2) / 2 + Math.cos(ang + 1.57) * bend, my = (y + y2) / 2 + Math.sin(ang + 1.57) * bend;
-    br.push(`<path class="br" pathLength="1" d="M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}" stroke-width="${f(w)}" style="animation-delay:${f(t0)}s"/>`);
+    const dP = `M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}`, sw = TECH ? Math.max(.8, w * (d < 3 ? .34 : .24)) : GEO ? w * .9 : w;
+    br.push(`<path class="br" pathLength="1" d="${dP}" stroke-width="${f(sw)}" style="animation-delay:${f(t0)}s"/>`);
+    if (TECH && d <= depth - 1 && (d < 5 || rnd() < .45)) pulse.push(`<path class="pl" pathLength="1" d="${dP}" stroke-width="${f(Math.max(1.4, sw * 1.6))}" style="animation-delay:${f(d * .32 + 4)}s"/>`);
+    if (MAJ && d >= depth - 3 && rnd() < .5) { const bx = x2 + (rnd() - .5) * 20 * LS, by = y2 + (rnd() - .3) * 14 * LS, sh = (bx - X0) / VW * 1.4 - (by - Y0) / VH * .6 + rnd() * .5; blob.push(`<ellipse class="lf cb${sh > .9 ? 2 : 1}" cx="${f(bx)}" cy="${f(by)}" rx="${f(LS * (12 + rnd() * 9))}" ry="${f(LS * (9 + rnd() * 6))}" style="animation-delay:${f(t0 + .3)}s"/>`); }
     if (d >= depth - 1) tips.push([x2, y2, ang]);
     const t1 = t0 + .38;
     if (d >= depth - 5) {
-      const k = d >= depth ? 4 : d >= depth - 1 ? 3 : d >= depth - 3 ? 3 : 2;
+      const k0 = d >= depth ? 4 : d >= depth - 1 ? 3 : d >= depth - 3 ? 3 : 2, k = GEO ? (d >= depth - 1 ? 2 : d >= depth - 3 ? 1 : 0) : TECH ? (d >= depth - 1 ? 2 : 1) : k0;
       for (let j = 0; j < k; j++) {
         const t = .45 + rnd() * .55, side = rnd() < .5 ? -1 : 1, off = (2 + rnd() * 6) * LS * side;
         const lx = x + (x2 - x) * t + Math.cos(ang + 1.57) * off, ly = y + (y2 - y) * t + Math.sin(ang + 1.57) * off;
@@ -953,8 +996,8 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   }
   // poster-style roots: fan out wide and shallow from the trunk, forking again and again into fine tips
   function rootFork(x, y, ang, len, w, d, dl) {
-    const { pts, ang: a2 } = rootPts(x, y, ang, len, 9, .008 + d * .008), w1 = Math.max(.5, w * .62);
-    rt.push(`<path class="lf" d="${ribbon(pts, w, w1)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
+    const { pts, ang: a2 } = rootPts(x, y, ang, len, GEO ? 2 : 9, .008 + d * .008), w1 = Math.max(.5, w * .62), wk = TECH ? .3 : 1;
+    rt.push(`<path class="lf" d="${ribbon(pts, w * wk, w1 * wk)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
     if (d >= 4) return;
     const end = pts[pts.length - 1], k = d < 2 ? 2 : rnd() < .3 ? 3 : 2;
     for (let i = 0; i < k; i++) {
@@ -981,11 +1024,14 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   }
   grow(X0, Y0 - W0 * .5, -1.5708, L0, W0, 1, 0);
   treeSVG.tips = tips; treeSVG.leafId = ID;
-  return `<svg class="vtsvg" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="${o.par || 'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg">
-  <defs><path id="${ID}" d="M0 0C3 -3.6 8 -4.2 12 0C8 4.2 3 3.6 0 0Z"/></defs>
+  return `<svg class="vtsvg ts-${ST}" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="${o.par || 'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg">
+  <defs>${TECH ? `<circle id="${ID}" cx="7" cy="0" r="2.3"/>` : GEO ? `<circle id="${ID}" cx="8" cy="0" r="5.4"/>` : `<path id="${ID}" d="M0 0C3 -3.6 8 -4.2 12 0C8 4.2 3 3.6 0 0Z"/>`}
+  <linearGradient id="bark${seed}" gradientUnits="userSpaceOnUse" x1="${f(X0 - W0 * 2.5)}" y1="0" x2="${f(X0 + W0 * 2.5)}" y2="0"><stop offset="0" class="bk0"/><stop offset=".55" class="bk1"/><stop offset="1" class="bk2"/></linearGradient>
+  <radialGradient id="gsh${seed}"><stop offset="0" class="gs0"/><stop offset="1" class="gs1"/></radialGradient></defs>
+  ${MAJ || GEO ? `<ellipse class="t-gsh" cx="${f(X0 - W0)}" cy="${f(Y0 + 4)}" rx="${f(W0 * 9)}" ry="${f(W0 * .9)}" fill="url(#gsh${seed})"/>` : ''}
   <line class="t-hz" x1="${o.vw ? 0 : 60}" y1="${Y0}" x2="${o.vw ? VW : 540}" y2="${Y0}" stroke-width=".8"/>
   ${soil}<g class="t-rt">${rt.join('')}</g>${grass}
-  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr">${flare}</g><g class="t-br" fill="none" stroke-linecap="round">${br.join('')}</g>
+  <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g><g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}>${br.join('')}</g>${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
   <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}<g class="r2">${ap.join('')}</g></g><g class="sprouts"></g></g></svg>`;
 };
 const sprig = () => {
@@ -997,7 +1043,8 @@ const sprig = () => {
 };
 (() => {
   const host = document.querySelector('.vtree');
-  host.innerHTML = treeSVG(10, 5, { vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
+  const TS = document.body.dataset.tree || 'classic';
+  host.innerHTML = treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
   const tips = treeSVG.tips, id = treeSVG.leafId, box = host.querySelector('.sprouts'), NS = 'http://www.w3.org/2000/svg';
   const sprout = () => {
     if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
@@ -1008,8 +1055,20 @@ const sprig = () => {
     inner.append(u); g.append(inner); box.append(g);
     if (box.childNodes.length > 60) { const old = box.firstChild; old.classList.add('gone'); setTimeout(() => old.remove(), 1600); }
   };
-  setTimeout(() => setInterval(sprout, 900), 6000);
-})(); $('.vt-side').innerHTML = treeSVG(8, 11);
+  setTimeout(() => setInterval(sprout, TS === 'dynamic' ? 420 : 900), TS === 'dynamic' ? 3500 : 6000);
+  if (TS === 'dynamic') {
+    const fall = () => {
+      if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
+      const [x, y] = tips[Math.floor(Math.random() * tips.length)];
+      const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      const inner = document.createElementNS(NS, 'g'); inner.setAttribute('class', 'fall');
+      const dur = 7 + Math.random() * 5; inner.style.cssText = `--fy:${(935 - y + 10).toFixed(0)}px;--fx:${(-160 - Math.random() * 260).toFixed(0)}px;animation-duration:${dur.toFixed(1)}s`;
+      const u = document.createElementNS(NS, 'use'); u.setAttribute('href', '#' + id); u.setAttribute('class', Math.random() < .5 ? 'l3' : 'l2'); u.setAttribute('transform', 'scale(2)');
+      inner.append(u); g.append(inner); host.querySelector('.crown').append(g); setTimeout(() => g.remove(), dur * 1000 + 200);
+    };
+    setTimeout(() => setInterval(fall, 1300), 5000);
+  }
+})(); $('.vt-side').innerHTML = treeSVG(8, 11, { style: document.body.dataset.tree });
 document.querySelectorAll('.cyear').forEach(n => n.textContent = new Date().getFullYear());
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
