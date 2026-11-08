@@ -49,7 +49,8 @@ export function createVisionTree(host, opts) {
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;   // shaders work directly in the artwork's sRGB values
   const cvs = renderer.domElement;
-  Object.assign(cvs.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block' });
+  // invisible until the artwork is ready, then cross-fades in (over a preview image, if the page shows one)
+  Object.assign(cvs.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', display: 'block', opacity: '0', transition: o.still ? 'none' : 'opacity .7s ease' });
   host.appendChild(cvs);
 
   const uniforms = {
@@ -70,7 +71,7 @@ export function createVisionTree(host, opts) {
   function render(now) {
     const t = (now - st.started) / 1000;
     uniforms.uTime.value = o.still ? 12 : t;
-    uniforms.uIntro.value = st.ready ? (o.still ? 1 : Math.min(1, t / 1.6)) : 0;
+    uniforms.uIntro.value = st.ready ? 1 : 0;
     const dt = Math.min(0.05, (now - (st.last || now)) / 1000); st.last = now;
     st.day += ((o.day ? 1 : 0) - st.day) * (o.still ? 1 : 1 - Math.exp(-dt * 3));
     uniforms.uDay.value = st.day;
@@ -107,7 +108,9 @@ export function createVisionTree(host, opts) {
     tex.colorSpace = THREE.NoColorSpace; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter;
     tex.generateMipmaps = true; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     uniforms.uArt.value = tex; st.ready = true; st.started = performance.now();
-    if (o.still) still(); else kick();
+    render(st.started);                                        // draw the first frame, then reveal it
+    requestAnimationFrame(() => { cvs.style.opacity = '1'; });
+    if (!o.still) kick();
   }, undefined, err => { o.onError && o.onError(err || new Error('artwork failed to load')); });
 
   const api = {
