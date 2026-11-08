@@ -50,9 +50,23 @@ The component fills its parent, so give the parent a size.
 
 Peer dependencies: `react` 18 or later and `three` 0.160 or later (built and tested with React 19.3 and three 0.187).
 
+## Without React (the CCTaxLab portal)
+
+`dist/vision-tree.js` is a self-contained browser build (three.js included) that exposes `window.VisionTree`:
+
+```js
+const tree = VisionTree.create(document.querySelector('.bg'), { src: 'vision-tree-hd.jpg', day: false });
+tree.set({ day: true });      // also: sun, interactive, still
+tree.destroy();
+```
+
+The portal (`index.html`) loads it on demand and falls back to its 2D canvas version if WebGL is unavailable.
+
 ## Files
 
-- `src/DigitalVisionTree.jsx`: the component (renderer, resizing, pausing, modes, pointer, fallback)
+- `src/core.js`: the framework-free renderer (WebGL setup, resizing, pausing, modes, pointer)
+- `src/DigitalVisionTree.jsx`: the React component (wraps the core, reduced-motion and auto-mode hooks, image fallback)
+- `src/portal.js` → `dist/vision-tree.js`: browser build for pages without React
 - `src/shaders.js`: the GLSL (colour masks, effects, light mode, sunlight, particles)
 - `src/visionTreeData.js`: feature coordinates extracted from the artwork (ruby nodes, light points, leaves)
 - `demo.html` + `demo/main.jsx`: the demo; `demo/demo.js` is the built bundle so the demo runs on GitHub Pages without installing anything
@@ -62,7 +76,7 @@ Peer dependencies: `react` 18 or later and `three` 0.160 or later (built and tes
 ```bash
 cd vision-tree
 npm install
-npm run build      # rebuilds demo/demo.js
+npm run build      # rebuilds demo/demo.js and dist/vision-tree.js
 python3 -m http.server -d ..   # then open http://localhost:8000/vision-tree/demo.html
 ```
 

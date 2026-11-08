@@ -420,7 +420,7 @@ let sb, me = null, isAdmin = false, docs = [], cats = [], curCat = null, hits = 
 
 /* ---------- automatic sign-out after inactivity (shared with the portal) ---------- */
 const IDLE_KEY = 'cctl-last-active', IDLE_MIN_KEY = 'cctl-idle-min';
-const idleMin = () => { try { const v = localStorage.getItem(IDLE_MIN_KEY); return v === null ? 30 : +v || 0; } catch { return 30; } };
+const idleMin = () => { try { const v = +localStorage.getItem(IDLE_MIN_KEY); return v >= 15 ? v : 30; } catch { return 30; } };   // always on: 15 minutes minimum
 const lastActive = () => { try { return +localStorage.getItem(IDLE_KEY) || 0; } catch { return 0; } };
 let lastPing = 0, idleWarnEl = null, idleTimer = null;
 function markActive(force) { const n = Date.now(); if (!force && n - lastPing < 5000) return; lastPing = n; try { localStorage.setItem(IDLE_KEY, String(n)); } catch {} if (idleWarnEl) { idleWarnEl.remove(); idleWarnEl = null; } }

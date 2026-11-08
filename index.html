@@ -592,12 +592,12 @@ table.rt .vbadge{width:auto}
 @media(max-width:860px){.rhead>div:nth-child(2){flex:1 1 calc(100% - 50px)}.rhead .cn{display:flex;flex-wrap:wrap;gap:6px}.bigcount{margin-left:44px}.rtools{margin-left:auto}.accsplit{grid-template-columns:1fr;height:auto}.accleft{max-height:300px;border-right:0;border-bottom:1px solid var(--line)}table.rt th.c,table.rt td.c{width:auto}.rtwrap{max-height:none}}
 
 /* ---------- Vision Tree look ---------- */
-body[data-theme=tree]{--gold:#c9a96a;--gold2:#e7d4a6;--acc-rgb:201,169,106;--acc2-rgb:231,212,166;--btn-ink:#14120a;--neb1:rgba(201,150,80,.16);--neb2:rgba(40,110,90,.18);--bg:#0a1613;--bg-b:#0e201b;--planet:#2f5f50;
-  --panel:rgba(16,34,29,.62);--panel2:rgba(22,44,38,.78);--line:rgba(231,212,166,.12);--line2:rgba(231,212,166,.22);--muted:#a9b5ac;--dim:#7a8a80;--ink:#f3efe4}
-body[data-theme=tree] .sheet{background:linear-gradient(180deg,#10241e,#0a1714)}
-body[data-theme=tree] .drawer{background:#0c1b17}
-body[data-theme=tree] .toast{background:#173129}
-body[data-theme=tree] .side{background:linear-gradient(165deg,#12291f,#08130f)}
+body[data-theme=tree]{--gold:#c9a96a;--gold2:#e7d4a6;--acc-rgb:201,169,106;--acc2-rgb:231,212,166;--btn-ink:#14120a;--neb1:rgba(201,150,80,.16);--neb2:rgba(30,90,170,.18);--bg:#000d28;--bg-b:#001836;--planet:#1d3f6e;
+  --panel:rgba(6,22,50,.62);--panel2:rgba(10,30,64,.8);--line:rgba(231,212,166,.12);--line2:rgba(231,212,166,.22);--muted:#a7b4c6;--dim:#7888a0;--ink:#f3efe4}
+body[data-theme=tree] .sheet{background:linear-gradient(180deg,#0a1e42,#04122c)}
+body[data-theme=tree] .drawer{background:#06162f}
+body[data-theme=tree] .toast{background:#0e2a52}
+body[data-theme=tree] .side{background:linear-gradient(165deg,#0b2148,#030f26)}
 body[data-theme^=tree] .hero h2,body[data-theme^=tree] .side h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.2px}
 body[data-theme^=tree] .hero h2{font-size:clamp(30px,4.2vw,42px)}
 body[data-theme^=tree] .side h2{font-size:34px}
@@ -891,8 +891,8 @@ body[data-tree] .vt-side .vtsvg.ts-fiber .apl{fill:#e8303e}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
+<body data-theme="tree" data-anim="tree" data-tree="fiber">
+<script>try{var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto';document.body.dataset.theme=m==='day'?'treeday':m==='night'?'tree':(h>=7&&h<19?'treeday':'tree');}catch(e){}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -1376,54 +1376,30 @@ const TechTree = (() => {
     stop() { live = false; cancelAnimationFrame(raf); removeEventListener('resize', onResize); if (cv && cv.parentNode) cv.remove(); cv = null; S = null; }
   };
 })();
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Digital Vision Tree: gold intertwined trunk, canopy of blue light, green leaves and ruby dots on midnight navy, with twinkling lights and rising golden energy'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+const TREE_STYLES = { fiber: ['Digital Vision Tree', 'Gold intertwined trunk, canopy of blue light, green leaves and ruby nodes'] };
 let treeTimers = [];
+let VT = null, vtObs = null;
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
   const host = document.querySelector('.vtree');
-  const TS = document.body.dataset.tree || 'classic';
-  TechTree.stop();
-  if (TS === 'fiber') { TechTree.start(host); $('.vt-side').innerHTML = treeSVG(8, 11, { style: TS }); return; }
-  host.innerHTML = TS === 'fiber' ? treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 985, y: 940, len: 178, w: 104, spread: 1.62, lenf: .735, lean: 1.5708, rootLen: 46, leaf: 2, grass: true, apples: .04, par: 'xMidYMax slice' })
-    : treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
-  const tips = treeSVG.tips, id = treeSVG.leafId, box = host.querySelector('.sprouts'), NS = 'http://www.w3.org/2000/svg';
-  const sprout = () => {
-    if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
-    if (TS === 'fiber') {
-      for (let k = 0; k < 3; k++) {
-        const [x, y, a] = tips[Math.floor(Math.random() * tips.length)], aa = a + (Math.random() - .5) * .8, L = 40 + Math.random() * 60, ex = x + Math.cos(aa) * L, ey = y + Math.sin(aa) * L;
-        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'gfil');
-        const pth = document.createElementNS(NS, 'path'); pth.setAttribute('pathLength', '1'); pth.setAttribute('d', `M${x.toFixed(1)} ${y.toFixed(1)}Q${(x + Math.cos(aa + .3) * L * .5).toFixed(1)} ${(y + Math.sin(aa + .3) * L * .5).toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
-        const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', ex.toFixed(1)); c.setAttribute('cy', ey.toFixed(1)); c.setAttribute('r', (1.6 + Math.random() * 1.6).toFixed(1));
-        g.append(pth, c); box.append(g); setTimeout(() => g.remove(), 7200);
-      }
-      return;
+  $('.vt-side').innerHTML = treeSVG(8, 11, { style: 'fiber' });
+  if (VT || host.querySelector('canvas')) return;
+  const day = () => document.body.dataset.theme === 'treeday';
+  const rm = matchMedia('(prefers-reduced-motion: reduce)');
+  const fallback = () => { if (VT) { VT.destroy(); VT = null; } TechTree.start(host); };   // 2D canvas version for browsers without WebGL
+  const go = () => {
+    if (!window.VisionTree || !VisionTree.supported()) return fallback();
+    try { VT = VisionTree.create(host, { src: 'vision-tree-hd.jpg', day: day(), still: rm.matches, onError: fallback }); } catch (e) { return fallback(); }
+    if (!vtObs) {
+      vtObs = new MutationObserver(() => VT && VT.set({ day: day() })); vtObs.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+      rm.addEventListener && rm.addEventListener('change', () => VT && VT.set({ still: rm.matches }));
     }
-    const [x, y, a] = tips[Math.floor(Math.random() * tips.length)], side = Math.random() < .5 ? -1 : 1;
-    const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `translate(${(x + (Math.random() - .5) * 10).toFixed(1)} ${(y + (Math.random() - .5) * 10).toFixed(1)}) rotate(${(a * 57.3 + side * (30 + Math.random() * 40)).toFixed(1)})`);
-    const inner = document.createElementNS(NS, 'g'); inner.setAttribute('class', 'sprout');
-    const u = document.createElementNS(NS, 'use'); u.setAttribute('href', '#' + id); u.setAttribute('class', 'l4'); u.setAttribute('transform', `scale(${(1.6 + Math.random() * .8).toFixed(2)})`);
-    inner.append(u); g.append(inner); box.append(g);
-    if (box.childNodes.length > 60) { const old = box.firstChild; old.classList.add('gone'); setTimeout(() => old.remove(), 1600); }
   };
-  treeTimers.push(setTimeout(() => treeTimers.push(setInterval(sprout, TS === 'dynamic' ? 420 : 900)), TS === 'dynamic' ? 3500 : 6000));
-  if (TS === 'dynamic') {
-    const fall = () => {
-      if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
-      const [x, y] = tips[Math.floor(Math.random() * tips.length)];
-      const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-      const inner = document.createElementNS(NS, 'g'); inner.setAttribute('class', 'fall');
-      const dur = 7 + Math.random() * 5; inner.style.cssText = `--fy:${(935 - y + 10).toFixed(0)}px;--fx:${(-160 - Math.random() * 260).toFixed(0)}px;animation-duration:${dur.toFixed(1)}s`;
-      const u = document.createElementNS(NS, 'use'); u.setAttribute('href', '#' + id); u.setAttribute('class', Math.random() < .5 ? 'l3' : 'l2'); u.setAttribute('transform', 'scale(2)');
-      inner.append(u); g.append(inner); host.querySelector('.crown').append(g); setTimeout(() => g.remove(), dur * 1000 + 200);
-    };
-    treeTimers.push(setTimeout(() => treeTimers.push(setInterval(fall, 1300)), 5000));
-  }
-  $('.vt-side').innerHTML = treeSVG(8, 11, { style: TS });
+  if (window.VisionTree) return go();
+  const sc = document.createElement('script'); sc.src = 'vision-tree/dist/vision-tree.js?v=1'; sc.async = true; sc.onload = go; sc.onerror = fallback; document.head.append(sc);
 }
-const urlTree = (() => { try { return new URLSearchParams(location.search).get('tree'); } catch { return null; } })();
 function setTreeStyle(st, remember = true) {
-  st = TREE_STYLES[st] ? st : 'classic';
+  st = 'fiber';
   if (remember) try { localStorage.setItem('cctl-tree', st); } catch {}
   if (urlTree && TREE_STYLES[urlTree] && remember !== 'force') st = urlTree;
   if (document.body.dataset.tree === st && document.querySelector('.vtree svg')) return;
@@ -1435,9 +1411,9 @@ document.querySelectorAll('.cyear').forEach(n => n.textContent = new Date().getF
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
 /* ================= look: themes & animations ================= */
-const THEMES = { treeday: ['Vision Tree · Morning', '#f6b94e', '#fdfbf6'], tree: ['Vision Tree · Night', '#c9a96a', '#0a1613'], treeauto: ['Vision Tree · Auto', '#f6b94e', '#0a1613'], blue: ['Cheng Blue', '#00aeef', '#071229'], gold: ['Navy & Gold', '#c9a54c', '#081028'], teal: ['Emerald', '#2ec4a0', '#06191c'], violet: ['Royal Violet', '#9b8cff', '#0e0a2a'], silver: ['Graphite', '#c3cede', '#0d1118'], copper: ['Copper', '#e8875a', '#140b14'] };
-const ANIMS = { tree: ['Growing tree', 'A fine-line tree growing beneath a rising sun'], calm: ['Calm orbit', 'Gentle stars and slow orbit rings'], meteor: ['Meteor shower', 'Frequent shooting stars'], constellation: ['Constellation', 'Linked stars that follow your pointer'], nebula: ['Nebula drift', 'Soft glowing clouds drifting'], galaxy: ['Spiral galaxy', 'A slowly turning galaxy'], solar: ['Solar system', 'Planets orbiting a glowing sun'] };
-let look = { theme: document.body.dataset.theme || 'blue', anim: document.body.dataset.anim || 'calm' };
+const THEMES = { treeday: ['Digital Vision Tree · Light', '#f6b94e', '#d6e7f3'], tree: ['Digital Vision Tree · Dark', '#c9a96a', '#000d28'], treeauto: ['Digital Vision Tree · Auto', '#f6b94e', '#000d28'] };
+const ANIMS = { tree: ['Digital Vision Tree', 'Twinkling lights, golden energy, sunlight'] };
+let look = { theme: 'treeauto', anim: 'tree' };
 let accRGB = '0,174,239', acc2RGB = '111,211,255';
 // Vision Tree · Auto: morning look from 7am to 7pm, night look otherwise (viewer's own clock)
 // personal Light / Dark / Auto switch (saved on this device); Auto follows the portal setting (time of day for Vision Tree · Auto)
@@ -1449,26 +1425,13 @@ function paintMode() { document.querySelectorAll('#modeSw button').forEach(b => 
 document.querySelectorAll('#modeSw button').forEach(b => b.onclick = () => setMode(b.dataset.m)); paintMode();
 setInterval(() => { if (look.theme.startsWith('tree') && document.body.dataset.theme !== effTheme(look.theme)) applyLook(look, false); }, 300000);
 function applyLook(l, remember = true) {
-  look = { theme: THEMES[l && l.theme] ? l.theme : 'blue', anim: ANIMS[l && l.anim] ? l.anim : 'calm' };
+  look = { theme: 'treeauto', anim: 'tree' };   // the Digital Vision Tree is the only design; Light / Dark / Auto is each viewer's choice
   document.body.dataset.theme = effTheme(look.theme); document.body.dataset.anim = look.anim;
   const cs = getComputedStyle(document.body);
   accRGB = cs.getPropertyValue('--acc-rgb').trim() || accRGB; acc2RGB = cs.getPropertyValue('--acc2-rgb').trim() || acc2RGB;
   initScene();
   if (remember) try { localStorage.setItem('cctl-look', JSON.stringify(look)); } catch {}
   document.querySelectorAll('[data-look-refresh]').forEach(n => n.dispatchEvent(new Event('refresh')));
-}
-function lookPicker(cur, onPick) {
-  const box = el('div', { 'data-look-refresh': '' });
-  const draw = () => {
-    const c = cur();
-    box.replaceChildren(
-      el('div', { class: 'section-t', text: 'Colour theme' }),
-      el('div', { class: 'themes' }, Object.entries(THEMES).map(([k, [name, a, bg]]) => el('button', { class: 'thm' + (c.theme === k ? ' on' : ''), onclick: () => { if (k.startsWith('tree')) { try { localStorage.setItem('cctl-mode', 'auto'); } catch {} paintMode(); } onPick({ theme: k, anim: k.startsWith('tree') ? 'tree' : c.anim === 'tree' ? 'calm' : c.anim }); } },
-        el('span', { class: 'swc', style: k === 'treeauto' ? 'background:linear-gradient(90deg,#fdfbf6 50%,#0a1613 50%);border:2px solid #c9a96a' : `background:radial-gradient(circle at 35% 30%,${a},${bg} 85%);border:2px solid ${a}` }), name))),
-      el('div', { class: 'section-t', text: 'Background animation' }),
-      el('div', { class: 'anims' }, Object.entries(ANIMS).map(([k, [name, d]]) => el('button', { class: 'anm' + (c.anim === k ? ' on' : ''), onclick: () => onPick({ theme: c.theme, anim: k }) }, el('b', { text: name }), d))));
-  };
-  box.addEventListener('refresh', draw); draw(); return box;
 }
 
 const cv = $('#stars'), cx = cv.getContext('2d');
@@ -1597,6 +1560,7 @@ function drawSolar(t) {
   }
 }
 function frame(t) {
+  if (look.anim === 'tree') { cx.clearRect(0, 0, W, H); return; }   // the Digital Vision Tree draws its own light
   speed += (targetSpeed - speed) * 0.05;
   cx.clearRect(0, 0, W, H);
   const m = look.anim;
@@ -1769,7 +1733,7 @@ async function loadDataInner() {
   if (s.data && s.data.tree_style) setTreeStyle(s.data.tree_style);
   cfg = {
     title: (s.data && s.data.title) || 'CCTaxLab', subtitle: (s.data && s.data.subtitle) || '', theme: (s.data && s.data.theme) || look.theme, anim: (s.data && s.data.animation) || look.anim,
-    idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30, tree: (s.data && s.data.tree_style) || 'classic',
+    idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30, tree: 'fiber',
     hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone', direct: !!x.open_direct,
       folders: fl.filter(c => c.hub_id === x.id && !c.parent_id).map(mkFolder),
       tools: tl.filter(y => y.hub_id === x.id && !y.folder_id).map(mkTool) }))
@@ -2052,20 +2016,15 @@ function renderApps(b) {
   const sopen = expanded.has('settings');
   const sc = el('div', { class: 'hubcard', style: 'margin-top:22px' },
     el('div', { class: 'hubrow', style: 'cursor:pointer', onclick: () => toggle('settings') },
-      el('div', { class: 'p-icon' }, icon('gear')), el('div', { class: 'hn' }, 'Portal settings', el('small', { text: 'Name, tagline, colours, animation' })), ib(sopen ? 'x' : 'edit', 'Portal settings', null)));
+      el('div', { class: 'p-icon' }, icon('gear')), el('div', { class: 'hn' }, 'Portal settings', el('small', { text: 'Name, company line, automatic sign-out' })), ib(sopen ? 'x' : 'edit', 'Portal settings', null)));
   if (sopen) sc.append(el('div', { class: 'hubedit', style: 'display:block' },
     el('label', { class: 'f', style: 'margin-top:0', text: 'Portal name' }), input(draft.title, v => draft.title = v, { maxlength: 80 }),
     el('label', { class: 'f', text: 'Company name line' }), input(draft.subtitle, v => draft.subtitle = v, { maxlength: 160 }),
     el('label', { class: 'f', text: 'Automatic sign-out when idle' }),
     (() => { const sel = el('select', { class: 'sel', onchange: e => { draft.idle = +e.target.value; markDirty(); } });
-      [[0, 'Off'], [15, 'After 15 minutes'], [30, 'After 30 minutes'], [60, 'After 1 hour'], [120, 'After 2 hours'], [240, 'After 4 hours']].forEach(([v, t]) => sel.append(el('option', { value: v, text: t })));
-      sel.value = String(draft.idle != null ? draft.idle : 30); return sel; })(),
-    el('p', { class: 'hint', text: 'Staff are signed out after this long with no mouse, keyboard or touch activity (on this portal and CCT Library). They see a one-minute warning first.' }),
-    lookPicker(() => ({ theme: draft.theme, anim: draft.anim }), l => { draft.theme = l.theme; draft.anim = l.anim; applyLook(l); markDirty(); }),
-    (() => { const box = el('div'); const draw = () => box.replaceChildren(
-      el('div', { class: 'section-t', text: 'Tree style (Vision Tree look)' }),
-      el('div', { class: 'anims' }, Object.entries(TREE_STYLES).map(([k, [name, d]]) => el('button', { class: 'anm' + ((draft.tree || 'classic') === k ? ' on' : ''), onclick: () => { draft.tree = k; setTreeStyle(k, 'force'); if (draft.anim !== 'tree') { const l = { theme: draft.theme.startsWith('tree') ? draft.theme : 'treeauto', anim: 'tree' }; draft.theme = l.theme; draft.anim = 'tree'; applyLook(l); } markDirty(); draw(); } }, el('b', { text: name }), d))),
-      el('p', { class: 'hint', style: 'font-size:12px;opacity:.75;margin-top:10px', text: 'Previews here straight away; press Save changes to apply it for everyone.' })); draw(); return box; })()));
+      [[15, 'After 15 minutes'], [30, 'After 30 minutes'], [60, 'After 1 hour'], [120, 'After 2 hours'], [240, 'After 4 hours']].forEach(([v, t]) => sel.append(el('option', { value: v, text: t })));
+      sel.value = String(draft.idle >= 15 ? draft.idle : 30); return sel; })(),
+    el('p', { class: 'hint', text: 'Staff are signed out after this long with no mouse, keyboard or touch activity (on this portal and CCT Library). They see a one-minute warning first.' })));
   b.append(sc);
 }
 
@@ -2188,8 +2147,8 @@ async function saveDraft(quiet) {
     const gone = (a, b) => { const keep = new Set(b.map(x => x.id)); return a.map(x => x.id).filter(id => !keep.has(id)); };
     const goneTools = gone(old.tools, nw.tools), goneFolders = gone(old.folders, nw.folders), goneHubs = gone(old.hubs, nw.hubs);
     const chk = r => { if (r.error) throw r.error; };
-    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim, idle_minutes: +draft.idle || 0, tree_style: TREE_STYLES[draft.tree] ? draft.tree : 'classic' }).eq('id', 1));
-    setIdleMinutes(+draft.idle || 0);
+    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: 'treeauto', animation: 'tree', idle_minutes: Math.max(15, +draft.idle || 30), tree_style: 'fiber' }).eq('id', 1));
+    setIdleMinutes(+draft.idle || 30);
     if (goneTools.length) chk(await sb.from('portal_tools').delete().in('id', goneTools));
     if (goneFolders.length) chk(await sb.from('portal_folders').delete().in('id', goneFolders));
     if (nw.hubs.length) chk(await sb.from('portal_hubs').upsert(nw.hubs));
@@ -2524,9 +2483,9 @@ function updForm(u) {
 /* ================= automatic sign-out after inactivity ================= */
 // Activity in any tab of this site (portal or CCT Library) counts; last activity is shared via localStorage.
 const IDLE_KEY = 'cctl-last-active', IDLE_MIN_KEY = 'cctl-idle-min';
-let idleMin = (() => { try { const v = localStorage.getItem(IDLE_MIN_KEY); return v === null ? 30 : +v || 0; } catch { return 30; } })();
+let idleMin = (() => { try { const v = +localStorage.getItem(IDLE_MIN_KEY); return v >= 15 ? v : 30; } catch { return 30; } })();
 let lastPing = 0, idleWarnEl = null, idledOut = false, firstAuth = true;
-function setIdleMinutes(m) { idleMin = Math.max(0, +m || 0); try { localStorage.setItem(IDLE_MIN_KEY, String(idleMin)); } catch {} }
+function setIdleMinutes(m) { idleMin = +m >= 15 ? +m : 30; try { localStorage.setItem(IDLE_MIN_KEY, String(idleMin)); } catch {} }
 function lastActive() { try { return +localStorage.getItem(IDLE_KEY) || 0; } catch { return 0; } }
 function markActive(force) { const n = Date.now(); if (!force && n - lastPing < 5000) return; lastPing = n; try { localStorage.setItem(IDLE_KEY, String(n)); } catch {} hideIdleWarn(); }
 ['pointerdown', 'keydown', 'wheel', 'touchstart', 'mousemove', 'scroll'].forEach(ev => addEventListener(ev, () => { if (session) markActive(); }, { passive: true, capture: true }));
@@ -2537,6 +2496,9 @@ function showIdleWarn(sec) {
 }
 function idleExpired() { const la = lastActive(); return idleMin > 0 && la > 0 && Date.now() - la > idleMin * 60000; }
 function idleSignOut() { hideIdleWarn(); idledOut = true; sb.auth.signOut({ scope: 'local' }); }
+// check straight away when someone comes back to the tab or wakes the computer, before anything else happens
+const idleCheckNow = () => { if (session && !window.__DEMO && document.visibilityState === 'visible' && idleExpired()) idleSignOut(); };
+document.addEventListener('visibilitychange', idleCheckNow, true); addEventListener('focus', idleCheckNow, true); addEventListener('pageshow', idleCheckNow);
 setInterval(() => {
   if (!session || !idleMin || window.__DEMO) { hideIdleWarn(); return; }
   const la = lastActive(); if (!la) { markActive(true); return; }
