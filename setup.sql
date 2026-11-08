@@ -366,3 +366,30 @@ alter table public.portal_hubs add column if not exists status text not null def
 alter table public.portal_hubs add column if not exists closed_note text not null default '';
 alter table public.portal_folders add column if not exists status text not null default 'active' check (status in ('active','closed'));
 alter table public.portal_folders add column if not exists closed_note text not null default '';
+
+-- Folders open to selected branches and/or users (added 2026-11-09), like applications ---------------
+alter table public.portal_folders drop constraint if exists portal_folders_access_check;
+alter table public.portal_folders add constraint portal_folders_access_check check (access in ('everyone','selected','admins','hidden'));
+create table if not exists public.portal_folder_access (folder_id uuid not null references public.portal_folders(id) on delete cascade, user_id uuid not null references public.portal_profiles(id) on delete cascade, primary key (folder_id, user_id));
+create table if not exists public.portal_folder_branch_access (folder_id uuid not null references public.portal_folders(id) on delete cascade, branch text not null references public.portal_branches(code) on update cascade on delete cascade, primary key (folder_id, branch));
+create index if not exists portal_folder_access_user_idx on public.portal_folder_access(user_id);
+create index if not exists portal_folder_branch_access_branch_idx on public.portal_folder_branch_access(branch);
+alter table public.portal_folder_access enable row level security;
+alter table public.portal_folder_branch_access enable row level security;
+create policy "folder grants read own or admin" on public.portal_folder_access for select using (user_id = (select auth.uid()) or public.portal_is_admin());
+create policy "folder grants admin write" on public.portal_folder_access for all using (public.portal_is_admin()) with check (public.portal_is_admin());
+create policy "folder branch grants read" on public.portal_folder_branch_access for select using (public.portal_is_admin() or branch = public.portal_my_branch());
+create policy "folder branch grants admin write" on public.portal_folder_branch_access for all using (public.portal_is_admin()) with check (public.portal_is_admin());
+create or replace function public.portal_has_folder_grant(f uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.portal_folder_access where folder_id = f and user_id = (select auth.uid()))
+      or exists (select 1 from public.portal_folder_branch_access b join public.portal_profiles p on p.branch = b.branch where b.folder_id = f and p.id = (select auth.uid()));
+$$;
+-- a folder is open when it and every folder above it are open to everyone, or selected and the user is selected
+create or replace function public.portal_folder_open(f uuid) returns boolean language sql stable security definer set search_path = '' as $$
+  with recursive chain as (
+    select id, parent_id, access, 1 as depth from public.portal_folders where id = f
+    union all
+    select p.id, p.parent_id, p.access, c.depth + 1 from public.portal_folders p join chain c on p.id = c.parent_id where c.depth < 50)
+  select exists (select 1 from chain)
+     and not exists (select 1 from chain where access <> 'everyone' and not (access = 'selected' and public.portal_has_folder_grant(id)));
+$$;

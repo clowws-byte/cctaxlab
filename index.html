@@ -1719,21 +1719,24 @@ function showApp() { $('#app').hidden = false; $('#fab').classList.toggle('show'
 
 async function loadData() { await loadDataInner(); if (cfg && cfg.theme) applyLook({ theme: cfg.theme, anim: cfg.anim }); }
 async function loadDataInner() {
-  const [s, h, f, t, g, bg] = await Promise.all([
+  const [s, h, f, t, g, bg, fg, fbg] = await Promise.all([
     sb.from('portal_settings').select('*').eq('id', 1).maybeSingle(),
     sb.from('portal_hubs').select('*').order('sort'),
     sb.from('portal_folders').select('*').order('sort'),
     sb.from('portal_tools').select('*').order('sort'),
     sb.from('portal_tool_access').select('*'),
-    sb.from('portal_tool_branch_access').select('*')]);
-  const err = s.error || h.error || f.error || t.error || g.error || bg.error;
+    sb.from('portal_tool_branch_access').select('*'),
+    sb.from('portal_folder_access').select('*'),
+    sb.from('portal_folder_branch_access').select('*')]);
+  const err = s.error || h.error || f.error || t.error || g.error || bg.error || fg.error || fbg.error;
   if (err) { note('Unable to load workspaces: ' + friendly(err)); cfg = cfg || { title: 'CCTaxLab', subtitle: '', hubs: [] }; return; }
   note('');
-  const grants = g.data || [], bgr = bg.data || [], fl = f.data || [], tl = t.data || [];
+  const grants = g.data || [], bgr = bg.data || [], fl = f.data || [], tl = t.data || [], fgr = fg.data || [], fbgr = fbg.data || [];
   const mkTool = y => ({ id: y.id, name: y.name, emoji: iconKey(y.emoji), url: y.url, desc: y.description, access: y.access || 'everyone',
     users: grants.filter(r => r.tool_id === y.id).map(r => r.user_id), branches: bgr.filter(r => r.tool_id === y.id).map(r => r.branch),
     status: y.status === 'closed' ? 'closed' : 'active', note: y.closed_note || '' });
   const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone', status: x.status === 'closed' ? 'closed' : 'active', note: x.closed_note || '',
+    users: fgr.filter(r => r.folder_id === x.id).map(r => r.user_id), branches: fbgr.filter(r => r.folder_id === x.id).map(r => r.branch),
     folders: fl.filter(c => c.parent_id === x.id).map(mkFolder), tools: tl.filter(y => y.folder_id === x.id).map(mkTool) });
   if (s.data && s.data.idle_minutes != null) setIdleMinutes(s.data.idle_minutes);
   if (s.data && s.data.tree_style) setTreeStyle(s.data.tree_style);
@@ -2068,14 +2071,17 @@ function wireAdminSort(b) {
 }
 
 /* ---------- Tab 2: Visibility ---------- */
+// is this one item (workspace, folder or application) open to subj ('any' = a staff member with no grants)?
+function openFor(subj, n) {
+  if (n.access === 'everyone') return true;
+  if (n.access !== 'selected' || subj === 'any') return false;
+  const br = (crew.find(p => p.id === subj) || {}).branch;
+  return (n.users || []).includes(subj) || (!!br && (n.branches || []).includes(br));
+}
 function visibleFor(subj, chain, t) {
   if (subj !== 'any' && crew.find(p => p.id === subj && p.is_admin)) return true;
-  if (!chain.every(n => n.access === 'everyone')) return false;
-  if (!t) return true;
-  if (t.access === 'everyone') return true;
-  if (t.access !== 'selected' || subj === 'any') return false;
-  const br = (crew.find(p => p.id === subj) || {}).branch;
-  return (t.users || []).includes(subj) || (!!br && (t.branches || []).includes(br));
+  if (!chain.every(n => openFor(subj, n))) return false;
+  return !t || openFor(subj, t);
 }
 const viaBranch = (t, p) => t.access === 'selected' && !(t.users || []).includes(p.id) && !!p.branch && (t.branches || []).includes(p.branch);
 
@@ -2092,16 +2098,36 @@ function renderVis(b) {
       el('div', { class: 'summary' }, el('b', { text: `${vis} of ${total}` }), ` applications visible to ${previewAs === 'any' ? 'staff' : nameOf(users.find(u => u.id === previewAs))}`)),
     el('div', { class: 'legend' },
       el('span', {}, el('i', { class: 'yes' }, icon('eye')), 'Visible'), el('span', {}, el('i', { class: 'no' }, icon('eyeoff')), 'Not visible'),
-      el('span', { class: 'lg-note', text: 'Hiding a workspace or folder hides everything inside it. Admins always see everything.' })));
+      el('span', { class: 'lg-note', text: 'Hiding a workspace or folder hides everything inside it. A folder set to Selected shows only to the chosen branches or users, with everything inside it. Admins always see everything.' })));
+  // choose branches and/or users for an item set to "Selected" (folders and applications)
+  const grantPicker = (t, depth) => {
+    const uopen = expanded.has('u:' + t.id);
+    const pick = el('div', { class: 'userpick', style: `--d:${depth}` }, el('button', { class: 'link', onclick: () => toggle('u:' + t.id), text: uopen ? 'Hide selection' : 'Choose branches or users…' }));
+    if (uopen) {
+      pick.append(el('div', { class: 'picklabel', text: 'By location (branch) — everyone in the branch, including future staff' }),
+        el('div', { class: 'uchips' }, branches.map(br => {
+          const on = (t.branches || []).includes(br.code), cnt = users.filter(u => u.branch === br.code).length;
+          return el('button', { class: 'uchip br' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', title: `${br.name} · ${plural(cnt, 'user')}`, onclick: () => { t.branches = on ? t.branches.filter(x => x !== br.code) : [...(t.branches || []), br.code]; markDirty(); renderAdmin(); } }, icon(on ? 'check' : 'plus'), br.code, el('span', { class: 'bn', text: br.name }));
+        })),
+        el('div', { class: 'picklabel', text: 'By user' }),
+        users.length ? el('div', { class: 'uchips' }, users.map(u => {
+          const on = (t.users || []).includes(u.id), viaB = !on && u.branch && (t.branches || []).includes(u.branch);
+          return el('button', { class: 'uchip' + (on ? ' on' : '') + (viaB ? ' via' : ''), 'aria-pressed': on ? 'true' : 'false', title: viaB ? `Already included through branch ${u.branch}` : u.email, onclick: () => { t.users = on ? t.users.filter(x => x !== u.id) : [...(t.users || []), u.id]; markDirty(); renderAdmin(); } }, icon(on || viaB ? 'check' : 'plus'), nameOf(u), u.branch ? el('span', { class: 'bn', text: u.branch }) : null);
+        })) : el('p', { class: 'hintline', text: 'No approved staff yet. Approve users in the Users tab first.' }));
+    }
+    return pick;
+  };
+  const selText = n => { const nu = (n.users || []).length, nb = (n.branches || []).length; return [nb ? plural(nb, 'branch').replace('branchs', 'branches') : '', nu ? plural(nu, 'user') : ''].filter(Boolean).join(' + '); };
   const toolRows = (card, node, chain, h, depth) => {
     (node.folders || []).forEach(f => {
       const fc = chain.concat(f);
       card.append(el('div', { class: 'vrow folderv', style: `--d:${depth}` },
         el('div', { class: 't-icon', style: `--c:${h.color}` }, icon(f.emoji || 'folder')),
-        el('div', { class: 'vn' }, el('b', { text: f.name || 'Untitled folder' }), el('small', { text: ['Folder', !chain.every(n => n.access === 'everyone') ? 'inside a restricted level' : '', isClosed(f) ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
-        select(ACCESS_HUB, f.access, v => { f.access = v; markDirty(); renderAdmin(); }, { 'aria-label': 'Folder access' }),
+        el('div', { class: 'vn' }, el('b', { text: f.name || 'Untitled folder' }), el('small', { text: ['Folder', f.access === 'selected' ? (selText(f) ? selText(f) + ' selected' : 'Nobody selected yet') : '', !chain.every(n => n.access === 'everyone') ? 'inside a restricted level' : '', isClosed(f) ? 'Closed (no longer in use)' : ''].filter(Boolean).join(' · ') })),
+        select(ACCESS_APP, f.access, v => { f.access = v; f.users = f.users || []; f.branches = f.branches || []; if (v === 'selected') expanded.add('u:' + f.id); markDirty(); renderAdmin(); }, { 'aria-label': 'Folder access' }),
         statusSelect(f, 'Folder'),
         badge(visibleFor(previewAs, fc))));
+      if (f.access === 'selected') card.append(grantPicker(f, depth));
       toolRows(card, f, fc, h, depth + 1);
     });
     (node.tools || []).forEach(t => {
@@ -2114,23 +2140,7 @@ function renderVis(b) {
         select(ACCESS_APP, t.access, v => { t.access = v; t.users = t.users || []; t.branches = t.branches || []; if (v === 'selected') expanded.add('u:' + t.id); markDirty(); renderAdmin(); }, { 'aria-label': 'Application access' }),
         statusSelect(t, 'Application'),
         badge(visibleFor(previewAs, chain, t))));
-      if (t.access === 'selected') {
-        const uopen = expanded.has('u:' + t.id);
-        const pick = el('div', { class: 'userpick', style: `--d:${depth}` }, el('button', { class: 'link', onclick: () => toggle('u:' + t.id), text: uopen ? 'Hide selection' : 'Choose branches or users…' }));
-        if (uopen) {
-          pick.append(el('div', { class: 'picklabel', text: 'By location (branch) — everyone in the branch, including future staff' }),
-            el('div', { class: 'uchips' }, branches.map(br => {
-              const on = (t.branches || []).includes(br.code), cnt = users.filter(u => u.branch === br.code).length;
-              return el('button', { class: 'uchip br' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', title: `${br.name} · ${plural(cnt, 'user')}`, onclick: () => { t.branches = on ? t.branches.filter(x => x !== br.code) : [...(t.branches || []), br.code]; markDirty(); renderAdmin(); } }, icon(on ? 'check' : 'plus'), br.code, el('span', { class: 'bn', text: br.name }));
-            })),
-            el('div', { class: 'picklabel', text: 'By user' }),
-            users.length ? el('div', { class: 'uchips' }, users.map(u => {
-              const on = (t.users || []).includes(u.id), viaB = !on && u.branch && (t.branches || []).includes(u.branch);
-              return el('button', { class: 'uchip' + (on ? ' on' : '') + (viaB ? ' via' : ''), 'aria-pressed': on ? 'true' : 'false', title: viaB ? `Already included through branch ${u.branch}` : u.email, onclick: () => { t.users = on ? t.users.filter(x => x !== u.id) : [...(t.users || []), u.id]; markDirty(); renderAdmin(); } }, icon(on || viaB ? 'check' : 'plus'), nameOf(u), u.branch ? el('span', { class: 'bn', text: u.branch }) : null);
-            })) : el('p', { class: 'hintline', text: 'No approved staff yet. Approve users in the Users tab first.' }));
-        }
-        card.append(pick);
-      }
+      if (t.access === 'selected') card.append(grantPicker(t, depth));
     });
   };
   draft.hubs.forEach(h => {
@@ -2150,11 +2160,13 @@ function renderVis(b) {
 
 $('#discardBtn').onclick = () => { draft = clone(cfg); applyLook({ theme: cfg.theme, anim: cfg.anim }); setTreeStyle(cfg.tree, 'force'); dirty = false; renderAdmin(); toast('Changes discarded'); };
 function flatten(root) {
-  const now = new Date().toISOString(), hubs = [], folders = [], tools = [], grants = [], bgrants = [];
+  const now = new Date().toISOString(), hubs = [], folders = [], tools = [], grants = [], bgrants = [], fgrants = [], fbgrants = [];
   root.hubs.forEach((h, i) => {
     hubs.push({ id: h.id, name: (h.name || 'Workspace').slice(0, 60), emoji: iconKey(h.emoji), color: col(h.color), access: ACCESS_HUB[h.access] ? h.access : 'everyone', open_direct: !!h.direct, status: h.status === 'closed' ? 'closed' : 'active', closed_note: (h.note || '').slice(0, 200), sort: i, updated_at: now });
     const walk = (node, parentId) => {
-      (node.folders || []).forEach((f, fi) => { folders.push({ id: f.id, hub_id: h.id, parent_id: parentId, name: (f.name || 'Folder').slice(0, 60), emoji: iconKey(f.emoji || 'folder'), access: ACCESS_HUB[f.access] ? f.access : 'everyone', status: f.status === 'closed' ? 'closed' : 'active', closed_note: (f.note || '').slice(0, 200), sort: fi, updated_at: now }); walk(f, f.id); });
+      (node.folders || []).forEach((f, fi) => { folders.push({ id: f.id, hub_id: h.id, parent_id: parentId, name: (f.name || 'Folder').slice(0, 60), emoji: iconKey(f.emoji || 'folder'), access: ACCESS_APP[f.access] ? f.access : 'everyone', status: f.status === 'closed' ? 'closed' : 'active', closed_note: (f.note || '').slice(0, 200), sort: fi, updated_at: now });
+        if (f.access === 'selected') { (f.users || []).forEach(u => fgrants.push({ folder_id: f.id, user_id: u })); (f.branches || []).forEach(b => fbgrants.push({ folder_id: f.id, branch: b })); }
+        walk(f, f.id); });
       (node.tools || []).forEach((t, ti) => {
         tools.push({ id: t.id, hub_id: h.id, folder_id: parentId, name: (t.name || 'Application').slice(0, 60), emoji: iconKey(t.emoji), url: (t.url || '').trim().slice(0, 1000), description: (t.desc || '').slice(0, 240), access: ACCESS_APP[t.access] ? t.access : 'everyone', status: t.status === 'closed' ? 'closed' : 'active', closed_note: (t.note || '').slice(0, 200), sort: ti, updated_at: now });
         if (t.access === 'selected') { (t.users || []).forEach(u => grants.push({ tool_id: t.id, user_id: u })); (t.branches || []).forEach(b => bgrants.push({ tool_id: t.id, branch: b })); }
@@ -2162,7 +2174,7 @@ function flatten(root) {
     };
     walk(h, null);
   });
-  return { hubs, folders, tools, grants, bgrants };
+  return { hubs, folders, tools, grants, bgrants, fgrants, fbgrants };
 }
 $('#saveBtn').onclick = () => saveDraft();
 async function saveDraft(quiet) {
@@ -2183,6 +2195,10 @@ async function saveDraft(quiet) {
     if (nw.grants.length) chk(await sb.from('portal_tool_access').insert(nw.grants));
     if (nw.tools.length) chk(await sb.from('portal_tool_branch_access').delete().in('tool_id', nw.tools.map(t => t.id)));
     if (nw.bgrants.length) chk(await sb.from('portal_tool_branch_access').insert(nw.bgrants));
+    if (nw.folders.length) chk(await sb.from('portal_folder_access').delete().in('folder_id', nw.folders.map(f => f.id)));
+    if (nw.fgrants.length) chk(await sb.from('portal_folder_access').insert(nw.fgrants));
+    if (nw.folders.length) chk(await sb.from('portal_folder_branch_access').delete().in('folder_id', nw.folders.map(f => f.id)));
+    if (nw.fbgrants.length) chk(await sb.from('portal_folder_branch_access').insert(nw.fbgrants));
     if (goneHubs.length) chk(await sb.from('portal_hubs').delete().in('id', goneHubs));
     await loadData(); draft = clone(cfg); dirty = false; renderGalaxy(); if (dockPath.length) renderDock();
     toast(quiet ? 'New order saved' : 'Changes saved'); ok = true;
@@ -2209,16 +2225,16 @@ function toggleGrant(t, uid, visibleNow, noRender) {
 let accUser = null, accClosed = new Set(), accBranchHidden = new Set();
 // every app under node with its full chain
 function appsUnder(node, chain) { const out = []; walkTools(node, (t, ch) => out.push({ t, chain: chain.slice(0, -1).concat(ch) })); return out; }
-const isBlocked = chain => chain.find(x => x.access !== 'everyone');
+const isBlocked = (chain, p) => chain.find(x => !openFor(p ? p.id : 'any', x));
 function nodeState(p, node, chain) {
   const apps = appsUnder(node, chain);
   const vis = apps.filter(a => p.is_admin || visibleFor(p.id, a.chain, a.t)).length;
-  const editable = p.is_admin ? [] : apps.filter(a => !isBlocked(a.chain));
+  const editable = p.is_admin ? [] : apps.filter(a => !isBlocked(a.chain, p));
   const on = editable.filter(a => visibleFor(p.id, a.chain, a.t)).length;
   return { total: apps.length, vis, editable, on };
 }
 function setAllFor(p, node, chain, grant) {
-  appsUnder(node, chain).forEach(a => { if (isBlocked(a.chain)) return; const v = visibleFor(p.id, a.chain, a.t); if (v !== grant) toggleGrant(a.t, p.id, v, true); });
+  appsUnder(node, chain).forEach(a => { if (isBlocked(a.chain, p)) return; const v = visibleFor(p.id, a.chain, a.t); if (v !== grant) toggleGrant(a.t, p.id, v, true); });
   markDirty(); renderAdmin();
 }
 function renderAccess(b) {
@@ -2273,7 +2289,7 @@ function renderAccess(b) {
     const ckbox = (state, onclick, title, disabled) => el('button', { class: 'ck ' + state, title, disabled: !!disabled, 'aria-label': title, onclick }, state === 'on' ? icon('check') : state === 'some' ? el('span', { class: 'dash' }) : null);
     const addNode = (node, chain, depth, kind, h) => {
       const st = nodeState(p, node, chain), closed = accClosed.has(node.id);
-      const blockedBy = isBlocked(chain);
+      const blockedBy = isBlocked(chain, p);
       let cstate = 'off'; if (p.is_admin || (st.editable.length && st.on === st.editable.length)) cstate = 'on'; else if (st.on > 0) cstate = 'some';
       const canEdit = !p.is_admin && st.editable.length > 0;
       tb.append(el('tr', { class: 'g ' + kind + (blockedBy ? ' blocked' : ''), style: `--c:${h.color}` },
@@ -2282,17 +2298,17 @@ function renderAccess(b) {
           el('span', { class: 'gi' }, icon(kind === 'hub' ? node.emoji : (node.emoji || 'folder'))),
           el('span', { class: 'gl', text: (kind === 'hub' ? 'Workspace : ' : 'Folder : ') }), el('b', { text: node.name || 'Untitled' }))),
         el('td', { class: 'c band1' }, ckbox(cstate, () => setAllFor(p, node, chain, cstate !== 'on'), canEdit ? (cstate === 'on' ? 'Remove everything inside' : 'Grant everything inside') : 'Not editable here', !canEdit)),
-        el('td', { class: 'c band2' }, el('span', { class: 'rule r-' + node.access, text: ACCESS_HUB[node.access] })),
+        el('td', { class: 'c band2' }, el('span', { class: 'rule r-' + node.access, text: ACCESS_APP[node.access] })),
         el('td', { class: 'c band3' }, el('span', { class: 'sumchip ' + (!st.total ? 'none' : st.vis === st.total ? 'full' : st.vis ? 'part' : 'none') }, st.total ? `${st.vis}/${st.total}` : '–'))));
       if (closed) return;
       (node.folders || []).forEach(f => addNode(f, chain.concat(f), depth + 1, 'folder', h));
       (node.tools || []).forEach(t => {
-        const blk = isBlocked(chain), on = p.is_admin || visibleFor(p.id, chain, t), vb = !p.is_admin && !blk && viaBranch(t, p);
+        const blk = isBlocked(chain, p), on = p.is_admin || visibleFor(p.id, chain, t), vb = !p.is_admin && !blk && viaBranch(t, p);
         const n = t.access === 'selected' ? (t.users || []).length : 0, nb = t.access === 'selected' ? (t.branches || []).length : 0;
         tb.append(el('tr', { class: 'a' + (blk ? ' blocked' : '') },
           el('td', { class: 'd' }, el('div', { class: 'leaf', style: `padding-left:${30 + (depth + 1) * 22}px` }, el('span', { class: 'ai', style: `--c:${h.color}` }, icon(t.emoji)), el('span', { text: t.name || 'Untitled application' }), t.status === 'closed' ? el('span', { class: 'closedtag', text: 'Closed' }) : null)),
           el('td', { class: 'c band1' }, p.is_admin ? ckbox('on adm', null, 'Admin sees everything', true)
-            : blk ? ckbox('blk', null, `Closed: "${blk.name}" is ${ACCESS_HUB[blk.access]}`, true)
+            : blk ? ckbox('blk', null, blk.access === 'selected' ? `"${blk.name}" is open to selected branches or users only. Add them in the Visibility tab.` : `Closed: "${blk.name}" is ${ACCESS_APP[blk.access]}`, true)
             : vb ? el('span', { class: 'viab', title: `Granted to everyone in branch ${p.branch}. Change it in the Visibility tab.` }, ckbox('on', null, 'Granted through branch', true), el('small', { text: 'via ' + p.branch }))
             : ckbox(on ? 'on' : 'off', () => toggleGrant(t, p.id, on), on ? 'Remove access' : 'Grant access')),
           el('td', { class: 'c band2' }, el('span', { class: 'rule r-' + t.access, text: ACCESS_APP[t.access] + (t.access === 'selected' ? ` (${[nb ? nb + ' br' : '', n ? n + ' u' : ''].filter(Boolean).join(' + ') || 0})` : '') })),
