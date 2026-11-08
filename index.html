@@ -849,6 +849,21 @@ body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc0{stroke:#0f9c8e}body[data-the
 body[data-theme=treeday] .vtsvg.ts-fiber .l1{fill:#0f8a52}body[data-theme=treeday] .vtsvg.ts-fiber .l2{fill:#1aa866}body[data-theme=treeday] .vtsvg.ts-fiber .l3{fill:#36c483}body[data-theme=treeday] .vtsvg.ts-fiber .l4{fill:#8be6bd}body[data-theme=treeday] .vtsvg.ts-fiber .l5{fill:#0f9c94}
 body[data-theme=treeday] .vtsvg .trace{stroke:#0a8f96;stroke-opacity:.5}body[data-theme=treeday] .vtsvg .tn{fill:#0fb8c0}
 body[data-theme=treeday] .vtsvg.ts-fiber .gf{fill:#0a8f96;stroke:#0a8f96}
+
+/* Tech Green grand: dense filament dome, radiating light threads, growing filaments */
+.vtsvg .fil{stroke-width:.7;animation:bud 2.6s ease-out 1.6s backwards}
+.vtsvg .fil0{stroke:#45e6d6;stroke-opacity:.55}.vtsvg .fil1{stroke:#22bcd0;stroke-opacity:.5}.vtsvg .fil2{stroke:#b5fff5;stroke-opacity:.55}
+.vtsvg .t-rad{animation:bud 3s ease-out 2.4s backwards}
+.vtsvg .rad0{stroke:#5ff0e4;stroke-opacity:.42;stroke-width:.6}.vtsvg .rad1{stroke:#c6fff8;stroke-opacity:.35;stroke-width:.5}
+.vtsvg .rdot{fill:#d8fffa;opacity:.85;animation:bud 3s ease-out 2.8s backwards}
+.vtsvg .gfil path{fill:none;stroke:#e8fffb;stroke-width:1.1;stroke-dasharray:1;stroke-dashoffset:1;animation:gfil 7s ease-out forwards}
+.vtsvg .gfil circle{fill:#fff;opacity:0;animation:gnode 7s ease-out forwards}
+@keyframes gfil{0%{stroke-dashoffset:1;opacity:1}40%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes gnode{0%,35%{opacity:0}45%{opacity:1}100%{opacity:0}}
+body[data-theme=treeday] .vtsvg .fil0{stroke:#0f9c8e}body[data-theme=treeday] .vtsvg .fil1{stroke:#0a7f96}body[data-theme=treeday] .vtsvg .fil2{stroke:#2ab3a6}
+body[data-theme=treeday] .vtsvg .rad0{stroke:#0f9c8e;stroke-opacity:.4}body[data-theme=treeday] .vtsvg .rad1{stroke:#0a7f96;stroke-opacity:.35}
+body[data-theme=treeday] .vtsvg .rdot{fill:#0fb8a8}
+body[data-theme=treeday] .vtsvg .gfil path{stroke:#0a9f96}body[data-theme=treeday] .vtsvg .gfil circle{fill:#0fb8c0}
 @media (prefers-reduced-motion:reduce){.vtsvg .plr,.vtsvg .ndr,.vtsvg .rip,.vtsvg .dm{display:none}}
 .sprig{position:absolute;right:16px;top:16px;width:58px;height:58px;color:color-mix(in srgb,var(--c) 45%,var(--gold2));opacity:.75;transition:opacity .4s,transform .6s ease}
 .sprig svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round}
@@ -1034,7 +1049,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   const ST = o.style || 'classic', LIV = ST === 'living', FIB = ST === 'fiber', TECH = ST === 'tech' || FIB, GEO = ST === 'premium', MAJ = ST === 'majestic';
   const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46, LS = o.leaf || .4, ID = 'lf' + seed;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [], rpl = [], mesh = [], mdots = [];
+  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [], rpl = [], mesh = [], mdots = [], fil = [[], [], []];
   const f = n => n.toFixed(1);
   const fc = [], fcl = [];
   function tube(ev, wf, K, dl, jit) {
@@ -1055,7 +1070,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     const dP = `M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}`, sw = TECH ? Math.max(.8, w * (d < 3 ? .34 : .24)) : GEO ? w * .9 : w;
     if (FIB && d <= 6) {
       // glowing light-strand bundle: gold at the trunk, turning cyan-teal out in the branches
-      const fw = w * (d === 1 ? 1.35 : d === 2 ? 1.1 : d <= 4 ? .85 : .6), n = Math.max(2, Math.min(90, Math.round(fw / 1.2))), nx = Math.cos(ang + 1.57), ny = Math.sin(ang + 1.57);
+      const fw = w * (d === 1 ? 1.35 : d === 2 ? 1.1 : d <= 4 ? .85 : .6), n = Math.max(2, Math.min(130, Math.round(fw / 1.15))), nx = Math.cos(ang + 1.57), ny = Math.sin(ang + 1.57);
       const pg = [1, 1, 1, .75, .45, .2, .06][d];
       for (let i = 0; i < n; i++) {
         const u = i / (n - 1) - .5, a0 = u * fw * (d === 1 ? 1.15 : 1), a1 = u * fw * (d === 1 ? .62 : .7), ac = u * fw * (d === 1 ? .55 + rnd() * .2 : .55 + rnd() * .5) + (rnd() - .5) * fw * (d === 1 ? .12 : .25);
@@ -1063,7 +1078,8 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
         br.push(`<path class="br ${rnd() < pg ? 'sg' : 'sc'}${i % 3}" pathLength="1" d="${sp}" stroke-width="${(.5 + rnd() * .75).toFixed(2)}" style="animation-delay:${f(t0)}s"/>`);
         if (rnd() < (d < 3 ? .1 : .18)) pulse.push(`<path class="pl fpl" pathLength="1" d="${sp}" stroke-width="${(1.3 + rnd()).toFixed(1)}" style="animation-delay:${f(d * .32 + 4 + rnd() * 2.4)}s"/>`);
       }
-    } else br.push(`<path class="br${FIB ? ' sc' + Math.floor(rnd() * 3) : ''}" pathLength="1" d="${dP}" stroke-width="${f(FIB ? .6 + rnd() * .6 : sw)}" style="animation-delay:${f(t0)}s"/>`);
+    } else if (FIB) { const nx = Math.cos(ang + 1.57), ny = Math.sin(ang + 1.57); for (let k = -1; k <= 1; k++) { const o1 = k * w * .5, o2 = k * w * .35 + (rnd() - .5) * 2, oc = k * w * .6 + (rnd() - .5) * 4; fil[(k + 1 + Math.floor(rnd() * 2)) % 3].push(`M${f(x + nx * o1)} ${f(y + ny * o1)}Q${f(mx + nx * oc)} ${f(my + ny * oc)} ${f(x2 + nx * o2)} ${f(y2 + ny * o2)}`); } }
+    else br.push(`<path class="br" pathLength="1" d="${dP}" stroke-width="${f(sw)}" style="animation-delay:${f(t0)}s"/>`);
     if (TECH && !FIB && d <= depth - 1 && (d < 5 || rnd() < .45)) pulse.push(`<path class="pl" pathLength="1" d="${dP}" stroke-width="${f(Math.max(1.4, sw * 1.6))}" style="animation-delay:${f(d * .32 + 4)}s"/>`);
     if (FIB && d > 5 && d <= depth - 1 && rnd() < .35) pulse.push(`<path class="pl fpl" pathLength="1" d="${dP}" stroke-width="1.5" style="animation-delay:${f(d * .32 + 4 + rnd() * 2.4)}s"/>`);
     if (LIV && d <= depth - 1 && (d < 5 || rnd() < .4)) pulse.push(`<path class="pl lv" pathLength="1" d="${dP}" stroke-width="${f(Math.min(9, Math.max(1.3, sw * .16)))}" style="animation-delay:${f(4 + 1.3 + d * .3)}s"/>`);
@@ -1164,6 +1180,10 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
       tr.push(`M${f(x)} ${f(y)}V${f(y - h1)}L${f(ex)} ${f(y - h1 - Math.abs(jg))}V${f(ey)}`); tn.push(`<circle class="tn" cx="${f(ex)}" cy="${f(ey)}" r="${f(LS * (1.2 + rnd() * .8))}" style="animation-delay:${f(rnd() * 5)}s"/>`); });
     const bursts = tips.filter(() => rnd() < (o.vw ? .006 : .02)).map(([x, y]) => `<circle class="burst" cx="${f(x)}" cy="${f(y)}" r="${f(LS * (16 + rnd() * 14))}" fill="url(#cyg${seed})" style="animation-delay:${f(rnd() * 6)}s;animation-duration:${f(4 + rnd() * 3)}s"/>`);
     const orbs = tips.filter(() => rnd() < (o.vw ? .03 : .06)).map(([x, y]) => `<circle class="orb" cx="${f(x + (rnd() - .5) * 14 * LS)}" cy="${f(y + (rnd() - .5) * 14 * LS)}" r="${f(LS * (3.5 + rnd() * 4))}" fill="url(#gdg${seed})" style="animation-delay:${f(rnd() * 6)}s;animation-duration:${f(3 + rnd() * 4)}s"/>`);
+    const rad = [[], []], rdot = [];
+    tips.forEach(([x, y, a]) => { const m = rnd() < .6 ? 2 : 1; for (let k = 0; k < m; k++) { const aa = a + (rnd() - .5) * .9, L = (8 + rnd() * 30) * LS, ex = x + Math.cos(aa) * L, ey = y + Math.sin(aa) * L, cx = x + Math.cos(aa + (rnd() - .5) * .6) * L * .5, cy = y + Math.sin(aa + (rnd() - .5) * .6) * L * .5;
+      rad[rnd() < .5 ? 0 : 1].push(`M${f(x)} ${f(y)}Q${f(cx)} ${f(cy)} ${f(ex)} ${f(ey)}`); if (rnd() < .45) { const r = LS * (.5 + rnd() * .7); rdot.push(`M${f(ex - r)} ${f(ey)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0`); } } });
+    fx = `<g class="t-rad" fill="none"><path class="rad0" d="${rad[0].join('')}"/><path class="rad1" d="${rad[1].join('')}"/></g><path class="rdot" d="${rdot.join('')}"/>` + fx;
     fx += `<g class="t-tr2" fill="none"><path class="trace" d="${tr.join('')}"/>${tn.join('')}</g><g class="t-burst">${bursts.join('')}</g><g class="t-orb">${orbs.join('')}</g>`;
     fx += `<g class="t-du">${du.join('')}</g><g class="t-md">${mdots.join('')}</g><g class="t-spk">${st.join('')}</g>`;
     // low-poly ground: jittered triangle mesh fanning out from the trunk
@@ -1198,7 +1218,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   ${MAJ || GEO ? `<ellipse class="t-gsh" cx="${f(X0 - W0)}" cy="${f(Y0 + 4)}" rx="${f(W0 * 9)}" ry="${f(W0 * .9)}" fill="url(#gsh${seed})"/>` : ''}
   <line class="t-hz" x1="${o.vw ? 0 : 60}" y1="${Y0}" x2="${o.vw ? VW : 540}" y2="${Y0}" stroke-width=".8"/>
   ${soil}${ground}<g class="t-rt">${rt.join('')}</g>${rpl.length ? `<g class="t-plr" fill="none" stroke-linecap="round">${rpl.join('')}</g>` : ''}${ripple}${grass}
-  <g class="crown" style="transform-origin:${X0}px ${Y0}px">${fc.length ? `<g class="t-fc">${fc.join('')}</g><g class="t-fco" fill="none" stroke-linejoin="round">${fcl.join('')}</g>` : ''}<g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g>${fbase}<g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}${FIB ? ` filter="url(#glw${seed})"` : ''}>${br.join('')}${mesh.length ? `<g class="t-mesh" stroke-linejoin="round">${mesh.join('')}</g>` : ''}</g>${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
+  <g class="crown" style="transform-origin:${X0}px ${Y0}px">${fc.length ? `<g class="t-fc">${fc.join('')}</g><g class="t-fco" fill="none" stroke-linejoin="round">${fcl.join('')}</g>` : ''}<g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g>${fbase}<g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}${FIB ? ` filter="url(#glw${seed})"` : ''}>${br.join('')}${mesh.length ? `<g class="t-mesh" stroke-linejoin="round">${mesh.join('')}</g>` : ''}</g>${fil[0].length ? `<g class="t-fil" fill="none">${fil.map((q, i) => `<path class="fil fil${i}" d="${q.join('')}"/>`).join('')}</g>` : ''}${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
   <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}<g class="r2">${ap.join('')}</g></g>${nodes}${fx}<g class="sprouts"></g></g>${motes}</svg>`;
 };
 const sprig = () => {
@@ -1208,16 +1228,27 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Technology tree: glowing gold light-strand trunk, teal light branches, circuit traces, green light leaves, red apples'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Grand technology tree: massive glowing gold trunk, dome of teal light filaments that keep growing, circuit traces, red apples'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
 let treeTimers = [];
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
   const host = document.querySelector('.vtree');
   const TS = document.body.dataset.tree || 'classic';
-  host.innerHTML = treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
+  host.innerHTML = TS === 'fiber' ? treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 985, y: 940, len: 178, w: 104, spread: 1.62, lenf: .735, lean: 1.5708, rootLen: 46, leaf: 2, grass: true, apples: .04, par: 'xMidYMax slice' })
+    : treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
   const tips = treeSVG.tips, id = treeSVG.leafId, box = host.querySelector('.sprouts'), NS = 'http://www.w3.org/2000/svg';
   const sprout = () => {
     if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
+    if (TS === 'fiber') {
+      for (let k = 0; k < 3; k++) {
+        const [x, y, a] = tips[Math.floor(Math.random() * tips.length)], aa = a + (Math.random() - .5) * .8, L = 40 + Math.random() * 60, ex = x + Math.cos(aa) * L, ey = y + Math.sin(aa) * L;
+        const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'gfil');
+        const pth = document.createElementNS(NS, 'path'); pth.setAttribute('pathLength', '1'); pth.setAttribute('d', `M${x.toFixed(1)} ${y.toFixed(1)}Q${(x + Math.cos(aa + .3) * L * .5).toFixed(1)} ${(y + Math.sin(aa + .3) * L * .5).toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`);
+        const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', ex.toFixed(1)); c.setAttribute('cy', ey.toFixed(1)); c.setAttribute('r', (1.6 + Math.random() * 1.6).toFixed(1));
+        g.append(pth, c); box.append(g); setTimeout(() => g.remove(), 7200);
+      }
+      return;
+    }
     const [x, y, a] = tips[Math.floor(Math.random() * tips.length)], side = Math.random() < .5 ? -1 : 1;
     const g = document.createElementNS(NS, 'g'); g.setAttribute('transform', `translate(${(x + (Math.random() - .5) * 10).toFixed(1)} ${(y + (Math.random() - .5) * 10).toFixed(1)}) rotate(${(a * 57.3 + side * (30 + Math.random() * 40)).toFixed(1)})`);
     const inner = document.createElementNS(NS, 'g'); inner.setAttribute('class', 'sprout');
