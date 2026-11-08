@@ -601,9 +601,9 @@ body[data-theme=tree] .side{background:linear-gradient(165deg,#12291f,#08130f)}
 body[data-theme^=tree] .hero h2,body[data-theme^=tree] .side h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;letter-spacing:.2px}
 body[data-theme^=tree] .hero h2{font-size:clamp(30px,4.2vw,42px)}
 body[data-theme^=tree] .side h2{font-size:34px}
-body[data-theme^=tree] .brandtext h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800;letter-spacing:-.4px}
-body[data-theme^=tree] .company{color:#00aeef;letter-spacing:.14em}
-body[data-theme=treeday] .company{color:#0096cf}
+body[data-theme^=tree] .brandtext h1{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:500;letter-spacing:.2px;color:#00aeef}
+body[data-theme=treeday] .brandtext h1{color:#0096cf}
+body[data-theme^=tree] .company{color:var(--ink);letter-spacing:.14em;font-weight:600}
 
 /* tree colours: night = gold line art under a moon-like sun */
 .vtsvg .t-hz{stroke:#e7d4a6;stroke-opacity:.22}.vtsvg .t-rt{fill:#c9a96a;fill-opacity:1;opacity:.75}.vtsvg .t-br{stroke:#d9be86}.vtsvg .t-tr{fill:#d9be86}
@@ -677,7 +677,7 @@ body[data-anim=tree] .copyright{color:var(--ink);opacity:.8;text-shadow:0 0 6px 
 /* Morning: blue sky, deeper at the top, paler toward the horizon, warm glow around the sun */
 body[data-theme=treeday]{--bg:#ecf5fb;--bg-b:#eef6f3;background-image:radial-gradient(48vmax 40vmax at 100% 0%,rgba(255,226,160,.55),rgba(255,226,160,.18) 45%,transparent 70%),linear-gradient(180deg,#d6eaf8 0%,#e1effa 32%,#ecf5fb 60%,#f4f9fb 84%,#f7f8f2 100%)!important;background-attachment:fixed}
 .side-brand{color:var(--gold2)}
-body[data-theme^=tree] .side-brand{color:#00aeef;font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800;letter-spacing:-.5px}
+body[data-theme^=tree] .side-brand{color:#00aeef;font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:500;letter-spacing:.2px}
 body[data-theme=treeday] .side-brand{color:#0096cf}
 .vtree,.vsun,.vt-side,.vformula,.sprig{display:none}
 body[data-anim=tree] .orbits,body[data-anim=tree] .bigplanet,body[data-anim=tree] .moon2,body[data-anim=tree] .side .sys,body[data-anim=tree] .planet .orb,body[data-anim=tree] .sun{display:none}
