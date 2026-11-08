@@ -763,6 +763,25 @@ body[data-tree=dynamic] .vtsvg .gw1{animation-duration:3s}body[data-tree=dynamic
 body[data-tree=premium] .vtsvg .crown{animation-duration:26s}
 body[data-tree=premium] .vtsvg .r1,body[data-tree=premium] .vtsvg .r2,body[data-tree=premium] .vtsvg .r3,body[data-tree=premium] .vtsvg .r4{animation:none}
 @media (prefers-reduced-motion:reduce){.vtsvg .pl,.vtsvg .fall{display:none}}
+
+/* Living Tech: natural tree colours + light pulses rising from the roots, glowing nodes, ground ripples, data motes */
+.vtsvg .pl.lv{stroke:#f4ffd8;stroke-dasharray:.1 .9;animation:lv-run 4.8s linear infinite}
+.vtsvg .plr{stroke:#f4ffd8;stroke-dasharray:.12 .88;stroke-dashoffset:-1;opacity:0;animation:lv-root 4.8s linear infinite}
+@keyframes lv-run{0%{stroke-dashoffset:1;opacity:0}5%{opacity:.95}40%{opacity:.85}48%,100%{stroke-dashoffset:-.1;opacity:0}}
+@keyframes lv-root{0%{stroke-dashoffset:-1;opacity:0}5%{opacity:.85}40%{opacity:.8}48%,100%{stroke-dashoffset:.12;opacity:0}}
+.vtsvg .nd{fill:#fffbe0;opacity:0;animation:nd-glow 5.5s ease-in-out infinite}
+.vtsvg .ndr{fill:none;stroke:#f6ffd0;stroke-width:1.2;opacity:0;transform-box:fill-box;transform-origin:center;animation:nd-ring 5.5s ease-out infinite}
+@keyframes nd-glow{0%,100%{opacity:.25}20%{opacity:1}45%{opacity:.4}}
+@keyframes nd-ring{0%{transform:scale(.3);opacity:0}15%{opacity:.9}55%,100%{transform:scale(2.2);opacity:0}}
+.vtsvg .rip{fill:none;stroke:#e9f7c4;stroke-width:1.4;opacity:0;transform-box:fill-box;transform-origin:center;animation:ripple 4.8s ease-out infinite}
+@keyframes ripple{0%{transform:scale(.4);opacity:0}10%{opacity:.7}100%{transform:scale(3.4);opacity:0}}
+.vtsvg .dm{fill:#f8ffd8;opacity:0;animation:mote 8s ease-in-out infinite}
+@keyframes mote{0%{transform:translate(0,30px);opacity:0}25%{opacity:.85}75%{opacity:.6}100%{transform:translate(14px,-110px);opacity:0}}
+body[data-theme=treeday] .vtsvg .pl.lv,body[data-theme=treeday] .vtsvg .plr{stroke:#fffbe6}
+body[data-theme=treeday] .vtsvg .nd{fill:#fff6c8}body[data-theme=treeday] .vtsvg .ndr{stroke:#fff3b8;stroke-width:1.6}
+body[data-theme=treeday] .vtsvg .rip{stroke:#a98a4c}
+body[data-theme=treeday] .vtsvg .dm{fill:#fff8d6}
+@media (prefers-reduced-motion:reduce){.vtsvg .plr,.vtsvg .ndr,.vtsvg .rip,.vtsvg .dm{display:none}}
 .sprig{position:absolute;right:16px;top:16px;width:58px;height:58px;color:color-mix(in srgb,var(--c) 45%,var(--gold2));opacity:.75;transition:opacity .4s,transform .6s ease}
 .sprig svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round}
 .planet:hover .sprig{opacity:1;transform:translateY(-2px)}
@@ -777,7 +796,7 @@ body[data-tree=premium] .vtsvg .r1,body[data-tree=premium] .vtsvg .r2,body[data-
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -944,10 +963,10 @@ $('#mark').append(orb('var(--gold)')); $('#mark2').append(orb('var(--gold)')); $
 
 /* ================= Vision Tree drawings ================= */
 const treeSVG = (depth = 9, seed = 7, o = {}) => {
-  const ST = o.style || 'classic', TECH = ST === 'tech', GEO = ST === 'premium', MAJ = ST === 'majestic';
+  const ST = o.style || 'classic', LIV = ST === 'living', TECH = ST === 'tech', GEO = ST === 'premium', MAJ = ST === 'majestic';
   const VW = o.vw || 600, VH = o.vh || 800, X0 = o.x || 300, Y0 = o.y || 600, L0 = o.len || 120, W0 = o.w || 7, SP = o.spread || 1, LF = o.lenf || .72, LEAN = o.lean || 1.38, RL = o.rootLen || 46, LS = o.leaf || .4, ID = 'lf' + seed;
   let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [];
+  const br = [], lf = [[], [], [], []], rt = [], ap = [], tips = [], pulse = [], blob = [], rpl = [];
   const f = n => n.toFixed(1);
   function grow(x, y, ang, len, w, d, t0) {
     const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = d === 1 || GEO ? 0 : (rnd() - .5) * len * (d < 4 ? .38 : .5) * (TECH ? .5 : 1);
@@ -955,6 +974,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     const dP = `M${f(x)} ${f(y)}Q${f(mx)} ${f(my)} ${f(x2)} ${f(y2)}`, sw = TECH ? Math.max(.8, w * (d < 3 ? .34 : .24)) : GEO ? w * .9 : w;
     br.push(`<path class="br" pathLength="1" d="${dP}" stroke-width="${f(sw)}" style="animation-delay:${f(t0)}s"/>`);
     if (TECH && d <= depth - 1 && (d < 5 || rnd() < .45)) pulse.push(`<path class="pl" pathLength="1" d="${dP}" stroke-width="${f(Math.max(1.4, sw * 1.6))}" style="animation-delay:${f(d * .32 + 4)}s"/>`);
+    if (LIV && d <= depth - 1 && (d < 5 || rnd() < .4)) pulse.push(`<path class="pl lv" pathLength="1" d="${dP}" stroke-width="${f(Math.min(9, Math.max(1.3, sw * .16)))}" style="animation-delay:${f(4 + 1.3 + d * .3)}s"/>`);
     if (MAJ && d >= depth - 3 && rnd() < .5) { const bx = x2 + (rnd() - .5) * 20 * LS, by = y2 + (rnd() - .3) * 14 * LS, sh = (bx - X0) / VW * 1.4 - (by - Y0) / VH * .6 + rnd() * .5; blob.push(`<ellipse class="lf cb${sh > .9 ? 2 : 1}" cx="${f(bx)}" cy="${f(by)}" rx="${f(LS * (12 + rnd() * 9))}" ry="${f(LS * (9 + rnd() * 6))}" style="animation-delay:${f(t0 + .3)}s"/>`); }
     if (d >= depth - 1) tips.push([x2, y2, ang]);
     const t1 = t0 + .38;
@@ -997,6 +1017,7 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   // poster-style roots: fan out wide and shallow from the trunk, forking again and again into fine tips
   function rootFork(x, y, ang, len, w, d, dl) {
     const { pts, ang: a2 } = rootPts(x, y, ang, len, GEO ? 2 : 9, .008 + d * .008), w1 = Math.max(.5, w * .62), wk = TECH ? .3 : 1;
+    if (LIV) rpl.push(`<path class="plr" pathLength="1" d="M${pts.map(q => f(q[0]) + ' ' + f(q[1])).join('L')}" stroke-width="${f(Math.max(1.2, w * .14))}" style="animation-delay:${f(4 + (4 - d) * .3)}s"/>`);
     rt.push(`<path class="lf" d="${ribbon(pts, w * wk, w1 * wk)}" style="animation-delay:${dl.toFixed(2)}s"/>`);
     if (d >= 4) return;
     const end = pts[pts.length - 1], k = d < 2 ? 2 : rnd() < .3 ? 3 : 2;
@@ -1023,6 +1044,14 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
     soil = `<defs><linearGradient id="soil${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="s0"/><stop offset="1" class="s1"/></linearGradient></defs><rect x="0" y="${Y0}" width="${VW}" height="${VH - Y0}" fill="url(#soil${seed})"/>`;
   }
   grow(X0, Y0 - W0 * .5, -1.5708, L0, W0, 1, 0);
+  let nodes = '', ripple = '', motes = '';
+  if (LIV) {
+    const pick = tips.filter(() => rnd() < (o.vw ? .07 : .12));
+    nodes = `<g class="t-nd">${pick.map(([x, y]) => { const dl = f(5 + rnd() * 6); return `<circle class="ndr" cx="${f(x)}" cy="${f(y)}" r="${f(LS * 5)}" style="animation-delay:${dl}s"/><circle class="nd" cx="${f(x)}" cy="${f(y)}" r="${f(LS * 1.5)}" style="animation-delay:${dl}s"/>`; }).join('')}</g>`;
+    ripple = `<g class="t-rip">${[0, 1, 2].map(i => `<ellipse class="rip" cx="${f(X0)}" cy="${f(Y0 + 2)}" rx="${f(W0 * 3)}" ry="${f(W0 * .45)}" style="animation-delay:${f(4 + i * 1.6)}s"/>`).join('')}</g>`;
+    const ms = []; for (let i = 0; i < (o.vw ? 46 : 14); i++) { const mx = X0 + (rnd() - .45) * VW * .55, my = Y0 - (VH * .25 + rnd() * VH * .55); ms.push(`<circle class="dm" cx="${f(mx)}" cy="${f(my)}" r="${f(LS * (.8 + rnd() * 1.1))}" style="animation-delay:${f(rnd() * 9)}s;animation-duration:${f(6 + rnd() * 6)}s"/>`); }
+    motes = `<g class="t-dm">${ms.join('')}</g>`;
+  }
   treeSVG.tips = tips; treeSVG.leafId = ID;
   return `<svg class="vtsvg ts-${ST}" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="${o.par || 'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg">
   <defs>${TECH ? `<circle id="${ID}" cx="7" cy="0" r="2.3"/>` : GEO ? `<circle id="${ID}" cx="8" cy="0" r="5.4"/>` : `<path id="${ID}" d="M0 0C3 -3.6 8 -4.2 12 0C8 4.2 3 3.6 0 0Z"/>`}
@@ -1030,9 +1059,9 @@ const treeSVG = (depth = 9, seed = 7, o = {}) => {
   <radialGradient id="gsh${seed}"><stop offset="0" class="gs0"/><stop offset="1" class="gs1"/></radialGradient></defs>
   ${MAJ || GEO ? `<ellipse class="t-gsh" cx="${f(X0 - W0)}" cy="${f(Y0 + 4)}" rx="${f(W0 * 9)}" ry="${f(W0 * .9)}" fill="url(#gsh${seed})"/>` : ''}
   <line class="t-hz" x1="${o.vw ? 0 : 60}" y1="${Y0}" x2="${o.vw ? VW : 540}" y2="${Y0}" stroke-width=".8"/>
-  ${soil}<g class="t-rt">${rt.join('')}</g>${grass}
+  ${soil}<g class="t-rt">${rt.join('')}</g>${rpl.length ? `<g class="t-plr" fill="none" stroke-linecap="round">${rpl.join('')}</g>` : ''}${ripple}${grass}
   <g class="crown" style="transform-origin:${X0}px ${Y0}px"><g class="t-tr"${MAJ ? ` style="fill:url(#bark${seed})"` : ''}>${TECH ? '' : flare}</g><g class="t-br" fill="none" stroke-linecap="round"${MAJ ? ` style="stroke:url(#bark${seed})"` : ''}>${br.join('')}</g>${blob.length ? `<g class="t-cb">${blob.join('')}</g>` : ''}${pulse.length ? `<g class="t-pl" fill="none" stroke-linecap="round">${pulse.join('')}</g>` : ''}
-  <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}<g class="r2">${ap.join('')}</g></g><g class="sprouts"></g></g></svg>`;
+  <g class="t-lf">${lf.map((g, i) => `<g class="r${i + 1}">${g.join('')}</g>`).join('')}<g class="r2">${ap.join('')}</g></g>${nodes}<g class="sprouts"></g></g>${motes}</svg>`;
 };
 const sprig = () => {
   const d = document.createElement('div'); d.className = 'sprig'; d.setAttribute('aria-hidden', 'true');
@@ -1041,7 +1070,7 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
 let treeTimers = [];
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];

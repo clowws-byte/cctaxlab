@@ -351,3 +351,7 @@ alter table public.portal_settings add column if not exists idle_minutes integer
 
 -- Tree style for the Vision Tree look (admin chooses in Portal settings)
 alter table public.portal_settings add column if not exists tree_style text not null default 'classic' check (tree_style in ('classic','majestic','tech','dynamic','premium'));
+
+-- add the Living Tech tree style
+alter table public.portal_settings drop constraint if exists portal_settings_tree_style_check;
+alter table public.portal_settings add constraint portal_settings_tree_style_check check (tree_style in ('classic','majestic','tech','dynamic','premium','living'));
