@@ -842,7 +842,8 @@ body[data-theme=treeday] .vtsvg .net{stroke:#1f9e55;stroke-opacity:.22}
 .vtsvg.ts-fiber .du{fill:#9fffe8}
 .vtsvg.ts-fiber .gf{fill:#3fd8ff;stroke:#3fd8ff}
 .vtsvg.ts-fiber .t-rt .fsr{stroke:#f0bb5a;stroke-opacity:.5}
-body[data-tree=fiber][data-theme=tree]{background:radial-gradient(ellipse at 62% 100%,rgba(255,196,90,.18),transparent 45%),radial-gradient(ellipse at 70% 30%,rgba(40,140,220,.18),transparent 55%),linear-gradient(180deg,#030816 0%,#06122b 55%,#0a1c3c 100%)!important;--bg:#050d22;--bg-b:#081834}
+body[data-tree=fiber][data-theme=tree]{--bg:#00152b;--bg-b:#002346;background:radial-gradient(ellipse 75% 55% at 56% 38%,rgba(0,90,200,.18),transparent 70%),linear-gradient(180deg,#00101f 0%,#00152b 40%,#002346 82%,#001a36 100%)!important;background-attachment:fixed!important}
+body[data-tree=fiber] .modeswitch{display:none!important}
 body[data-tree=fiber][data-theme=tree] .vsun{opacity:.55}
 body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg0{stroke:#b8862e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg1{stroke:#9a6c1e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg2{stroke:#d9a64a}
 body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc0{stroke:#0f9c8e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc1{stroke:#0a7f96}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc2{stroke:#24b8a8}
@@ -892,7 +893,7 @@ body[data-tree] .vt-side .vtsvg.ts-fiber .apl{fill:#e8303e}
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';if(document.body.dataset.tree==='fiber'&&/^tree/.test(document.body.dataset.theme||''))document.body.dataset.theme='tree';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -1241,49 +1242,40 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-/* ================= Tech Green: grand technology advancement tree (canvas) =================
-   Modelled on the "glowing fibre tree" reference: centred tree, short thick trunk of gold light fibres,
-   a wide round dome of puffy glowing green leaf clusters with branches of light showing between them,
-   red apples, a bright sun, gold roots on a neon perspective grid with a violet horizon glow.
-   Pulses of light travel from the roots up to the branch tips. */
+/* ================= Tech Green: Digital Vision Tree (canvas) =================
+   A single majestic tree on deep midnight navy: an intertwined trunk of gold and amber energy streams,
+   branches growing finer and more intricate, a broad canopy of thousands of cyan / electric-blue light
+   particles joined by a faint neural network, small translucent emerald wireframe leaves, tiny ruby glowing
+   dots, and golden roots spreading along the ground among cyan data particles and waves.
+   Animation: twinkling, slowly drifting particles; energy pulses through roots, trunk and branches;
+   shimmering leaves; gently glowing ruby dots. */
 const TechTree = (() => {
   const TAU = Math.PI * 2, RM = matchMedia('(prefers-reduced-motion: reduce)');
-  let host = null, cv = null, g = null, W = 0, H = 0, DPR = 1, raf = 0, live = false, born = 0, last = 0, day = null, S = null, rsT = 0;
+  let host = null, cv = null, g = null, W = 0, H = 0, DPR = 1, raf = 0, live = false, born = 0, last = 0, S = null, rsT = 0;
   const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
   const rng = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
   const sprite = (rgb, core) => {
     const c = mk(64, 64), x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, `rgba(${core || rgb},1)`); gr.addColorStop(.16, `rgba(${rgb},.85)`); gr.addColorStop(.42, `rgba(${rgb},.26)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    gr.addColorStop(0, `rgba(${core || rgb},1)`); gr.addColorStop(.16, `rgba(${rgb},.8)`); gr.addColorStop(.42, `rgba(${rgb},.22)`); gr.addColorStop(1, `rgba(${rgb},0)`);
     x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c;
   };
-  const PAL = {
-    night: { gold: ['255,190,70', '255,218,130', '255,240,196'], twig: '255,226,150', fill: 'rgba(255,184,60,.13)',
-      leaf: ['4,64,30', '10,108,46', '22,156,66', '56,204,92', '124,236,136'], leafA: .82, under: '6,70,34',
-      apple: ['#ffd2d2', '#ff3044', '#990c1b'], grid: '96,130,255', horizon: '196,120,255', pool: '255,200,90', star: '220,230,255', spark: 'rgba(255,250,225,.95)',
-      sp: { gold: ['255,196,90', '255,250,225'], green: ['100,255,150', '235,255,240'], red: ['255,50,66', '255,200,200'], white: ['255,246,210', '255,255,255'] } },
-    day: { gold: ['178,118,18', '206,150,38', '228,184,84'], twig: '196,146,50', fill: 'rgba(214,160,50,.32)',
-      leaf: ['14,92,40', '22,124,52', '36,152,66', '72,182,92', '150,214,140'], leafA: .92, under: '20,90,40',
-      apple: ['#ffb4b4', '#e0202e', '#86101a'], grid: '70,110,200', horizon: '150,110,230', pool: '214,150,40', star: '0,0,0', spark: 'rgba(255,255,235,.95)',
-      sp: { gold: ['236,160,20', '255,240,190'], green: ['30,190,90', '220,255,230'], red: ['230,30,46', '255,190,190'], white: ['255,214,120', '255,255,240'] } }
-  };
+  // palette from the brief
+  const GOLD = '217,164,65', AMBER = '255,198,90', LIGHT = '255,230,170', CYAN = '0,207,255', BLUE = '0,143,255', EMER = '25,200,117', MINT = '131,245,162', RUBY = '255,53,77';
 
-  /* ---------- geometry (depends only on viewport size) ---------- */
+  /* ---------- geometry ---------- */
   function gen() {
     const rnd = rng(20261108), mob = W < 760, MAXD = mob ? 10 : 11;
-    const GY = H * (mob ? .9 : .87), top = H * (mob ? .1 : .06), TH = GY - top;
-    const X0 = mob ? W * .5 : W * .56;
-    // canopy envelope: a wide lobed dome, flattened underneath, like the reference
-    const B = TH * .44, A = Math.min(B * 1.95, mob ? W * .62 : W * .47), CX = X0, CY = top + B, k = B / 320;
+    const GY = H * (mob ? .9 : .875), top = H * (mob ? .1 : .065), TH = GY - top, X0 = mob ? W * .5 : W * .56;
+    const B = TH * .45, A = Math.min(B * 1.8, mob ? W * .62 : W * .46), CX = X0, CY = top + B, k = B / 320;
     const ph1 = rnd() * TAU, ph2 = rnd() * TAU;
     const inside = (x, y) => { const dx = (x - CX) / A, dy = (y - CY) / B, th = Math.atan2(dy, dx), lob = 1 + .045 * Math.sin(9 * th + ph1) + .03 * Math.sin(17 * th + ph2);
-      return dx * dx + dy * dy <= lob * lob && y <= CY + B * (.2 + .05 * Math.sin(x * .018)); };
+      return dx * dx + dy * dy <= lob * lob && y <= CY + B * (.24 + .05 * Math.sin(x * .018)); };
     const edge = (x, y, a) => { const c = Math.cos(a), s = Math.sin(a); let t = 0, seen = false; for (; t < 2400; t += 3) { const ins = inside(x + c * t, y + s * t); if (ins) seen = true; else if (seen) break; } return seen ? t : 0; };
-    const nodes = [], tips = [], roots = [];
-    const TW = A * .15, splitY = GY - TH * .34;
+    const nodes = [], tips = [], roots = [], TW = A * .15, splitY = GY - TH * .35;
     function grow(x, y, ang, len, w, d, p) {
       const room = edge(x, y, ang); if (room < 5 * k && d > 2) { if (p >= 0) tips.push(p); return; }
       len = Math.min(len, room * (d < 3 ? .7 : .8));
-      const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = (rnd() - .5) * len * .3;
+      const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = (rnd() - .5) * len * .32;
       const cx = (x + x2) / 2 + Math.cos(ang + 1.5708) * bend, cy = (y + y2) / 2 + Math.sin(ang + 1.5708) * bend;
       const i = nodes.push({ x, y, cx, cy, x2, y2, w, d, p, kids: 0 }) - 1; if (p >= 0) nodes[p].kids++;
       if (d >= MAXD || len < 4 * k) { tips.push(i); return; }
@@ -1294,94 +1286,95 @@ const TechTree = (() => {
         grow(x2, y2, na, len * (.78 + rnd() * .1), w * (n === 3 ? .6 : .72), d + 1, i);
       }
     }
-    // trunk: short and thick, splitting low into a fan of limbs that fill the dome
     const t0 = nodes.push({ x: X0, y: GY, cx: X0 + (rnd() - .5) * TW * .2, cy: (GY + splitY) / 2, x2: X0, y2: splitY, w: TW, d: 1, p: -1, kids: 0 }) - 1;
-    const LA = [-2.95, -2.6, -2.25, -1.9, -1.57, -1.24, -.89, -.54, -.19];
-    LA.forEach((a, j) => grow(X0 + Math.cos(a) * TW * .15, splitY, a + (rnd() - .5) * .08, B * (.46 - Math.abs(a + 1.5708) * .03), TW * (j % 4 === 0 ? .36 : .3), 2, t0));
-    // leaf clusters: one at every branch tip, plus extra masses along the outer shell of the dome
+    [-2.95, -2.6, -2.25, -1.9, -1.57, -1.24, -.89, -.54, -.19].forEach((a, j) => grow(X0 + Math.cos(a) * TW * .15, splitY, a + (rnd() - .5) * .08, B * (.46 - Math.abs(a + 1.5708) * .03), TW * (j % 4 === 0 ? .36 : .3), 2, t0));
+    // canopy masses (invisible scaffolding for particles, leaves and fruit)
     const cl = [];
-    for (const i of tips) { const n = nodes[i]; if (rnd() < .3) cl.push({ x: n.x2, y: n.y2, r: (8 + rnd() * 10) * k }); }
-    for (let tries = 0, made = 0; made < (mob ? 120 : 260) && tries < 20000; tries++) {
-      const a = Math.PI + rnd() * Math.PI * 1.08 - .04 * Math.PI, rr = .4 + Math.sqrt(rnd()) * .58, x = CX + Math.cos(a) * A * rr, y = CY + Math.sin(a) * B * rr;
-      if (!inside(x, y)) continue; cl.push({ x, y, r: (14 + rnd() * 16) * k }); made++;
+    for (const i of tips) if (rnd() < .12) { const n = nodes[i]; cl.push({ x: n.x2, y: n.y2, r: (9 + rnd() * 10) * k }); }
+    for (let tries = 0, made = 0; made < (mob ? 200 : 460) && tries < 20000; tries++) {
+      const a = Math.PI + rnd() * Math.PI * 1.08 - .04 * Math.PI, rr = .12 + Math.sqrt(rnd()) * .84, x = CX + Math.cos(a) * A * rr, y = CY + Math.sin(a) * B * rr;
+      if (inside(x, y)) { cl.push({ x, y, r: (14 + rnd() * 16) * k }); made++; }
     }
-    cl.forEach(c => { c.o = Math.hypot((c.x - CX) / A, (c.y - CY) / B); }); cl.sort((a, b) => a.o - b.o);
-    // roots: short, dense, fanning out across the floor
+    const inCl = () => { const c = cl[Math.floor(rnd() * cl.length)], a = rnd() * TAU, rr = c.r * Math.sqrt(rnd()); return [c.x + Math.cos(a) * rr, c.y + Math.sin(a) * rr * .85]; };
+    // thousands of cyan / blue particles
+    const nP = mob ? 5000 : 12000, pts = new Float32Array(nP * 4);
+    for (let i = 0; i < nP; i++) { const [px, py] = inCl(); pts[i * 4] = px; pts[i * 4 + 1] = py; pts[i * 4 + 2] = (.55 + Math.pow(rnd(), 3) * 1.6) * Math.max(.8, k); pts[i * 4 + 3] = rnd() < .62 ? 0 : 1; }
+    // neural network: a subset of nodes, each joined to its nearest neighbours with hair-thin lines
+    const nN = mob ? 260 : 620, net = [], nn = [];
+    for (let i = 0; i < nN; i++) nn.push(inCl());
+    const reach = 46 * k;
+    for (let i = 0; i < nN; i++) { const d = []; for (let j = 0; j < nN; j++) if (j !== i) { const dd = Math.hypot(nn[i][0] - nn[j][0], nn[i][1] - nn[j][1]); if (dd < reach) d.push([dd, j]); }
+      d.sort((a, b) => a[0] - b[0]); d.slice(0, 1 + (rnd() < .5 ? 1 : 0)).forEach(([, j]) => { if (j > i || rnd() < .3) net.push(nn[i][0], nn[i][1], nn[j][0], nn[j][1]); }); }
+    // small translucent wireframe leaves
+    const nL = mob ? 520 : 1350, leaves = [];
+    for (let i = 0; i < nL; i++) { const [lx, ly] = inCl(); leaves.push({ x: lx, y: ly, rot: rnd() * TAU, s: (4.2 + rnd() * 3.6) * Math.max(.75, k), ph: rnd() * TAU }); }
+    // ruby dots, evenly spread (minimum spacing)
+    const fruit = [], want = mob ? 26 : 60, gap = 38 * k;
+    for (let tries = 0; fruit.length < want && tries < 8000; tries++) { const [fx, fy] = inCl(); if (fy < top + B * .12) continue; if (fruit.some(f => Math.hypot(f.x - fx, f.y - fy) < gap)) continue; fruit.push({ x: fx, y: fy, r: Math.max(1.8, (2.4 + rnd() * .9) * k), ph: rnd() * TAU }); }
+    // roots: intricate golden strands spreading wide along the ground
     function root(x, y, a, len, w, d, p) {
-      const pts = [[x, y]], st = len / 7;
-      for (let i = 0; i < 7; i++) { a += (rnd() - .5) * .3; a = Math.max(.03, Math.min(Math.PI - .03, a)); x += Math.cos(a) * st; y += Math.sin(a) * st * .22; pts.push([x, y]); }
-      const i = roots.push({ pts, w, d, p, kids: 0 }) - 1; if (p >= 0) roots[p].kids++;
-      if (d >= 4) return;
+      const pts2 = [[x, y]], st = len / 8;
+      for (let i = 0; i < 8; i++) { a += (rnd() - .5) * .3; a = Math.max(.02, Math.min(Math.PI - .02, a)); x += Math.cos(a) * st; y += Math.sin(a) * st * .2; pts2.push([x, y]); }
+      const i = roots.push({ pts: pts2, w, d, p, kids: 0 }) - 1; if (p >= 0) roots[p].kids++;
+      if (d >= 5) return;
       const kk = d < 2 ? 3 : 2;
-      for (let j = 0; j < kk; j++) root(x, y, a + (kk === 2 ? (j ? 1 : -1) : j - 1) * (.28 + rnd() * .3), len * (.62 + rnd() * .14), w * .6, d + 1, i);
+      for (let j = 0; j < kk; j++) root(x, y, a + (kk === 2 ? (j ? 1 : -1) : j - 1) * (.26 + rnd() * .3), len * (.64 + rnd() * .14), w * .6, d + 1, i);
     }
-    for (let j = 0; j < 12; j++) { const a = .04 + j / 11 * (Math.PI - .08), side = Math.abs(a - 1.5708) / 1.5708; root(X0 + Math.cos(a) * TW * .5, GY + 1, a, (60 + side * 170) * k * (.8 + rnd() * .4), TW * .22, 1, -1); }
-    // apples hang among the clusters
-    const apples = [], used = new Set(), want = mob ? 16 : 34;
-    for (let tries = 0; apples.length < want && tries < 6000; tries++) {
-      const c = cl[Math.floor(rnd() * cl.length)]; if (c.y < top + B * .25 || c.y > CY + B * .15) continue;
-      const key = Math.round(c.x / (44 * k)) + ':' + Math.round(c.y / (44 * k)); if (used.has(key)) continue; used.add(key);
-      apples.push({ x: c.x + (rnd() - .5) * c.r, y: c.y + c.r * (.2 + rnd() * .5), r: Math.max(3.4, (7 + rnd() * 2.5) * k), ph: rnd() * TAU });
-    }
-    // light pulse paths: root tip -> trunk -> limb -> branch tip
+    for (let j = 0; j < 14; j++) { const a = .03 + j / 13 * (Math.PI - .06), side = Math.abs(a - 1.5708) / 1.5708; root(X0 + Math.cos(a) * TW * .5, GY + 1, a, (60 + side * 150) * k * (.8 + rnd() * .4), TW * .2, 1, -1); }
+    // energy pulse paths through gold: root tip -> trunk -> limb -> branch
     const curve = (n, out, first) => { for (let s = first ? 0 : 1; s <= 6; s++) { const t = s / 6, m = 1 - t; out.push(m * m * n.x + 2 * m * t * n.cx + t * t * n.x2, m * m * n.y + 2 * m * t * n.cy + t * t * n.y2); } };
     const leafRoots = roots.map((r, i) => i).filter(i => !roots[i].kids), paths = [];
-    for (let q = 0; q < 200; q++) {
+    const mkPath = out => { const cum = [0]; for (let j = 2; j < out.length; j += 2) cum.push(cum[cum.length - 1] + Math.hypot(out[j] - out[j - 2], out[j + 1] - out[j - 1])); return { p: out, cum, len: cum[cum.length - 1] }; };
+    for (let q = 0; q < 220; q++) {
       const out = [];
       if (q % 5 < 3) { const ch = []; for (let i = leafRoots[Math.floor(rnd() * leafRoots.length)]; i >= 0; i = roots[i].p) ch.push(roots[i]); ch.forEach(r => { for (let j = r.pts.length - 1; j >= 0; j--) out.push(r.pts[j][0], r.pts[j][1]); }); }
       const ch = []; for (let i = tips[Math.floor(rnd() * tips.length)]; i >= 0; i = nodes[i].p) ch.push(nodes[i]);
       ch.reverse().forEach((n, j) => curve(n, out, j === 0 && !out.length));
-      const cum = [0]; for (let j = 2; j < out.length; j += 2) cum.push(cum[cum.length - 1] + Math.hypot(out[j] - out[j - 2], out[j + 1] - out[j - 1]));
-      paths.push({ p: out, cum, len: cum[cum.length - 1] });
+      paths.push(mkPath(out));
     }
-    const tw = []; for (let q = 0; q < (mob ? 100 : 260); q++) { const c = cl[Math.floor(rnd() * cl.length)], a = rnd() * TAU, rr = rnd() * c.r; tw.push({ x: c.x + Math.cos(a) * rr, y: c.y + Math.sin(a) * rr, f: .0006 + rnd() * .0016, ph: rnd() * TAU, s: 5 + rnd() * 9, star: rnd() < .22 }); }
-    const motes = []; for (let q = 0; q < (mob ? 24 : 60); q++) motes.push({ x: X0 + (rnd() - .5) * A * 2.2, y: rnd() * GY, v: 6 + rnd() * 16, ph: rnd() * TAU, s: 4 + rnd() * 7, gold: rnd() < .4 });
-    const stars = []; for (let q = 0; q < Math.min(340, W * H / 3800); q++) stars.push([rnd() * W, rnd() * GY * .97, .3 + rnd() * 1.1, .25 + rnd() * .7]);
-    const sun = { x: mob ? W * .86 : W * .9, y: mob ? H * .08 : H * .12, r: Math.max(18, Math.min(W, H) * .034) };
-    S = { mob, nodes, tips, roots, cl, apples, paths, tw, motes, stars, sun, GY, X0, k, A, B, CX, CY, TW, pulses: [], flashes: [], next: 0 };
+    // outward pulses along the roots (trunk -> root tip)
+    for (let q = 0; q < 40; q++) { const out = [], ch = []; for (let i = leafRoots[Math.floor(rnd() * leafRoots.length)]; i >= 0; i = roots[i].p) ch.push(roots[i]); ch.reverse().forEach((r, j) => r.pts.forEach((pt, m) => { if (j === 0 || m) out.push(pt[0], pt[1]); })); paths.push(mkPath(out)); }
+    // animated particles: a subset that drifts and twinkles
+    const live = []; for (let i = 0; i < (mob ? 160 : 420); i++) { const [px, py] = inCl(); live.push({ x: px, y: py, ax: (3 + rnd() * 7) * k, ay: (2 + rnd() * 5) * k, f: .00012 + rnd() * .00025, ph: rnd() * TAU, tf: .0008 + rnd() * .002, s: 4 + rnd() * 7, c: rnd() < .6 ? 0 : 1 }); }
+    const shim = []; for (let i = 0; i < Math.min(leaves.length, mob ? 70 : 170); i++) { const l = leaves[Math.floor(rnd() * leaves.length)]; shim.push({ x: l.x, y: l.y, s: l.s * 2.6, f: .0005 + rnd() * .0009, ph: rnd() * TAU }); }
+    const gp = []; for (let i = 0; i < (mob ? 50 : 130); i++) { const u = (rnd() - .5) * 2, dd = rnd(); gp.push({ x: X0 + u * A * (1.1 + dd * .8), y: GY + 3 + dd * (H - GY) * .9, s: 3 + rnd() * 5, f: .0006 + rnd() * .0015, ph: rnd() * TAU, v: (rnd() - .5) * 6 }); }
+    const stars = []; for (let q = 0; q < Math.min(260, W * H / 5200); q++) stars.push([rnd() * W, rnd() * GY * .95, .3 + rnd() * .9, .2 + rnd() * .55]);
+    const sun = { x: mob ? W * .86 : W * .9, y: mob ? H * .08 : H * .12, r: Math.max(14, Math.min(W, H) * .026) };
+    S = { mob, nodes, tips, roots, pts, net, leaves, fruit, paths, live, shim, gp, stars, sun, GY, X0, k, A, B, CX, CY, TW, pulses: [], flashes: [], next: 0 };
   }
 
   /* ---------- static layer ---------- */
-  function apples(x, C) {
-    for (const a of S.apples) {
-      x.strokeStyle = `rgba(${C.gold[1]},.9)`; x.lineWidth = Math.max(.8, a.r * .16); x.beginPath(); x.moveTo(a.x, a.y - a.r * .85); x.quadraticCurveTo(a.x + a.r * .1, a.y - a.r * 1.4, a.x + a.r * .35, a.y - a.r * 1.7); x.stroke();
-      x.fillStyle = `rgba(${C.leaf[3]},.95)`; x.beginPath(); x.ellipse(a.x + a.r * .6, a.y - a.r * 1.35, a.r * .5, a.r * .2, -.5, 0, TAU); x.fill();
-      const ag = x.createRadialGradient(a.x - a.r * .35, a.y - a.r * .35, a.r * .05, a.x, a.y, a.r); ag.addColorStop(0, C.apple[0]); ag.addColorStop(.35, C.apple[1]); ag.addColorStop(1, C.apple[2]);
-      x.fillStyle = ag; x.beginPath(); x.arc(a.x - a.r * .1, a.y, a.r, 0, TAU); x.arc(a.x + a.r * .1, a.y, a.r, 0, TAU); x.fill();
-      x.fillStyle = 'rgba(255,255,255,.85)'; x.beginPath(); x.ellipse(a.x - a.r * .4, a.y - a.r * .4, a.r * .22, a.r * .14, -.6, 0, TAU); x.fill();
-    }
-  }
   function paint() {
-    const C = day ? PAL.day : PAL.night, rnd = rng(7), { nodes, roots, GY, X0, k, A, B, CX, CY } = S;
+    const rnd = rng(7), { nodes, roots, GY, X0, k, A, B, CX, CY } = S;
     const L = mk(W * DPR, H * DPR), x = L.getContext('2d'); x.setTransform(DPR, 0, 0, DPR, 0, 0); x.lineCap = 'round'; x.lineJoin = 'round';
-    const Bt = new Map(), bp = (col, a, w) => { const ak = Math.round(a * 10) / 10, wk = Math.max(.25, Math.round(w * 4) / 4), key = col + '|' + ak + '|' + wk; let e = Bt.get(key); if (!e) Bt.set(key, e = { p: new Path2D(), s: `rgba(${col},${ak})`, w: wk }); return e.p; };
+    const Bt = new Map(), bp = (col, a, w) => { const ak = Math.round(a * 20) / 20, wk = Math.max(.25, Math.round(w * 4) / 4), key = col + '|' + ak + '|' + wk; let e = Bt.get(key); if (!e) Bt.set(key, e = { p: new Path2D(), s: `rgba(${col},${ak})`, w: wk }); return e.p; };
     const flush = () => { for (const e of Bt.values()) { x.strokeStyle = e.s; x.lineWidth = e.w; x.stroke(e.p); } Bt.clear(); };
-    if (!day) for (const [sx, sy, r, a] of S.stars) { x.fillStyle = `rgba(${C.star},${a})`; x.beginPath(); x.arc(sx, sy, r, 0, TAU); x.fill(); }
-    // floor: neon perspective grid with a violet horizon glow and a golden pool under the trunk
-    const fl = H - GY, cX = Math.max(.05, Math.min(.95, X0 / W));
-    const hb = x.createLinearGradient(0, GY - fl * 1.4, 0, GY + fl * .5); hb.addColorStop(0, `rgba(${C.horizon},0)`); hb.addColorStop(.62, `rgba(${C.horizon},${day ? .16 : .3})`); hb.addColorStop(.74, `rgba(${C.horizon},${day ? .1 : .18})`); hb.addColorStop(1, `rgba(${C.horizon},0)`);
-    x.fillStyle = hb; x.fillRect(0, GY - fl * 1.4, W, fl * 1.9);
-    const hg = x.createLinearGradient(0, 0, W, 0); hg.addColorStop(0, `rgba(${C.grid},.12)`); hg.addColorStop(cX, `rgba(${C.grid},.55)`); hg.addColorStop(1, `rgba(${C.grid},.12)`);
-    x.strokeStyle = hg; x.lineWidth = .9;
-    for (let j = 1; j <= 11; j++) { const y = GY + fl * Math.pow(j / 11, 1.7); x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); }
-    const u = Math.max(W, 900) / 16;
-    for (let i = -22; i <= 22; i++) { x.globalAlpha = Math.max(.08, .6 - Math.abs(i) * .025); x.strokeStyle = `rgb(${C.grid})`; x.beginPath(); x.moveTo(X0 + i * u * .14, GY); x.lineTo(X0 + i * u * 1.8, H + fl * .4); x.stroke(); }
-    x.globalAlpha = 1;
-    const hz = x.createLinearGradient(0, 0, W, 0); hz.addColorStop(0, `rgba(${C.horizon},.25)`); hz.addColorStop(cX, `rgba(255,236,250,.95)`); hz.addColorStop(1, `rgba(${C.horizon},.25)`);
-    x.strokeStyle = hz; x.lineWidth = 1.6; x.beginPath(); x.moveTo(0, GY); x.lineTo(W, GY); x.stroke();
-    x.save(); x.translate(X0, GY + 2); x.scale(1, .2); const bg = x.createRadialGradient(0, 0, 0, 0, 0, A * .9);
-    bg.addColorStop(0, `rgba(${C.pool},${day ? .5 : .75})`); bg.addColorStop(.3, `rgba(${C.pool},.22)`); bg.addColorStop(1, `rgba(${C.pool},0)`); x.fillStyle = bg; x.beginPath(); x.arc(0, 0, A * .9, 0, TAU); x.fill(); x.restore();
-    // roots
+    for (const [sx, sy, r, a] of S.stars) { x.fillStyle = `rgba(200,225,255,${a})`; x.beginPath(); x.arc(sx, sy, r, 0, TAU); x.fill(); }
+    // volumetric light: a soft blue halo behind the canopy and warm light rising from the base
+    let gr = x.createRadialGradient(CX, CY + B * .1, 0, CX, CY + B * .1, A * 1.15); gr.addColorStop(0, 'rgba(0,120,255,.16)'); gr.addColorStop(.55, 'rgba(0,100,220,.06)'); gr.addColorStop(1, 'rgba(0,80,200,0)');
+    x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    x.save(); x.translate(X0, GY); x.scale(1, .22); gr = x.createRadialGradient(0, 0, 0, 0, 0, A * 1.05); gr.addColorStop(0, `rgba(${AMBER},.42)`); gr.addColorStop(.25, `rgba(${GOLD},.14)`); gr.addColorStop(1, `rgba(${GOLD},0)`);
+    x.fillStyle = gr; x.beginPath(); x.arc(0, 0, A * 1.05, 0, TAU); x.fill(); x.restore();
+    // ground: a faint horizon, then wave-like data connections in cyan
+    const hz = x.createLinearGradient(0, 0, W, 0), cX = Math.max(.05, Math.min(.95, X0 / W)); hz.addColorStop(0, `rgba(${BLUE},0)`); hz.addColorStop(cX, `rgba(${CYAN},.5)`); hz.addColorStop(1, `rgba(${BLUE},0)`);
+    x.strokeStyle = hz; x.lineWidth = 1; x.beginPath(); x.moveTo(0, GY); x.lineTo(W, GY); x.stroke();
+    for (let j = 0; j < 6; j++) {
+      const yb = GY + (H - GY) * (.12 + j * .15), amp = (3 + j * 2.2) * k, fr = .006 - j * .0006, ph = j * 1.7, wg = x.createLinearGradient(0, 0, W, 0);
+      wg.addColorStop(0, `rgba(${CYAN},0)`); wg.addColorStop(Math.max(0, cX - .35), `rgba(${CYAN},${.05 + j * .012})`); wg.addColorStop(cX, `rgba(${CYAN},${.22 - j * .02})`); wg.addColorStop(Math.min(1, cX + .35), `rgba(${CYAN},${.05 + j * .012})`); wg.addColorStop(1, `rgba(${CYAN},0)`);
+      x.strokeStyle = wg; x.lineWidth = .8; x.beginPath(); for (let px = 0; px <= W; px += 6) { const py = yb + Math.sin(px * fr + ph) * amp + Math.sin(px * fr * 2.7 + ph * 2) * amp * .35; px ? x.lineTo(px, py) : x.moveTo(px, py); } x.stroke();
+    }
+    for (let i = 0; i < 260; i++) { const u = (rnd() - .5) * 2, dd = rnd(), px = X0 + u * A * (1 + dd), py = GY + 2 + dd * (H - GY); x.fillStyle = `rgba(${rnd() < .6 ? CYAN : BLUE},${(.15 + rnd() * .45) * (1 - Math.abs(u) * .6)})`; x.beginPath(); x.arc(px, py, .5 + rnd() * .9, 0, TAU); x.fill(); }
+    // roots: delicate flowing strands of golden light
     for (const r of roots) {
-      const m = r.d === 1 ? 5 : r.d === 2 ? 3 : r.d === 3 ? 2 : 1;
+      const m = r.d === 1 ? 6 : r.d === 2 ? 3 : r.d === 3 ? 2 : 1;
       for (let j = 0; j < m; j++) {
-        const jo = (j - (m - 1) / 2) * r.w * .3, pp = bp(C.gold[j % 3], .45 + rnd() * .4, .5 + rnd() * .8);
-        r.pts.forEach(([px, py], q) => { const kk = 1 - q / r.pts.length; q ? pp.lineTo(px, py + jo * kk * .3 + (rnd() - .5)) : pp.moveTo(px + jo, py); });
+        const jo = (j - (m - 1) / 2) * r.w * .3, pp = bp(j % 3 === 2 ? LIGHT : j % 2 ? AMBER : GOLD, .3 + rnd() * .35, .4 + rnd() * .6);
+        r.pts.forEach(([px, py], q) => { const kk = 1 - q / r.pts.length; q ? pp.lineTo(px, py + jo * kk * .3 + (rnd() - .5) * .8) : pp.moveTo(px + jo, py); });
       }
     }
     flush();
-    // trunk & limbs: gold body plus braided fibres of light
-    x.fillStyle = C.fill;
+    // trunk & limbs: intertwining streams of gold and amber energy over a faint metallic body
+    x.fillStyle = `rgba(${GOLD},.12)`;
     for (const n of nodes) if (n.d <= 4) {
       const dx = n.x2 - n.x, dy = n.y2 - n.y, m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, a = n.w * .5, b = n.w * (n.d === 1 ? .62 : .36), fl2 = n.d === 1 ? 1.9 : 1;
       x.beginPath(); x.moveTo(n.x + nx * a * fl2, n.y + ny * a); x.quadraticCurveTo(n.cx + nx * a * .75, n.cy + ny * a * .75, n.x2 + nx * b, n.y2 + ny * b);
@@ -1391,59 +1384,62 @@ const TechTree = (() => {
       if (n.d <= 5) {
         const dx = n.x2 - n.x, dy = n.y2 - n.y, m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, cnt = Math.max(2, Math.min(150, Math.round(n.w / (n.d === 1 ? .9 : 1.3))));
         for (let i = 0; i < cnt; i++) {
-          const uu = i / (cnt - 1) - .5, a0 = uu * n.w, a1 = uu * n.w * (n.d === 1 ? .9 : .7), ac = uu * n.w * (.3 + rnd() * .8) + (rnd() - .5) * n.w * .3, edge = Math.abs(uu) > .45;
-          const pp = bp(C.gold[edge ? 2 : i % 3], edge ? .85 : .35 + rnd() * .45, edge ? 1.3 : .45 + rnd() * .8);
-          if (n.d === 1) {
-            // the trunk's fibres fan out at the base and spread to all limbs at the top
-            const ex = n.x2 + nx * a1 + (rnd() - .5) * n.w * .35;
-            pp.moveTo(n.x + nx * a0 * 2.1, n.y + 1 + rnd() * 6 * k); pp.bezierCurveTo(n.x + nx * a0 * .9, n.y - n.w * .8, n.cx + nx * ac, n.cy, ex, n.y2 - n.w * .05);
-          } else { pp.moveTo(n.x + nx * a0, n.y + ny * a0); pp.quadraticCurveTo(n.cx + nx * ac, n.cy + ny * ac, n.x2 + nx * a1, n.y2 + ny * a1); }
+          // each strand crosses from one side to the other on its way up: an intertwined, braided trunk
+          const uu = i / (cnt - 1) - .5, sw = n.d <= 2 ? (rnd() < .5 ? -1 : 1) * (.4 + rnd() * .6) : 1, a0 = uu * n.w, a1 = uu * n.w * (n.d === 1 ? .9 : .7) * sw, ac = -uu * n.w * (.2 + rnd() * .6) * (n.d <= 2 ? 1 : -.8) + (rnd() - .5) * n.w * .3, edge = Math.abs(uu) > .45;
+          const fade = n.d <= 2 ? 1 : n.d === 3 ? .7 : .5, pp = bp(edge ? LIGHT : i % 3 === 0 ? AMBER : GOLD, (edge ? .8 : .3 + rnd() * .45) * fade, edge ? 1.2 * fade : .4 + rnd() * .7);
+          if (n.d === 1) { const ex = n.x2 + nx * a1 + (rnd() - .5) * n.w * .35; pp.moveTo(n.x + nx * a0 * 2.1, n.y + 1 + rnd() * 6 * k); pp.bezierCurveTo(n.x + nx * a0 * .9, n.y - n.w * .8, n.cx + nx * ac, n.cy, ex, n.y2 - n.w * .05); }
+          else { pp.moveTo(n.x + nx * a0, n.y + ny * a0); pp.quadraticCurveTo(n.cx + nx * ac, n.cy + ny * ac, n.x2 + nx * a1 * (n.d <= 2 ? 1 : 1), n.y2 + ny * a1); }
         }
       } else {
-        const pp = bp(n.d < 7 ? C.gold[2] : C.twig, n.d < 7 ? .8 : .65, Math.max(.5, n.w * .55));
+        const t = (n.d - 6) / 5, pp = bp(t < .3 ? AMBER : LIGHT, .42 - t * .3, Math.max(.3, n.w * .4));
         pp.moveTo(n.x, n.y); pp.quadraticCurveTo(n.cx, n.cy, n.x2, n.y2);
       }
     }
     flush();
-    // canopy: puffy clusters of small leaves, a darker body under each, lit from the top-right
-    for (const c of S.cl) { const gr = x.createRadialGradient(c.x, c.y + c.r * .15, 0, c.x, c.y + c.r * .15, c.r * 1.25); gr.addColorStop(0, `rgba(${C.under},${day ? .55 : .7})`); gr.addColorStop(1, `rgba(${C.under},0)`); x.fillStyle = gr; x.beginPath(); x.arc(c.x, c.y + c.r * .15, c.r * 1.25, 0, TAU); x.fill(); }
-    const LP = C.leaf.map(() => []), DT = [], lr = Math.max(1.5, 3.3 * k), lw = Math.max(.8, 1.6 * k);
-    for (const c of S.cl) {
-      const n = Math.round(c.r * c.r * .1 / (k * k)) + 6;
-      for (let j = 0; j < n; j++) {
-        const a = rnd() * TAU, rr = c.r * Math.sqrt(rnd()), lx = c.x + Math.cos(a) * rr, ly = c.y + Math.sin(a) * rr * .85;
-        const lit = (lx - c.x) / c.r * .5 - (ly - c.y) / c.r * .9 + (lx - CX) / A * .3 - (ly - CY) / B * .3 + c.o * .2 + (rnd() - .5) * .6;
-        const sh = lit > 1.45 ? 4 : lit > .8 ? 3 : lit > .2 ? 2 : lit > -.35 ? 1 : 0, s = .7 + rnd() * .6;
-        LP[sh].push(lx, ly, lr * s, lw * s, rnd() * TAU);
-        if (rnd() < .025) DT.push(lx, ly);
-      }
+    // neural network lines: hair-thin, faint
+    const np = bp(CYAN, .2, .45); for (let i = 0; i < S.net.length; i += 4) { np.moveTo(S.net[i], S.net[i + 1]); np.lineTo(S.net[i + 2], S.net[i + 3]); } flush();
+    // thousands of tiny cyan and electric-blue particles
+    const P = S.pts, pc = [new Path2D(), new Path2D()], big = [];
+    for (let i = 0; i < P.length; i += 4) { const r = P[i + 2]; if (r > 1.35) big.push(i); else { pc[P[i + 3]].moveTo(P[i] + r, P[i + 1]); pc[P[i + 3]].arc(P[i], P[i + 1], r, 0, TAU); } }
+    x.fillStyle = `rgba(${CYAN},.85)`; x.fill(pc[0]); x.fillStyle = `rgba(${BLUE},.9)`; x.fill(pc[1]);
+    for (const i of big) { x.fillStyle = `rgba(${P[i + 3] ? BLUE : CYAN},.95)`; x.beginPath(); x.arc(P[i], P[i + 1], P[i + 2], 0, TAU); x.fill(); x.fillStyle = 'rgba(225,250,255,.9)'; x.beginPath(); x.arc(P[i], P[i + 1], P[i + 2] * .45, 0, TAU); x.fill(); }
+    // net nodes as brighter points
+    x.fillStyle = 'rgba(190,240,255,.85)'; x.beginPath(); for (let i = 0; i < S.net.length; i += 4) { x.moveTo(S.net[i] + 1, S.net[i + 1]); x.arc(S.net[i], S.net[i + 1], .9 * Math.max(.8, k), 0, TAU); } x.fill();
+    // small translucent emerald leaves with glowing mint outlines and wireframe veins
+    const lf = new Path2D(), lo = new Path2D(), lv = new Path2D();
+    for (const l of S.leaves) {
+      const c = Math.cos(l.rot), s = Math.sin(l.rot), P2 = (u, v) => [l.x + (u * c - v * s) * l.s, l.y + (u * s + v * c) * l.s];
+      const [ax, ay] = P2(-1, 0), [bx, by] = P2(1, 0), [c1x, c1y] = P2(0, -.62), [c2x, c2y] = P2(0, .62);
+      for (const p of [lf, lo]) { p.moveTo(ax, ay); p.quadraticCurveTo(c1x, c1y, bx, by); p.quadraticCurveTo(c2x, c2y, ax, ay); }
+      lv.moveTo(ax, ay); lv.lineTo(bx, by);
+      for (const t of [-.35, .2]) { const [mx, my] = P2(t, 0), [ex, ey] = P2(t + .35, -.24), [fx, fy] = P2(t + .35, .24); lv.moveTo(mx, my); lv.lineTo(ex, ey); lv.moveTo(mx, my); lv.lineTo(fx, fy); }
     }
-    LP.forEach((a, i) => { x.fillStyle = `rgba(${C.leaf[i]},${C.leafA})`;
-      for (let j = 0; j < a.length; j += 5) { if (j % 1000 === 0) { if (j) x.fill(); x.beginPath(); } x.moveTo(a[j] + Math.cos(a[j + 4]) * a[j + 2], a[j + 1] + Math.sin(a[j + 4]) * a[j + 2]); x.ellipse(a[j], a[j + 1], a[j + 2], a[j + 3], a[j + 4], 0, TAU); }
-      x.fill(); });
-    // fine branches of light glinting through the leaves, as in the reference
-    for (const n of nodes) if (n.d >= 4 && n.d <= 8) { const pp = bp(C.gold[n.d < 6 ? 1 : 2], n.d < 6 ? .3 : .16, Math.max(.4, n.w * .35)); pp.moveTo(n.x, n.y); pp.quadraticCurveTo(n.cx, n.cy, n.x2, n.y2); }
-    flush();
-    const dr = Math.max(.9, 1.4 * k); x.fillStyle = C.spark; x.beginPath();
-    for (let j = 0; j < DT.length; j += 2) { x.moveTo(DT[j] + dr, DT[j + 1]); x.arc(DT[j], DT[j + 1], dr, 0, TAU); } x.fill();
-    // bloom: blur by downsampling, add it back under the sharp layer
+    x.fillStyle = `rgba(${EMER},.28)`; x.fill(lf);
+    x.strokeStyle = `rgba(${MINT},.85)`; x.lineWidth = .7; x.stroke(lo);
+    x.strokeStyle = `rgba(${MINT},.45)`; x.lineWidth = .4; x.stroke(lv);
+    // bloom: soft cinematic glow
     const F = mk(W * DPR, H * DPR), f = F.getContext('2d'), b1 = mk(W / 4, H / 4), b2 = mk(W / 12, H / 12);
     b1.getContext('2d').drawImage(L, 0, 0, b1.width, b1.height); b2.getContext('2d').drawImage(b1, 0, 0, b2.width, b2.height);
-    f.imageSmoothingQuality = 'high';
-    if (day) { f.globalAlpha = .3; f.drawImage(b2, 0, 0, F.width, F.height); f.globalAlpha = 1; f.drawImage(L, 0, 0); }
-    else { f.globalCompositeOperation = 'lighter'; f.globalAlpha = .65; f.drawImage(b2, 0, 0, F.width, F.height); f.globalAlpha = .3; f.drawImage(b1, 0, 0, F.width, F.height); f.globalAlpha = 1; f.drawImage(L, 0, 0); }
-    f.globalCompositeOperation = 'source-over'; f.globalAlpha = 1; f.setTransform(DPR, 0, 0, DPR, 0, 0); apples(f, C);
+    f.imageSmoothingQuality = 'high'; f.globalCompositeOperation = 'lighter';
+    f.globalAlpha = .85; f.drawImage(b2, 0, 0, F.width, F.height); f.globalAlpha = .55; f.drawImage(b1, 0, 0, F.width, F.height); f.globalAlpha = 1; f.drawImage(L, 0, 0);
+    // ruby dots with restrained halos, kept crisp on top
+    f.setTransform(DPR, 0, 0, DPR, 0, 0);
+    for (const d of S.fruit) {
+      const h = f.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 4); h.addColorStop(0, `rgba(${RUBY},.45)`); h.addColorStop(1, `rgba(${RUBY},0)`); f.fillStyle = h; f.beginPath(); f.arc(d.x, d.y, d.r * 4, 0, TAU); f.fill();
+      f.globalCompositeOperation = 'source-over'; const s2 = f.createRadialGradient(d.x - d.r * .3, d.y - d.r * .3, 0, d.x, d.y, d.r); s2.addColorStop(0, '#ffd6dc'); s2.addColorStop(.4, `rgb(${RUBY})`); s2.addColorStop(1, '#b0102a');
+      f.fillStyle = s2; f.beginPath(); f.arc(d.x, d.y, d.r, 0, TAU); f.fill(); f.globalCompositeOperation = 'lighter';
+    }
+    f.globalCompositeOperation = 'source-over';
     S.static = F;
-    const sp = C.sp; S.spr = { gold: sprite(sp.gold[0], sp.gold[1]), green: sprite(sp.green[0], sp.green[1]), red: sprite(sp.red[0], sp.red[1]), white: sprite(sp.white[0], sp.white[1]) };
-    // the sun: crisp white core, warm bloom, short rays
-    const R = S.sun.r, sb = mk(R * 16, R * 16), sx = sb.getContext('2d'), c = R * 8, sg = sx.createRadialGradient(c, c, 0, c, c, c);
-    sg.addColorStop(0, 'rgba(255,255,255,1)'); sg.addColorStop(.11, 'rgba(255,252,232,1)'); sg.addColorStop(.14, day ? 'rgba(255,206,96,.95)' : 'rgba(255,224,140,.9)');
-    sg.addColorStop(.26, day ? 'rgba(255,184,64,.45)' : 'rgba(255,186,80,.4)'); sg.addColorStop(.55, 'rgba(255,160,60,.1)'); sg.addColorStop(1, 'rgba(255,160,60,0)');
+    S.spr = { gold: sprite(AMBER, '255,248,220'), cyan: sprite(CYAN, '230,252,255'), blue: sprite(BLUE, '210,235,255'), mint: sprite(MINT, '235,255,240'), ruby: sprite(RUBY, '255,200,205'), white: sprite('220,245,255', '255,255,255') };
+    // the sun: a refined golden glow in the corner
+    const R = S.sun.r, sb = mk(R * 14, R * 14), sx = sb.getContext('2d'), c = R * 7, sg = sx.createRadialGradient(c, c, 0, c, c, c);
+    sg.addColorStop(0, 'rgba(255,255,250,1)'); sg.addColorStop(.12, 'rgba(255,246,220,1)'); sg.addColorStop(.16, `rgba(${AMBER},.85)`); sg.addColorStop(.32, `rgba(${GOLD},.3)`); sg.addColorStop(.6, `rgba(${GOLD},.08)`); sg.addColorStop(1, `rgba(${GOLD},0)`);
     sx.fillStyle = sg; sx.fillRect(0, 0, sb.width, sb.height);
-    const rays = mk(R * 20, R * 20), rx = rays.getContext('2d'), rc = R * 10; rx.translate(rc, rc);
-    for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, len = rc * (i % 2 ? .55 : .95), wd = R * (i % 2 ? .09 : .14);
-      const gr = rx.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len); gr.addColorStop(0, day ? 'rgba(255,186,70,.55)' : 'rgba(255,226,150,.5)'); gr.addColorStop(1, 'rgba(255,214,130,0)');
-      rx.fillStyle = gr; rx.beginPath(); rx.moveTo(Math.cos(a + 1.5708) * wd, Math.sin(a + 1.5708) * wd); rx.lineTo(Math.cos(a) * len, Math.sin(a) * len); rx.lineTo(Math.cos(a - 1.5708) * wd, Math.sin(a - 1.5708) * wd); rx.closePath(); rx.fill(); }
+    const rays = mk(R * 16, R * 16), rx = rays.getContext('2d'), rc = R * 8; rx.translate(rc, rc);
+    for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, len = rc * (i % 2 ? .55 : .95), wd = R * (i % 2 ? .06 : .1);
+      const g2 = rx.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len); g2.addColorStop(0, `rgba(${AMBER},.4)`); g2.addColorStop(1, `rgba(${AMBER},0)`);
+      rx.fillStyle = g2; rx.beginPath(); rx.moveTo(Math.cos(a + 1.5708) * wd, Math.sin(a + 1.5708) * wd); rx.lineTo(Math.cos(a) * len, Math.sin(a) * len); rx.lineTo(Math.cos(a - 1.5708) * wd, Math.sin(a - 1.5708) * wd); rx.closePath(); rx.fill(); }
     S.sunBloom = sb; S.sunRays = rays;
   }
 
@@ -1456,53 +1452,45 @@ const TechTree = (() => {
   const dot = (img, px, py, sz, a) => { if (a <= 0 || sz <= 0) return; g.globalAlpha = Math.min(1, a); g.drawImage(img, px - sz / 2, py - sz / 2, sz, sz); };
   function draw(t) {
     const dt = Math.min(50, t - (last || t)); last = t;
-    const age = Math.max(0, (t - born) / 1000), intro = RM.matches ? 1 : Math.min(1, age / 3.4), ease = 1 - Math.pow(1 - intro, 3), { sun, spr, GY, X0 } = S;
-    g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H); g.globalCompositeOperation = day ? 'source-over' : 'lighter';
-    const sa = Math.min(1, age / 2.2), br = 1 + Math.sin(t / 1900) * .04;
-    g.save(); g.translate(sun.x, sun.y); g.rotate(t * .00004); g.globalAlpha = sa * (.7 + Math.sin(t / 2600) * .15); g.drawImage(S.sunRays, -sun.r * 10, -sun.r * 10); g.restore();
-    g.globalAlpha = sa; g.drawImage(S.sunBloom, sun.x - sun.r * 8 * br, sun.y - sun.r * 8 * br, sun.r * 16 * br, sun.r * 16 * br);
+    const age = Math.max(0, (t - born) / 1000), intro = RM.matches ? 1 : Math.min(1, age / 3.6), ease = 1 - Math.pow(1 - intro, 3), { sun, spr, GY, X0, k } = S;
+    g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H); g.globalCompositeOperation = 'lighter';
+    const sa = Math.min(1, age / 2.4), br = 1 + Math.sin(t / 2100) * .03;
+    g.save(); g.translate(sun.x, sun.y); g.rotate(t * .00003); g.globalAlpha = sa * (.6 + Math.sin(t / 2800) * .12); g.drawImage(S.sunRays, -sun.r * 8, -sun.r * 8); g.restore();
+    g.globalAlpha = sa; g.drawImage(S.sunBloom, sun.x - sun.r * 7 * br, sun.y - sun.r * 7 * br, sun.r * 14 * br, sun.r * 14 * br);
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
     if (ease < 1) { g.save(); g.beginPath(); g.arc(X0, GY, ease * Math.hypot(W, H), 0, TAU); g.clip(); g.drawImage(S.static, 0, 0, W, H); g.restore(); }
     else g.drawImage(S.static, 0, 0, W, H);
     if (RM.matches) return;
-    g.globalCompositeOperation = day ? 'source-over' : 'lighter';
-    for (let q = 0; q < 3; q++) { const ph = ((t / 4200) + q / 3) % 1, rx = ph * W * .55;
-      g.globalAlpha = (1 - ph) * .5 * ease; g.strokeStyle = day ? 'rgba(200,140,30,1)' : 'rgba(255,214,120,1)'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(X0, GY + 2, rx, rx * .13, 0, 0, TAU); g.stroke(); }
-    for (const w of S.tw) { const s = Math.sin(t * w.f + w.ph); if (s < .55) continue; const a = (s - .55) / .45;
-      dot(spr.white, w.x, w.y, w.s * (.6 + a), a * ease);
-      if (w.star && a > .4) { const L = w.s * 1.4 * a; g.globalAlpha = a * .8; g.strokeStyle = '#fffbe8'; g.lineWidth = 1; g.beginPath(); g.moveTo(w.x - L, w.y); g.lineTo(w.x + L, w.y); g.moveTo(w.x, w.y - L); g.lineTo(w.x, w.y + L); g.stroke(); } }
-    for (const a of S.apples) dot(spr.red, a.x, a.y, a.r * (5 + Math.sin(t / 900 + a.ph)), (day ? .35 : .55) * ease);
-    if (intro >= 1 && t > S.next && S.pulses.length < (S.mob ? 14 : 34)) {
-      const pa = S.paths[Math.floor(Math.random() * S.paths.length)];
-      S.pulses.push({ pa, s: 0, v: H * (.3 + Math.random() * .28), h: { i: 0 }, tr: [] }); S.next = t + 70 + Math.random() * 170;
-    }
+    g.globalCompositeOperation = 'lighter';
+    // blue particles: gentle twinkling and slow drifting
+    for (const p of S.live) { const px = p.x + Math.sin(t * p.f + p.ph) * p.ax, py = p.y + Math.cos(t * p.f * 1.3 + p.ph) * p.ay, tw = .5 + .5 * Math.sin(t * p.tf + p.ph);
+      dot(p.c ? spr.blue : spr.cyan, px, py, p.s * (.7 + tw * .5), (.25 + tw * .6) * ease); }
+    // leaves shimmer softly
+    for (const l of S.shim) { const s = .5 + .5 * Math.sin(t * l.f + l.ph); dot(spr.mint, l.x, l.y, l.s, s * s * .35 * ease); }
+    // ruby dots glow gently
+    for (const d of S.fruit) dot(spr.ruby, d.x, d.y, d.r * (6 + Math.sin(t / 1100 + d.ph) * 1.2), .4 * ease);
+    // ground: drifting cyan data particles
+    for (const p of S.gp) { const px = p.x + Math.sin(t * .0002 + p.ph) * 12 * k + p.v * Math.sin(t * .00005), s = .5 + .5 * Math.sin(t * p.f + p.ph); dot(spr.cyan, px, p.y, p.s, s * .55 * ease); }
+    // energy pulses travelling through the gold
+    if (intro >= 1 && t > S.next && S.pulses.length < (S.mob ? 10 : 24)) { S.pulses.push({ pa: S.paths[Math.floor(Math.random() * S.paths.length)], s: 0, v: H * (.22 + Math.random() * .2), h: { i: 0 }, tr: [] }); S.next = t + 120 + Math.random() * 240; }
     S.pulses = S.pulses.filter(q => {
-      q.s += q.v * dt / 1000; const [px, py] = at(q.pa, q.s, q.h), img = q.s / q.pa.len < .55 ? spr.gold : spr.green;
-      q.tr.unshift(px, py); if (q.tr.length > 18) q.tr.length = 18;
-      for (let j = q.tr.length - 2; j >= 2; j -= 2) dot(img, q.tr[j], q.tr[j + 1], 9 - j * .3, .5 - j * .025);
-      dot(img, px, py, 16, .95); dot(spr.white, px, py, 5, 1);
+      q.s += q.v * dt / 1000; const [px, py] = at(q.pa, q.s, q.h);
+      q.tr.unshift(px, py); if (q.tr.length > 20) q.tr.length = 20;
+      for (let j = q.tr.length - 2; j >= 2; j -= 2) dot(spr.gold, q.tr[j], q.tr[j + 1], 8 - j * .25, .45 - j * .02);
+      dot(spr.gold, px, py, 13, .9); dot(spr.white, px, py, 4, .9);
       if (q.s >= q.pa.len) { S.flashes.push({ x: px, y: py, t0: t }); return false; }
       return true;
     });
-    S.flashes = S.flashes.filter(fl => { const p = (t - fl.t0) / 1100; if (p >= 1) return false;
-      dot(spr.green, fl.x, fl.y, 10 + p * 34, (1 - p) * .9); dot(spr.white, fl.x, fl.y, 8 * (1 - p), 1 - p);
-      g.globalAlpha = (1 - p) * .6; g.strokeStyle = day ? '#2a9a52' : '#bfffd6'; g.lineWidth = 1; g.beginPath(); g.arc(fl.x, fl.y, 4 + p * 16, 0, TAU); g.stroke(); return true; });
-    for (const m of S.motes) { m.y -= m.v * dt / 1000; m.x += Math.sin(t / 2400 + m.ph) * .12; if (m.y < -10) { m.y = GY; m.x = X0 + (Math.random() - .5) * S.A * 2.2; }
-      dot(m.gold ? spr.gold : spr.green, m.x, m.y, m.s, (.35 + .3 * Math.sin(t / 700 + m.ph)) * ease * Math.min(1, (GY - m.y) / 80)); }
+    S.flashes = S.flashes.filter(fl => { const p = (t - fl.t0) / 1200; if (p >= 1) return false; dot(spr.cyan, fl.x, fl.y, 8 + p * 22, (1 - p) * .7); return true; });
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
   }
   function loop(t) {
     if (!live) return;
     raf = requestAnimationFrame(loop);
     if (document.hidden || document.body.dataset.anim !== 'tree') { last = 0; return; }
-    const d = document.body.dataset.theme === 'treeday';
-    if (d !== day) { day = d; paint(); }
     draw(t);
   }
-  function size() {
-    DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
-    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); gen(); day = document.body.dataset.theme === 'treeday'; paint();
-  }
+  function size() { DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); gen(); paint(); }
   function onResize() { clearTimeout(rsT); rsT = setTimeout(() => { if (live && (innerWidth !== W || Math.abs(innerHeight - H) > 90)) size(); }, 160); }
   return {
     start(el) {
@@ -1512,7 +1500,7 @@ const TechTree = (() => {
     stop() { live = false; cancelAnimationFrame(raf); removeEventListener('resize', onResize); if (cv && cv.parentNode) cv.remove(); cv = null; S = null; }
   };
 })();
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Grand technology tree: gold fibre-optic trunk, glowing dome of green leaves, red apples, bright sun, neon grid floor, light pulses rising from the roots'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Digital Vision Tree: intertwined gold trunk, canopy of cyan light particles and neural lines, emerald wireframe leaves, ruby dots, on midnight navy'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
 let treeTimers = [];
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
@@ -1564,6 +1552,7 @@ function setTreeStyle(st, remember = true) {
   if (urlTree && TREE_STYLES[urlTree] && remember !== 'force') st = urlTree;
   if (document.body.dataset.tree === st && document.querySelector('.vtree svg')) return;
   document.body.dataset.tree = st; buildTree();
+  if (typeof look !== 'undefined' && look.theme.startsWith('tree')) applyLook(look, false);
 }
 buildTree();
 document.querySelectorAll('.cyear').forEach(n => n.textContent = new Date().getFullYear());
@@ -1577,7 +1566,7 @@ let accRGB = '0,174,239', acc2RGB = '111,211,255';
 // Vision Tree · Auto: morning look from 7am to 7pm, night look otherwise (viewer's own clock)
 // personal Light / Dark / Auto switch (saved on this device); Auto follows the portal setting (time of day for Vision Tree · Auto)
 const getMode = () => { try { return localStorage.getItem('cctl-mode') || 'auto'; } catch { return 'auto'; } };
-const effTheme = t => { if (!t || !t.startsWith('tree')) return t; const m = getMode(); if (m === 'day') return 'treeday'; if (m === 'night') return 'tree';
+const effTheme = t => { if (!t || !t.startsWith('tree')) return t; if (document.body.dataset.tree === 'fiber') return 'tree'; const m = getMode(); if (m === 'day') return 'treeday'; if (m === 'night') return 'tree';
   return t === 'treeauto' ? ((h => h >= 7 && h < 19)(new Date().getHours()) ? 'treeday' : 'tree') : t; };
 function setMode(m) { try { localStorage.setItem('cctl-mode', m); } catch {} applyLook(look, false); paintMode(); }
 function paintMode() { document.querySelectorAll('#modeSw button').forEach(b => { const on = b.dataset.m === getMode(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
