@@ -864,6 +864,19 @@ body[data-theme=treeday] .vtsvg .fil0{stroke:#0f9c8e}body[data-theme=treeday] .v
 body[data-theme=treeday] .vtsvg .rad0{stroke:#0f9c8e;stroke-opacity:.4}body[data-theme=treeday] .vtsvg .rad1{stroke:#0a7f96;stroke-opacity:.35}
 body[data-theme=treeday] .vtsvg .rdot{fill:#0fb8a8}
 body[data-theme=treeday] .vtsvg .gfil path{stroke:#0a9f96}body[data-theme=treeday] .vtsvg .gfil circle{fill:#0fb8c0}
+/* Tech Green grand canvas: deep tech night sky, own sun, no top fade */
+.vtree canvas.ttc{position:absolute;inset:0;width:100%;height:100%;display:block}
+body[data-tree=fiber][data-anim=tree] .vsun{display:none}
+body[data-tree=fiber] .vtree{-webkit-mask-image:linear-gradient(100deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.8) 22%,#000 34%);mask-image:linear-gradient(100deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.8) 22%,#000 34%);-webkit-mask-composite:source-over;mask-composite:add}
+body[data-tree=fiber][data-theme=tree]{background:radial-gradient(ellipse 70% 30% at 60% 90%,rgba(255,190,90,.16),transparent 70%),radial-gradient(ellipse 60% 45% at 85% 12%,rgba(255,170,80,.12),transparent 70%),radial-gradient(ellipse 80% 60% at 40% 40%,rgba(30,90,170,.22),transparent 70%),linear-gradient(180deg,#02050f 0%,#050d24 50%,#0a1636 86%,#060b1c 100%)!important;background-attachment:fixed!important}
+@media(max-width:760px){body[data-tree=fiber] .vtree{opacity:.55}}
+/* login-panel mini tree in the Tech Green palette: gold strands, green leaves */
+body[data-tree] .vt-side .vtsvg.ts-fiber .t-br .sc0,body[data-tree] .vt-side .vtsvg.ts-fiber .t-br .sc1,body[data-tree] .vt-side .vtsvg.ts-fiber .t-br .sc2{stroke:#f0c766}
+body[data-tree] .vt-side .vtsvg.ts-fiber .fil0,body[data-tree] .vt-side .vtsvg.ts-fiber .fil1,body[data-tree] .vt-side .vtsvg.ts-fiber .fil2{stroke:#e8c15a}
+body[data-tree] .vt-side .vtsvg.ts-fiber .rad0,body[data-tree] .vt-side .vtsvg.ts-fiber .rad1,body[data-tree] .vt-side .vtsvg .trace,body[data-tree] .vt-side .vtsvg.ts-fiber .net{stroke:#3fcf74}
+body[data-tree] .vt-side .vtsvg .rdot,body[data-tree] .vt-side .vtsvg .tn,body[data-tree] .vt-side .vtsvg.ts-fiber .du{fill:#7cf09a}
+body[data-tree] .vt-side .vtsvg.ts-fiber .l1{fill:#14904a}body[data-tree] .vt-side .vtsvg.ts-fiber .l2{fill:#22b45e}body[data-tree] .vt-side .vtsvg.ts-fiber .l3{fill:#46d47c}body[data-tree] .vt-side .vtsvg.ts-fiber .l4{fill:#a6f0b8}body[data-tree] .vt-side .vtsvg.ts-fiber .l5{fill:#1c9c52}
+body[data-tree] .vt-side .vtsvg.ts-fiber .apl{fill:#e8303e}
 @media (prefers-reduced-motion:reduce){.vtsvg .plr,.vtsvg .ndr,.vtsvg .rip,.vtsvg .dm{display:none}}
 .sprig{position:absolute;right:16px;top:16px;width:58px;height:58px;color:color-mix(in srgb,var(--c) 45%,var(--gold2));opacity:.75;transition:opacity .4s,transform .6s ease}
 .sprig svg{width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round}
@@ -1228,12 +1241,279 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Grand technology tree: massive glowing gold trunk, dome of teal light filaments that keep growing, circuit traces, red apples'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+/* ================= Tech Green: grand technology advancement tree (canvas) =================
+   Gold fibre-optic trunk, dense green canopy of light, red apples, a bright sun, glowing floor grid,
+   and pulses of light that travel from the roots up to the branch tips. */
+const TechTree = (() => {
+  const TAU = Math.PI * 2, RM = matchMedia('(prefers-reduced-motion: reduce)');
+  let host = null, cv = null, g = null, W = 0, H = 0, DPR = 1, raf = 0, live = false, born = 0, last = 0, day = null, S = null, rsT = 0;
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
+  const rng = seed => { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+  const sprite = (rgb, core) => {
+    const c = mk(64, 64), x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, `rgba(${core || rgb},1)`); gr.addColorStop(.16, `rgba(${rgb},.85)`); gr.addColorStop(.42, `rgba(${rgb},.26)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+    x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return c;
+  };
+  const PAL = {
+    night: { gold: ['255,196,80', '255,222,140', '255,240,200'], twig: '214,236,150', fill: 'rgba(255,190,70,.10)', leaf: ['10,104,44', '20,154,68', '46,200,92', '128,236,140'], leafA: .7,
+      apple: ['#ffd0d0', '#ff3446', '#9c0d1c'], grid: '64,226,160', horizon: '255,214,120', star: '220,232,255',
+      sp: { gold: ['255,196,90', '255,250,225'], green: ['100,255,160', '235,255,240'], red: ['255,50,66', '255,200,200'], white: ['255,246,210', '255,255,255'] } },
+    day: { gold: ['176,118,20', '204,150,40', '226,182,84'], twig: '120,150,60', fill: 'rgba(214,160,50,.30)', leaf: ['18,112,52', '28,142,66', '58,172,88', '120,204,128'], leafA: .9,
+      apple: ['#ffb4b4', '#e0202e', '#86101a'], grid: '30,140,96', horizon: '214,150,40', star: '0,0,0',
+      sp: { gold: ['236,160,20', '255,240,190'], green: ['30,190,90', '220,255,230'], red: ['230,30,46', '255,190,190'], white: ['255,214,120', '255,255,240'] } }
+  };
+
+  /* ---------- geometry (depends only on viewport size) ---------- */
+  function gen() {
+    const rnd = rng(20261108), mob = W < 760, DEPTH = mob ? 10 : 11;
+    const nodes = [], tips = [], roots = [];
+    function grow(x, y, ang, len, w, d, p) {
+      const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len, bend = (rnd() - .5) * len * (d === 1 ? .06 : .34);
+      const cx = (x + x2) / 2 + Math.cos(ang + 1.5708) * bend, cy = (y + y2) / 2 + Math.sin(ang + 1.5708) * bend;
+      const i = nodes.push({ x, y, cx, cy, x2, y2, w, d, p, kids: 0 }) - 1;
+      if (p >= 0) nodes[p].kids++;
+      if (d >= DEPTH) { tips.push(i); return; }
+      const n = d === 1 ? 3 : d < 4 ? 2 : rnd() < .3 ? 3 : 2;
+      for (let k = 0; k < n; k++) {
+        let sp = n === 2 ? (k ? 1 : -1) * (d < 4 ? .44 + rnd() * .06 : .34 + rnd() * .24) : (k - 1) * (.5 + rnd() * .18);
+        if (d === 1) sp = (k - 1) * .78;
+        let na = ang + sp * 1.18 + (rnd() - .5) * .14; na -= (na + 1.5708) * (d < 4 ? .1 : .2);
+        na = Math.max(-Math.PI + .1, Math.min(-.1, na));
+        grow(x2, y2, d === 1 && k === 1 ? -1.5708 : na, len * (d === 1 ? (k === 1 ? .62 : .74) : .73 + rnd() * .09), w * (n === 3 ? .6 : .7), d + 1, i);
+      }
+    }
+    grow(0, 0, -1.5708, 240, 96, 1, -1);
+    // crown bounds -> fit to the viewport
+    let x0 = 1e9, x1 = -1e9, y0 = 0;
+    for (const n of nodes) { x0 = Math.min(x0, n.x2); x1 = Math.max(x1, n.x2); y0 = Math.min(y0, n.y2); }
+    const GY = H * (mob ? .9 : .87), TH = GY - H * (mob ? .1 : .045), X0 = mob ? W * .5 : W * .6;
+    const sc = Math.min(TH / (-y0 + 16), (mob ? W * 1.5 : W * 1.12) / (x1 - x0 + 30));
+    const ox = X0 - (x0 + x1) / 2 * sc * .5;  // keep the trunk near X0, centre the crown
+    const P = (x, y) => [ox + x * sc, GY + y * sc];
+    for (const n of nodes) { [n.x, n.y] = P(n.x, n.y); [n.cx, n.cy] = P(n.cx, n.cy); [n.x2, n.y2] = P(n.x2, n.y2); n.w *= sc; }
+    const tx = nodes[0].x;
+    // roots: fan out across the floor in perspective, forking into fine tips
+    function root(x, y, a, len, w, d, p) {
+      const pts = [[x, y]], st = len / 8;
+      for (let i = 0; i < 8; i++) { a += (rnd() - .5) * .28; a = Math.max(.04, Math.min(Math.PI - .04, a)); x += Math.cos(a) * st; y += Math.sin(a) * st * .26; pts.push([x, y]); }
+      const i = roots.push({ pts, w, d, p, kids: 0 }) - 1; if (p >= 0) roots[p].kids++;
+      if (d >= 4) return;
+      const k = d < 2 ? 2 : rnd() < .35 ? 3 : 2;
+      for (let j = 0; j < k; j++) root(x, y, a + (k === 2 ? (j ? 1 : -1) : j - 1) * (.3 + rnd() * .3), len * (.66 + rnd() * .14), w * .6, d + 1, i);
+    }
+    const RA = [.05, .22, .5, .9, 1.35, 1.8, 2.24, 2.64, 2.92, 3.09];
+    RA.forEach(a => { const side = Math.abs(a - 1.5708) / 1.5708; root(tx + Math.cos(a) * nodes[0].w * .45, GY + 1, a, (90 + side * 190) * sc * (.85 + rnd() * .3), nodes[0].w * .3, 1, -1); });
+    // apples hang from tips in the body of the crown
+    const crownTop = GY + y0 * sc, apples = [], used = new Set(), want = mob ? 16 : 38;
+    for (let tries = 0; apples.length < want && tries < 4000; tries++) {
+      const n = nodes[tips[Math.floor(rnd() * tips.length)]];
+      if (n.y2 > GY - (GY - crownTop) * .3 || n.y2 < crownTop + (GY - crownTop) * .08) continue;
+      const key = Math.round(n.x2 / 34) + ':' + Math.round(n.y2 / 34); if (used.has(key)) continue; used.add(key);
+      apples.push({ x: n.x2 + (rnd() - .5) * 4 * sc, y: n.y2 + 7 * sc, r: Math.max(3.2, (7.5 + rnd() * 2.5) * sc), ph: rnd() * TAU });
+    }
+    // light pulse paths: root tip -> trunk -> crown tip
+    const curve = (n, out, first) => { for (let s = first ? 0 : 1; s <= 6; s++) { const t = s / 6, m = 1 - t; out.push(m * m * n.x + 2 * m * t * n.cx + t * t * n.x2, m * m * n.y + 2 * m * t * n.cy + t * t * n.y2); } };
+    const leafRoots = roots.map((r, i) => i).filter(i => !roots[i].kids), paths = [];
+    for (let k = 0; k < 180; k++) {
+      const out = [];
+      if (k % 5 < 3) { const ch = []; for (let i = leafRoots[Math.floor(rnd() * leafRoots.length)]; i >= 0; i = roots[i].p) ch.push(roots[i]); ch.forEach(r => { for (let j = r.pts.length - 1; j >= 0; j--) out.push(r.pts[j][0], r.pts[j][1]); }); }
+      const ch = []; for (let i = tips[Math.floor(rnd() * tips.length)]; i >= 0; i = nodes[i].p) ch.push(nodes[i]);
+      ch.reverse().forEach((n, j) => curve(n, out, j === 0 && !out.length));
+      const cum = [0]; for (let j = 2; j < out.length; j += 2) cum.push(cum[cum.length - 1] + Math.hypot(out[j] - out[j - 2], out[j + 1] - out[j - 1]));
+      paths.push({ p: out, cum, len: cum[cum.length - 1] });
+    }
+    // twinkles across the canopy, motes drifting up
+    const tw = []; for (let k = 0; k < (mob ? 90 : 240); k++) { const n = nodes[tips[Math.floor(rnd() * tips.length)]]; tw.push({ x: n.x2 + (rnd() - .5) * 18 * sc, y: n.y2 + (rnd() - .5) * 18 * sc, f: .0006 + rnd() * .0016, ph: rnd() * TAU, s: 5 + rnd() * 9, star: rnd() < .22 }); }
+    const motes = []; for (let k = 0; k < (mob ? 24 : 60); k++) motes.push({ x: X0 + (rnd() - .5) * W * .9, y: rnd() * GY, v: 6 + rnd() * 16, ph: rnd() * TAU, s: 4 + rnd() * 7, gold: rnd() < .4 });
+    const stars = []; for (let k = 0; k < Math.min(320, W * H / 4200); k++) stars.push([rnd() * W, rnd() * GY * .95, .3 + rnd() * 1.1, .25 + rnd() * .7]);
+    const sun = { x: mob ? W * .84 : W * .87, y: mob ? H * .1 : H * .15, r: Math.max(26, Math.min(W, H) * .052) };
+    S = { mob, DEPTH, nodes, tips, roots, apples, paths, tw, motes, stars, sun, GY, X0: tx, sc, crownTop, rnd, pulses: [], flashes: [], next: 0 };
+  }
+
+  // apples are drawn after the bloom so they stay a clear, glossy red
+  function apples(x, C) {
+    for (const a of S.apples) {
+      x.strokeStyle = `rgba(${C.gold[1]},.9)`; x.lineWidth = Math.max(.8, a.r * .16); x.beginPath(); x.moveTo(a.x, a.y - a.r * .85); x.quadraticCurveTo(a.x + a.r * .1, a.y - a.r * 1.4, a.x + a.r * .35, a.y - a.r * 1.7); x.stroke();
+      x.fillStyle = `rgba(${C.leaf[2]},.95)`; x.beginPath(); x.ellipse(a.x + a.r * .6, a.y - a.r * 1.35, a.r * .5, a.r * .2, -.5, 0, TAU); x.fill();
+      const ag = x.createRadialGradient(a.x - a.r * .35, a.y - a.r * .35, a.r * .05, a.x, a.y, a.r); ag.addColorStop(0, C.apple[0]); ag.addColorStop(.35, C.apple[1]); ag.addColorStop(1, C.apple[2]);
+      x.fillStyle = ag; x.beginPath(); x.arc(a.x - a.r * .1, a.y, a.r, 0, TAU); x.arc(a.x + a.r * .1, a.y, a.r, 0, TAU); x.fill();
+      x.fillStyle = 'rgba(255,255,255,.85)'; x.beginPath(); x.ellipse(a.x - a.r * .4, a.y - a.r * .4, a.r * .22, a.r * .14, -.6, 0, TAU); x.fill();
+    }
+  }
+  /* ---------- static layer: everything that doesn't move, with a bloom pass ---------- */
+  function paint() {
+    const C = day ? PAL.day : PAL.night, rnd = rng(7), { nodes, roots, GY, X0, sc, DEPTH } = S;
+    const L = mk(W * DPR, H * DPR), x = L.getContext('2d'); x.setTransform(DPR, 0, 0, DPR, 0, 0); x.lineCap = 'round'; x.lineJoin = 'round';
+    if (!day) for (const [sx, sy, r, a] of S.stars) { x.fillStyle = `rgba(${C.star},${a})`; x.beginPath(); x.arc(sx, sy, r, 0, TAU); x.fill(); }
+    // floor: perspective grid fading out from the trunk
+    const fl = H - GY, hg = x.createLinearGradient(0, 0, W, 0), cX = Math.max(.05, Math.min(.95, X0 / W));
+    hg.addColorStop(0, `rgba(${C.grid},0)`); hg.addColorStop(Math.max(0, cX - .42), `rgba(${C.grid},.18)`); hg.addColorStop(cX, `rgba(${C.grid},.5)`); hg.addColorStop(Math.min(1, cX + .42), `rgba(${C.grid},.18)`); hg.addColorStop(1, `rgba(${C.grid},0)`);
+    x.strokeStyle = hg; x.lineWidth = .8;
+    for (let j = 1; j <= 10; j++) { const y = GY + fl * Math.pow(j / 10, 1.8); x.globalAlpha = .45 + j * .05; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); }
+    const u = Math.max(W, 900) / 13;
+    for (let i = -16; i <= 16; i++) { x.globalAlpha = Math.max(0, .55 - Math.abs(i) * .035); x.strokeStyle = `rgb(${C.grid})`; x.beginPath(); x.moveTo(X0 + i * u * .1, GY); x.lineTo(X0 + i * u * 1.6, H + fl * .6); x.stroke(); }
+    x.globalAlpha = 1;
+    const hz = x.createLinearGradient(0, 0, W, 0); hz.addColorStop(0, `rgba(${C.horizon},0)`); hz.addColorStop(cX, `rgba(${C.horizon},.95)`); hz.addColorStop(1, `rgba(${C.horizon},.1)`);
+    x.strokeStyle = hz; x.lineWidth = 1.4; x.beginPath(); x.moveTo(0, GY); x.lineTo(W, GY); x.stroke();
+    x.save(); x.translate(X0, GY); x.scale(1, .16); const bg = x.createRadialGradient(0, 0, 0, 0, 0, W * .42);
+    bg.addColorStop(0, `rgba(${C.horizon},${day ? .45 : .55})`); bg.addColorStop(.35, `rgba(${C.horizon},.14)`); bg.addColorStop(1, `rgba(${C.horizon},0)`); x.fillStyle = bg; x.beginPath(); x.arc(0, 0, W * .42, 0, TAU); x.fill(); x.restore();
+    // strokes are batched by colour / alpha / width so tens of thousands of strands draw in a few calls
+    const B = new Map(), bp = (col, a, w) => { const ak = Math.round(a * 10) / 10, wk = Math.max(.25, Math.round(w * 4) / 4), key = col + '|' + ak + '|' + wk; let e = B.get(key); if (!e) B.set(key, e = { p: new Path2D(), s: `rgba(${col},${ak})`, w: wk }); return e.p; };
+    const flush = () => { for (const e of B.values()) { x.strokeStyle = e.s; x.lineWidth = e.w; x.stroke(e.p); } B.clear(); };
+    // roots: bundles of gold strands
+    for (const r of roots) {
+      const m = r.d === 1 ? 6 : r.d === 2 ? 3 : r.d === 3 ? 2 : 1;
+      for (let j = 0; j < m; j++) {
+        const jo = (j - (m - 1) / 2) * r.w * .28;
+        const pp = bp(C.gold[j % 3], .4 + rnd() * .35, .5 + rnd() * .8);
+        r.pts.forEach(([px, py], q) => { const k = 1 - q / r.pts.length; q ? pp.lineTo(px, py + jo * k * .35 + (rnd() - .5)) : pp.moveTo(px + jo, py); });
+      }
+    }
+    flush();
+    // trunk & limbs: a faint gold body, then hundreds of braided light strands
+    x.fillStyle = C.fill;
+    for (const n of nodes) if (n.d <= 5) {
+      const dx = n.x2 - n.x, dy = n.y2 - n.y, m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, a = n.w * (n.d === 1 ? .62 : .5), b = n.w * .36, fl2 = n.d === 1 ? 1.7 : 1;
+      x.beginPath(); x.moveTo(n.x + nx * a * fl2, n.y + ny * a); x.quadraticCurveTo(n.cx + nx * a * .8, n.cy + ny * a * .8, n.x2 + nx * b, n.y2 + ny * b);
+      x.lineTo(n.x2 - nx * b, n.y2 - ny * b); x.quadraticCurveTo(n.cx - nx * a * .8, n.cy - ny * a * .8, n.x - nx * a * fl2, n.y - ny * a); x.closePath(); x.fill();
+    }
+    for (const n of nodes) {
+      if (n.d <= 7) {
+        const dx = n.x2 - n.x, dy = n.y2 - n.y, m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, cnt = Math.max(2, Math.min(120, Math.round(n.w / (n.d === 1 ? 1.05 : 1.35))));
+        for (let i = 0; i < cnt; i++) {
+          const uu = i / (cnt - 1) - .5, a0 = uu * n.w, a1 = uu * n.w * .7, ac = uu * n.w * (.35 + rnd() * .75) + (rnd() - .5) * n.w * (n.d === 1 ? .25 : .3), edge = Math.abs(uu) > .44;
+          const pp = bp(C.gold[edge ? 2 : i % 3], edge ? .85 : .35 + rnd() * .4, edge ? 1.3 : .45 + rnd() * .75);
+          if (n.d === 1) { pp.moveTo(n.x + nx * a0 * 1.9, n.y + 2 + rnd() * 10 * sc); pp.bezierCurveTo(n.x + nx * a0 * .95, n.y - n.w * .9, n.cx + nx * ac, n.cy, n.x2 + nx * a1, n.y2 + ny * a1); }
+          else { pp.moveTo(n.x + nx * a0, n.y + ny * a0); pp.quadraticCurveTo(n.cx + nx * ac, n.cy + ny * ac, n.x2 + nx * a1, n.y2 + ny * a1); }
+        }
+      } else {
+        const t = (n.d - 8) / Math.max(1, DEPTH - 8);
+        const pp = bp(t < .5 ? C.gold[2] : C.twig, .6 - t * .15, Math.max(.45, n.w * .5));
+        pp.moveTo(n.x, n.y); pp.quadraticCurveTo(n.cx, n.cy, n.x2, n.y2);
+      }
+    }
+    flush();
+    // canopy: tens of thousands of small leaves, lit from the sun's side, clustered at the tips
+    const LP = C.leaf.map(() => []), DT = [], cw = W, ch = GY - S.crownTop, lr = Math.max(1.6, 4.2 * sc), lw = Math.max(.8, 1.9 * sc);
+    const leaf = (lx, ly, rot, s) => {
+      const lit = (lx - X0) / cw * 1.1 - (ly - GY) / ch * .55 + rnd() * .75, k = lit > 1.25 ? 3 : lit > .85 ? 2 : lit > .42 ? 1 : 0;
+      LP[k].push(lx, ly, lr * s, lw * s, rot);
+      if (rnd() < .022) DT.push(lx, ly);
+    };
+    for (const n of nodes) if (n.d >= DEPTH - 3) {
+      const k = n.d === DEPTH ? 3 : n.d === DEPTH - 3 ? 1 : 2, ang = Math.atan2(n.y2 - n.y, n.x2 - n.x);
+      for (let j = 0; j < k; j++) { const t = .35 + rnd() * .65, side = rnd() < .5 ? -1 : 1, off = (2 + rnd() * 6) * sc * side; leaf(n.x + (n.x2 - n.x) * t - Math.sin(ang) * off, n.y + (n.y2 - n.y) * t + Math.cos(ang) * off, ang + side * (.5 + rnd() * .8), .8 + rnd() * .5); }
+      if (n.d === DEPTH) for (let j = 0; j < (S.mob ? 3 : 5); j++) { const a = rnd() * TAU, rr = rnd() * 11 * sc; leaf(n.x2 + Math.cos(a) * rr, n.y2 + Math.sin(a) * rr * .8, rnd() * TAU, .7 + rnd() * .6); }
+    }
+    // filled in modest chunks: one giant path with tens of thousands of sub-paths is very slow to build
+    LP.forEach((a, i) => { x.fillStyle = `rgba(${C.leaf[i]},${C.leafA})`;
+      for (let j = 0; j < a.length; j += 5) { if (j % 1000 === 0) { if (j) x.fill(); x.beginPath(); } const [lx, ly, R, r2, rot] = [a[j], a[j + 1], a[j + 2], a[j + 3], a[j + 4]]; x.moveTo(lx + Math.cos(rot) * R, ly + Math.sin(rot) * R); x.ellipse(lx, ly, R, r2, rot, 0, TAU); }
+      x.fill(); });
+    const dr = Math.max(.9, 1.3 * sc); x.fillStyle = day ? 'rgba(255,255,230,.9)' : 'rgba(225,255,215,.95)'; x.beginPath();
+    for (let j = 0; j < DT.length; j += 2) { x.moveTo(DT[j] + dr, DT[j + 1]); x.arc(DT[j], DT[j + 1], dr, 0, TAU); } x.fill();
+    // bloom: blur by downsampling, then add it back under the sharp layer
+    const F = mk(W * DPR, H * DPR), f = F.getContext('2d'), b1 = mk(W / 4, H / 4), b2 = mk(W / 12, H / 12);
+    b1.getContext('2d').drawImage(L, 0, 0, b1.width, b1.height); const b2x = b2.getContext('2d'); b2x.drawImage(b1, 0, 0, b2.width, b2.height);
+    f.imageSmoothingQuality = 'high';
+    if (day) { f.globalAlpha = .3; f.drawImage(b2, 0, 0, F.width, F.height); f.globalAlpha = 1; f.drawImage(L, 0, 0); }
+    else { f.globalCompositeOperation = 'lighter'; f.globalAlpha = .75; f.drawImage(b2, 0, 0, F.width, F.height); f.globalAlpha = .4; f.drawImage(b1, 0, 0, F.width, F.height); f.globalAlpha = 1; f.drawImage(L, 0, 0); }
+    f.globalCompositeOperation = 'source-over'; f.globalAlpha = 1; f.setTransform(DPR, 0, 0, DPR, 0, 0); apples(f, C);
+    S.static = F;
+    // sprites & the sun
+    const sp = C.sp; S.spr = { gold: sprite(sp.gold[0], sp.gold[1]), green: sprite(sp.green[0], sp.green[1]), red: sprite(sp.red[0], sp.red[1]), white: sprite(sp.white[0], sp.white[1]) };
+    const R = S.sun.r, sb = mk(R * 16, R * 16), sx = sb.getContext('2d'), c = R * 8, sg = sx.createRadialGradient(c, c, 0, c, c, c);
+    if (day) { sg.addColorStop(0, 'rgba(255,255,255,1)'); sg.addColorStop(.1, 'rgba(255,250,222,1)'); sg.addColorStop(.125, 'rgba(255,206,96,.95)'); sg.addColorStop(.22, 'rgba(255,184,64,.5)'); sg.addColorStop(.45, 'rgba(255,172,64,.16)'); sg.addColorStop(1, 'rgba(255,172,64,0)'); }
+    else { sg.addColorStop(0, 'rgba(255,255,255,1)'); sg.addColorStop(.11, 'rgba(255,252,232,1)'); sg.addColorStop(.15, 'rgba(255,224,140,.85)'); sg.addColorStop(.3, 'rgba(255,186,80,.35)'); sg.addColorStop(.6, 'rgba(255,150,60,.1)'); sg.addColorStop(1, 'rgba(255,150,60,0)'); }
+    sx.fillStyle = sg; sx.fillRect(0, 0, sb.width, sb.height);
+    const rays = mk(R * 30, R * 30), rx = rays.getContext('2d'), rc = R * 15; rx.translate(rc, rc);
+    for (let i = 0; i < 36; i++) { const a = i / 36 * TAU + (i % 2 ? .03 : 0), len = rc * (i % 3 ? .55 : .95), wd = R * (i % 3 ? .1 : .16);
+      const gr = rx.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len); gr.addColorStop(0, day ? 'rgba(255,186,70,.6)' : 'rgba(255,226,150,.5)'); gr.addColorStop(1, 'rgba(255,214,130,0)');
+      rx.fillStyle = gr; rx.beginPath(); rx.moveTo(Math.cos(a + 1.5708) * wd, Math.sin(a + 1.5708) * wd); rx.lineTo(Math.cos(a) * len, Math.sin(a) * len); rx.lineTo(Math.cos(a - 1.5708) * wd, Math.sin(a - 1.5708) * wd); rx.closePath(); rx.fill(); }
+    S.sunBloom = sb; S.sunRays = rays;
+  }
+
+  /* ---------- per-frame animation ---------- */
+  const at = (pa, s, h) => { // position along a pulse path; h caches the segment index
+    const { cum, p } = pa; while (h.i < cum.length - 2 && cum[h.i + 1] < s) h.i++;
+    const seg = cum[h.i + 1] - cum[h.i] || 1, t = Math.min(1, Math.max(0, (s - cum[h.i]) / seg)), j = h.i * 2;
+    return [p[j] + (p[j + 2] - p[j]) * t, p[j + 1] + (p[j + 3] - p[j + 1]) * t];
+  };
+  const dot = (img, px, py, sz, a) => { if (a <= 0) return; g.globalAlpha = Math.min(1, a); g.drawImage(img, px - sz / 2, py - sz / 2, sz, sz); };
+  function draw(t) {
+    const dt = Math.min(50, t - (last || t)); last = t;
+    const age = Math.max(0, (t - born) / 1000), intro = RM.matches ? 1 : Math.min(1, age / 3.4), ease = 1 - Math.pow(1 - intro, 3), { sun, spr, GY, X0 } = S;
+    g.setTransform(DPR, 0, 0, DPR, 0, 0); g.clearRect(0, 0, W, H); g.globalCompositeOperation = day ? 'source-over' : 'lighter';
+    // the sun: slowly turning rays and a breathing bloom
+    const sa = Math.min(1, age / 2.2), br = 1 + Math.sin(t / 1900) * .04;
+    g.save(); g.translate(sun.x, sun.y); g.rotate(t * .00004); g.globalAlpha = sa * (.7 + Math.sin(t / 2600) * .15); g.drawImage(S.sunRays, -sun.r * 15, -sun.r * 15); g.restore();
+    g.globalAlpha = sa; g.drawImage(S.sunBloom, sun.x - sun.r * 8 * br, sun.y - sun.r * 8 * br, sun.r * 16 * br, sun.r * 16 * br);
+    // the tree, revealed from the roots outward on first load
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    if (ease < 1) { g.save(); g.beginPath(); g.arc(X0, GY, ease * Math.hypot(W, H), 0, TAU); g.clip(); g.drawImage(S.static, 0, 0, W, H); g.restore(); }
+    else g.drawImage(S.static, 0, 0, W, H);
+    if (RM.matches) return;
+    g.globalCompositeOperation = day ? 'source-over' : 'lighter';
+    // floor ripples spreading from the trunk
+    for (let k = 0; k < 3; k++) { const ph = ((t / 4200) + k / 3) % 1, rx = ph * W * .6;
+      g.globalAlpha = (1 - ph) * .55 * ease; g.strokeStyle = day ? 'rgba(200,140,30,1)' : 'rgba(255,214,120,1)'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(X0, GY + 2, rx, rx * .12, 0, 0, TAU); g.stroke(); }
+    // twinkling lights in the canopy
+    for (const w of S.tw) { const s = Math.sin(t * w.f + w.ph); if (s < .55) continue; const a = (s - .55) / .45;
+      dot(spr.white, w.x, w.y, w.s * (.6 + a), a * ease);
+      if (w.star && a > .4) { const L = w.s * 1.4 * a; g.globalAlpha = a * .8; g.strokeStyle = day ? '#fff6d8' : '#fffbe8'; g.lineWidth = 1; g.beginPath(); g.moveTo(w.x - L, w.y); g.lineTo(w.x + L, w.y); g.moveTo(w.x, w.y - L); g.lineTo(w.x, w.y + L); g.stroke(); } }
+    // apples glow softly
+    for (const a of S.apples) dot(spr.red, a.x, a.y, a.r * (5 + Math.sin(t / 900 + a.ph)), (day ? .35 : .55) * ease);
+    // pulses of light: roots -> trunk -> tips
+    if (intro >= 1 && t > S.next && S.pulses.length < (S.mob ? 14 : 34)) {
+      const pa = S.paths[Math.floor(Math.random() * S.paths.length)];
+      S.pulses.push({ pa, s: 0, v: H * (.32 + Math.random() * .3), h: { i: 0 }, tr: [] }); S.next = t + 70 + Math.random() * 170;
+    }
+    S.pulses = S.pulses.filter(q => {
+      q.s += q.v * dt / 1000; const [px, py] = at(q.pa, q.s, q.h), fr = q.s / q.pa.len, img = fr < .5 ? spr.gold : spr.green;
+      q.tr.unshift(px, py); if (q.tr.length > 18) q.tr.length = 18;
+      for (let j = q.tr.length - 2; j >= 2; j -= 2) dot(img, q.tr[j], q.tr[j + 1], 9 - j * .3, .5 - j * .025);
+      dot(img, px, py, 16, .95); dot(spr.white, px, py, 5, 1);
+      if (q.s >= q.pa.len) { S.flashes.push({ x: px, y: py, t0: t }); return false; }
+      return true;
+    });
+    // a bud of light opens where each pulse arrives
+    S.flashes = S.flashes.filter(fl => { const p = (t - fl.t0) / 1100; if (p >= 1) return false;
+      dot(spr.green, fl.x, fl.y, 10 + p * 34, (1 - p) * .9); dot(spr.white, fl.x, fl.y, 8 * (1 - p), 1 - p);
+      g.globalAlpha = (1 - p) * .6; g.strokeStyle = day ? '#2a9a52' : '#bfffd6'; g.lineWidth = 1; g.beginPath(); g.arc(fl.x, fl.y, 4 + p * 16, 0, TAU); g.stroke(); return true; });
+    // motes of light drifting upward
+    for (const m of S.motes) { m.y -= m.v * dt / 1000; m.x += Math.sin(t / 2400 + m.ph) * .12; if (m.y < -10) { m.y = GY; m.x = X0 + (Math.random() - .5) * W * .9; }
+      dot(m.gold ? spr.gold : spr.green, m.x, m.y, m.s, (.35 + .3 * Math.sin(t / 700 + m.ph)) * ease * Math.min(1, (GY - m.y) / 80)); }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  }
+  function loop(t) {
+    if (!live) return;
+    raf = requestAnimationFrame(loop);
+    if (document.hidden || document.body.dataset.anim !== 'tree') { last = 0; return; }
+    const d = document.body.dataset.theme === 'treeday';
+    if (d !== day) { day = d; paint(); }
+    draw(t);
+  }
+  function size() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); gen(); day = document.body.dataset.theme === 'treeday'; paint();
+  }
+  function onResize() { clearTimeout(rsT); rsT = setTimeout(() => { if (live && (innerWidth !== W || Math.abs(innerHeight - H) > 90)) size(); }, 160); }
+  return {
+    start(el) {
+      this.stop(); host = el; cv = document.createElement('canvas'); cv.className = 'ttc'; host.replaceChildren(cv); g = cv.getContext('2d');
+      live = true; born = performance.now(); last = 0; size(); addEventListener('resize', onResize);
+      raf = requestAnimationFrame(loop);
+    },
+    stop() { live = false; cancelAnimationFrame(raf); removeEventListener('resize', onResize); if (cv && cv.parentNode) cv.remove(); cv = null; S = null; }
+  };
+})();
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], fiber: ['Tech Green', 'Grand technology tree: gold fibre-optic trunk, glowing green canopy, red apples, bright sun, light pulses rising from the roots'], living: ['Living Tech', 'Natural tree colours with light pulses, glowing nodes and data motes'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
 let treeTimers = [];
 function buildTree() {
   treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
   const host = document.querySelector('.vtree');
   const TS = document.body.dataset.tree || 'classic';
+  TechTree.stop();
+  if (TS === 'fiber') { TechTree.start(host); $('.vt-side').innerHTML = treeSVG(8, 11, { style: TS }); return; }
   host.innerHTML = TS === 'fiber' ? treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 985, y: 940, len: 178, w: 104, spread: 1.62, lenf: .735, lean: 1.5708, rootLen: 46, leaf: 2, grass: true, apples: .04, par: 'xMidYMax slice' })
     : treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
   const tips = treeSVG.tips, id = treeSVG.leafId, box = host.querySelector('.sprouts'), NS = 'http://www.w3.org/2000/svg';
