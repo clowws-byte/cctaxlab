@@ -1299,7 +1299,7 @@ const TechTree = (() => {
   let dayCache = null;
   function dayArt() {
     if (dayCache) return dayCache;
-    const c = mk(IW, IH), x = c.getContext('2d'); x.drawImage(img, 0, 0); const d = x.getImageData(0, 0, IW, IH), p = d.data;
+    const NW = img.naturalWidth, NH = img.naturalHeight, c = mk(NW, NH), x = c.getContext('2d'); x.drawImage(img, 0, 0); const d = x.getImageData(0, 0, NW, NH), p = d.data;
     for (let i = 0; i < p.length; i += 4) {
       const r = p[i], gg = p[i + 1], b = p[i + 2], m = Math.max(r, gg, b); let a = (m - 72) / 150; a = a <= 0 ? 0 : a >= 1 ? 1 : a * a * (3 - 2 * a);
       if (a < .01) { p[i + 3] = 0; continue; }
@@ -1369,7 +1369,7 @@ const TechTree = (() => {
       this.stop(); host = el; cv = document.createElement('canvas'); cv.className = 'ttc'; host.replaceChildren(cv); g = cv.getContext('2d');
       live = true; S = null; size(); addEventListener('resize', onResize);
       const go = () => { if (!live) return; born = performance.now(); layout(); };
-      if (!img) { img = new Image(); img.decoding = 'async'; img.src = 'vision-tree.jpg'; }
+      if (!img) { img = new Image(); img.decoding = 'async'; img.src = 'vision-tree-hd.jpg'; }
       if (img.complete && img.naturalWidth) go(); else img.addEventListener('load', go, { once: true });
       raf = requestAnimationFrame(loop);
     },
