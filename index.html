@@ -1398,12 +1398,8 @@ function buildTree() {
   if (window.VisionTree) return go();
   const sc = document.createElement('script'); sc.src = 'vision-tree/dist/vision-tree.js?v=1'; sc.async = true; sc.onload = go; sc.onerror = fallback; document.head.append(sc);
 }
-function setTreeStyle(st, remember = true) {
-  st = 'fiber';
-  if (remember) try { localStorage.setItem('cctl-tree', st); } catch {}
-  if (urlTree && TREE_STYLES[urlTree] && remember !== 'force') st = urlTree;
-  if (document.body.dataset.tree === st && document.querySelector('.vtree svg')) return;
-  document.body.dataset.tree = st; buildTree();
+function setTreeStyle() {   // the Digital Vision Tree is the only style
+  document.body.dataset.tree = 'fiber'; buildTree();
   if (typeof look !== 'undefined' && look.theme.startsWith('tree')) applyLook(look, false);
 }
 buildTree();
