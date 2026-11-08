@@ -348,3 +348,6 @@ alter table public.portal_tools add column if not exists closed_at timestamptz;
 
 -- Automatic sign-out after inactivity (minutes, 0 = off). Added 2026-11-08.
 alter table public.portal_settings add column if not exists idle_minutes integer not null default 30 check (idle_minutes between 0 and 1440);
+
+-- Tree style for the Vision Tree look (admin chooses in Portal settings)
+alter table public.portal_settings add column if not exists tree_style text not null default 'classic' check (tree_style in ('classic','majestic','tech','dynamic','premium'));

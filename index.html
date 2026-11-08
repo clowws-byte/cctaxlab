@@ -777,7 +777,7 @@ body[data-tree=premium] .vtsvg .r1,body[data-tree=premium] .vtsvg .r2,body[data-
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree');if(ts)localStorage.setItem('cctl-tree',ts);ts=localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -1041,7 +1041,10 @@ const sprig = () => {
   <path d="M30 58C30 46 28 38 22 30"/><path d="M29 46c-6-1-10-5-11-10 6 0 10 4 11 10Z"/><path d="M27 37c4-4 9-5 13-3-2 5-8 6-13 3Z"/></svg>`;
   return d;
 };
-(() => {
+const TREE_STYLES = { classic: ['Classic', 'The calm, full apple tree'], majestic: ['Majestic', 'Grand and detailed: sunlit bark, deep canopy, ground shadow'], tech: ['Tech', 'Cheng-blue light lines, glowing nodes, energy pulses'], dynamic: ['Dynamic', 'Lively wind, fast sprouting, falling leaves'], premium: ['Premium', 'Clean geometry: straight branches, round leaves'] };
+let treeTimers = [];
+function buildTree() {
+  treeTimers.forEach(t => { clearTimeout(t); clearInterval(t); }); treeTimers = [];
   const host = document.querySelector('.vtree');
   const TS = document.body.dataset.tree || 'classic';
   host.innerHTML = treeSVG(10, 5, { style: TS, vw: 1600, vh: 1000, x: 1000, y: 935, len: 182, w: 68, spread: 1.85, lenf: .755, lean: 1.5708, rootLen: 42, leaf: 2, grass: true, apples: .045, par: 'xMidYMax slice' });
@@ -1055,7 +1058,7 @@ const sprig = () => {
     inner.append(u); g.append(inner); box.append(g);
     if (box.childNodes.length > 60) { const old = box.firstChild; old.classList.add('gone'); setTimeout(() => old.remove(), 1600); }
   };
-  setTimeout(() => setInterval(sprout, TS === 'dynamic' ? 420 : 900), TS === 'dynamic' ? 3500 : 6000);
+  treeTimers.push(setTimeout(() => treeTimers.push(setInterval(sprout, TS === 'dynamic' ? 420 : 900)), TS === 'dynamic' ? 3500 : 6000));
   if (TS === 'dynamic') {
     const fall = () => {
       if (document.hidden || document.body.dataset.anim !== 'tree' || !tips.length) return;
@@ -1066,9 +1069,19 @@ const sprig = () => {
       const u = document.createElementNS(NS, 'use'); u.setAttribute('href', '#' + id); u.setAttribute('class', Math.random() < .5 ? 'l3' : 'l2'); u.setAttribute('transform', 'scale(2)');
       inner.append(u); g.append(inner); host.querySelector('.crown').append(g); setTimeout(() => g.remove(), dur * 1000 + 200);
     };
-    setTimeout(() => setInterval(fall, 1300), 5000);
+    treeTimers.push(setTimeout(() => treeTimers.push(setInterval(fall, 1300)), 5000));
   }
-})(); $('.vt-side').innerHTML = treeSVG(8, 11, { style: document.body.dataset.tree });
+  $('.vt-side').innerHTML = treeSVG(8, 11, { style: TS });
+}
+const urlTree = (() => { try { return new URLSearchParams(location.search).get('tree'); } catch { return null; } })();
+function setTreeStyle(st, remember = true) {
+  st = TREE_STYLES[st] ? st : 'classic';
+  if (remember) try { localStorage.setItem('cctl-tree', st); } catch {}
+  if (urlTree && TREE_STYLES[urlTree] && remember !== 'force') st = urlTree;
+  if (document.body.dataset.tree === st && document.querySelector('.vtree svg')) return;
+  document.body.dataset.tree = st; buildTree();
+}
+buildTree();
 document.querySelectorAll('.cyear').forEach(n => n.textContent = new Date().getFullYear());
 $('#searchIcon').append(icon('search')); $('#bellIc').append(icon('bell')); $('#dockClose').append(icon('x')); $('#closeAdmin').append(icon('x')); $('#gearIc').append(icon('gear'));
 
@@ -1404,9 +1417,10 @@ async function loadDataInner() {
   const mkFolder = x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji || 'folder'), access: x.access || 'everyone',
     folders: fl.filter(c => c.parent_id === x.id).map(mkFolder), tools: tl.filter(y => y.folder_id === x.id).map(mkTool) });
   if (s.data && s.data.idle_minutes != null) setIdleMinutes(s.data.idle_minutes);
+  if (s.data && s.data.tree_style) setTreeStyle(s.data.tree_style);
   cfg = {
     title: (s.data && s.data.title) || 'CCTaxLab', subtitle: (s.data && s.data.subtitle) || '', theme: (s.data && s.data.theme) || look.theme, anim: (s.data && s.data.animation) || look.anim,
-    idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30,
+    idle: s.data && s.data.idle_minutes != null ? s.data.idle_minutes : 30, tree: (s.data && s.data.tree_style) || 'classic',
     hubs: (h.data || []).map(x => ({ id: x.id, name: x.name, emoji: iconKey(x.emoji), color: col(x.color), access: x.access || 'everyone', direct: !!x.open_direct,
       folders: fl.filter(c => c.hub_id === x.id && !c.parent_id).map(mkFolder),
       tools: tl.filter(y => y.hub_id === x.id && !y.folder_id).map(mkTool) }))
@@ -1698,7 +1712,11 @@ function renderApps(b) {
       [[0, 'Off'], [15, 'After 15 minutes'], [30, 'After 30 minutes'], [60, 'After 1 hour'], [120, 'After 2 hours'], [240, 'After 4 hours']].forEach(([v, t]) => sel.append(el('option', { value: v, text: t })));
       sel.value = String(draft.idle != null ? draft.idle : 30); return sel; })(),
     el('p', { class: 'hint', text: 'Staff are signed out after this long with no mouse, keyboard or touch activity (on this portal and CCT Library). They see a one-minute warning first.' }),
-    lookPicker(() => ({ theme: draft.theme, anim: draft.anim }), l => { draft.theme = l.theme; draft.anim = l.anim; applyLook(l); markDirty(); })));
+    lookPicker(() => ({ theme: draft.theme, anim: draft.anim }), l => { draft.theme = l.theme; draft.anim = l.anim; applyLook(l); markDirty(); }),
+    (() => { const box = el('div'); const draw = () => box.replaceChildren(
+      el('div', { class: 'section-t', text: 'Tree style (Vision Tree look)' }),
+      el('div', { class: 'anims' }, Object.entries(TREE_STYLES).map(([k, [name, d]]) => el('button', { class: 'anm' + ((draft.tree || 'classic') === k ? ' on' : ''), onclick: () => { draft.tree = k; setTreeStyle(k, 'force'); if (draft.anim !== 'tree') { const l = { theme: draft.theme.startsWith('tree') ? draft.theme : 'treeauto', anim: 'tree' }; draft.theme = l.theme; draft.anim = 'tree'; applyLook(l); } markDirty(); draw(); } }, el('b', { text: name }), d))),
+      el('p', { class: 'hint', style: 'font-size:12px;opacity:.75;margin-top:10px', text: 'Previews here straight away; press Save changes to apply it for everyone.' })); draw(); return box; })()));
   b.append(sc);
 }
 
@@ -1797,7 +1815,7 @@ function renderVis(b) {
   b.append(el('p', { class: 'footnote', text: 'These rules are enforced by the database, so staff never receive items they are not allowed to see. Each application should still keep its own login, because anyone who has its direct link can reach it.' }));
 }
 
-$('#discardBtn').onclick = () => { draft = clone(cfg); applyLook({ theme: cfg.theme, anim: cfg.anim }); dirty = false; renderAdmin(); toast('Changes discarded'); };
+$('#discardBtn').onclick = () => { draft = clone(cfg); applyLook({ theme: cfg.theme, anim: cfg.anim }); setTreeStyle(cfg.tree, 'force'); dirty = false; renderAdmin(); toast('Changes discarded'); };
 function flatten(root) {
   const now = new Date().toISOString(), hubs = [], folders = [], tools = [], grants = [], bgrants = [];
   root.hubs.forEach((h, i) => {
@@ -1821,7 +1839,7 @@ async function saveDraft(quiet) {
     const gone = (a, b) => { const keep = new Set(b.map(x => x.id)); return a.map(x => x.id).filter(id => !keep.has(id)); };
     const goneTools = gone(old.tools, nw.tools), goneFolders = gone(old.folders, nw.folders), goneHubs = gone(old.hubs, nw.hubs);
     const chk = r => { if (r.error) throw r.error; };
-    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim, idle_minutes: +draft.idle || 0 }).eq('id', 1));
+    chk(await sb.from('portal_settings').update({ title: (draft.title || 'CCTaxLab').slice(0, 80), subtitle: (draft.subtitle || '').slice(0, 160), theme: look.theme, animation: look.anim, idle_minutes: +draft.idle || 0, tree_style: TREE_STYLES[draft.tree] ? draft.tree : 'classic' }).eq('id', 1));
     setIdleMinutes(+draft.idle || 0);
     if (goneTools.length) chk(await sb.from('portal_tools').delete().in('id', goneTools));
     if (goneFolders.length) chk(await sb.from('portal_folders').delete().in('id', goneFolders));
@@ -2186,7 +2204,7 @@ $('#signOut').onclick = () => sb.auth.signOut({ scope: 'local' });
   const wake = () => { if (document.visibilityState === 'visible') sb.auth.getSession().catch(() => {}); };
   document.addEventListener('visibilitychange', wake); addEventListener('focus', wake); addEventListener('online', wake);
   gate([el('h3', { text: 'Loading…' }), el('p', { class: 'lead', text: 'Checking your session.' })]);
-  if (!window.__DEMO) sb.from('portal_settings').select('theme,animation,idle_minutes').eq('id', 1).maybeSingle().then(r => { if (r && r.data && r.data.idle_minutes != null) setIdleMinutes(r.data.idle_minutes); if (r && r.data && r.data.theme) applyLook({ theme: r.data.theme, anim: r.data.animation }); });
+  if (!window.__DEMO) sb.from('portal_settings').select('theme,animation,idle_minutes,tree_style').eq('id', 1).maybeSingle().then(r => { if (r && r.data && r.data.idle_minutes != null) setIdleMinutes(r.data.idle_minutes); if (r && r.data && r.data.tree_style) setTreeStyle(r.data.tree_style); if (r && r.data && r.data.theme) applyLook({ theme: r.data.theme, anim: r.data.animation }); });
   let started = false;
   sb.auth.onAuthStateChange((event, s) => {
     if (s && firstAuth && idleExpired() && !window.__DEMO) { firstAuth = false; session = s; idleSignOut(); return; }
