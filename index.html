@@ -843,7 +843,6 @@ body[data-theme=treeday] .vtsvg .net{stroke:#1f9e55;stroke-opacity:.22}
 .vtsvg.ts-fiber .gf{fill:#3fd8ff;stroke:#3fd8ff}
 .vtsvg.ts-fiber .t-rt .fsr{stroke:#f0bb5a;stroke-opacity:.5}
 body[data-tree=fiber][data-theme=tree]{--bg:#000d28;--bg-b:#001836;background:radial-gradient(ellipse 75% 75% at 50% 50%,#001836,#000d28 75%)!important;background-attachment:fixed!important}
-body[data-tree=fiber] .modeswitch{display:none!important}
 body[data-tree=fiber][data-theme=tree] .vsun{opacity:.55}
 body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg0{stroke:#b8862e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg1{stroke:#9a6c1e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sg2{stroke:#d9a64a}
 body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc0{stroke:#0f9c8e}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc1{stroke:#0a7f96}body[data-theme=treeday] .vtsvg.ts-fiber .t-br .sc2{stroke:#24b8a8}
@@ -893,7 +892,7 @@ body[data-tree] .vt-side .vtsvg.ts-fiber .apl{fill:#e8303e}
 </style>
 </head>
 <body data-theme="blue" data-anim="calm">
-<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';if(document.body.dataset.tree==='fiber'&&/^tree/.test(document.body.dataset.theme||''))document.body.dataset.theme='tree';}catch(e){document.body.dataset.tree='classic';}</script>
+<script>try{const l=JSON.parse(localStorage.getItem('cctl-look')||'{}');if(l.theme){var h=new Date().getHours(),m=localStorage.getItem('cctl-mode')||'auto',t=l.theme;if(t.indexOf('tree')===0){t=m==='day'?'treeday':m==='night'?'tree':t==='treeauto'?(h>=7&&h<19?'treeday':'tree'):t;}document.body.dataset.theme=t;}if(l.anim)document.body.dataset.anim=l.anim;}catch(e){}try{var ts=new URLSearchParams(location.search).get('tree')||localStorage.getItem('cctl-tree')||'classic';document.body.dataset.tree=/^(classic|majestic|tech|dynamic|premium|living|fiber)$/.test(ts)?ts:'classic';}catch(e){document.body.dataset.tree='classic';}</script>
 <div class="sun" aria-hidden="true"><div class="rays"></div><div class="core"></div></div>
 <div class="vsun" aria-hidden="true"><i class="rays"></i><i class="bloom"></i><i class="core"></i></div><div class="vtree" aria-hidden="true"></div>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -1271,25 +1270,77 @@ const TechTree = (() => {
     const gold = pairs(VT_GOLD, 2).map(p => { const [x, y] = P(p); return { x, y, v: p[1], j: rnd() }; });
     const can = pairs(VT_CAN, 2), motes = [];
     for (let i = 0; i < (port ? 26 : 55); i++) { const [x, y] = P(can[Math.floor(rnd() * can.length)]); motes.push({ x0: x, y0: y, x, y, v: (5 + rnd() * 10) * sc, ph: rnd() * TAU, s: (5 + rnd() * 6) * sc, life: rnd() }); }
-    S = { sc, ox, oy, dw, dh, tw, red, leaf, gold, motes, port };
-    // static layer: navy, the artwork, and a soft blend of its edges into the page
-    const F = mk(W * DPR, H * DPR), f = F.getContext('2d'); f.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const day = document.body.dataset.theme === 'treeday';
+    const sun = { x: port ? W * .84 : W * .87, y: port ? H * .09 : H * .13, r: Math.max(16, Math.min(W, H) * .03) };
+    S = { sc, ox, oy, dw, dh, tw, red, leaf, gold, motes, port, day, sun };
+    const F = mk(W * DPR, H * DPR), f = F.getContext('2d'); f.setTransform(DPR, 0, 0, DPR, 0, 0); f.imageSmoothingQuality = 'high';
+    if (day) {
+      // light: soft morning sky with warm sunlight, the artwork's lights laid over it without the navy
+      const sk = f.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, '#b9d6ee'); sk.addColorStop(.45, '#d6e7f3'); sk.addColorStop(.8, '#eaf1f2'); sk.addColorStop(1, '#f1f3ec');
+      f.fillStyle = sk; f.fillRect(0, 0, W, H);
+      const wm = f.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, Math.max(W, H) * .7); wm.addColorStop(0, 'rgba(255,226,160,.5)'); wm.addColorStop(.35, 'rgba(255,226,170,.16)'); wm.addColorStop(1, 'rgba(255,226,170,0)');
+      f.fillStyle = wm; f.fillRect(0, 0, W, H);
+      let art = null; try { art = dayArt(); } catch (e) { art = null; }
+      if (art) f.drawImage(art, ox, oy, dw, dh); else { f.globalCompositeOperation = 'screen'; f.drawImage(img, ox, oy, dw, dh); f.globalCompositeOperation = 'source-over'; }
+      S.static = F; S.beams = beams(); return;
+    }
+    // dark: navy, the artwork, and a soft blend of its edges into the page
     const bg = f.createRadialGradient(W / 2, H * .5, 0, W / 2, H * .5, Math.max(W, H) * .75); bg.addColorStop(0, '#001836'); bg.addColorStop(1, '#000d28');
     f.fillStyle = bg; f.fillRect(0, 0, W, H);
-    f.imageSmoothingQuality = 'high'; f.drawImage(img, ox, oy, dw, dh);
+    f.drawImage(img, ox, oy, dw, dh);
     const fade = (x0, y0, x1, y1) => { const gr = f.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, '#000d28'); gr.addColorStop(1, 'rgba(0,13,40,0)'); f.fillStyle = gr; f.fillRect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0) || W, Math.abs(y1 - y0) || H); };
     const e = 24 * sc;
     if (oy > 0) { f.fillStyle = '#000d28'; fade(0, oy, 0, oy + e * 2); }
     if (oy + dh < H) fade(0, oy + dh, 0, oy + dh - e * 2);
     if (ox > 0) { fade(ox, 0, ox + e * 2, 0); fade(ox + dw, 0, ox + dw - e * 2, 0); }
-    S.static = F;
+    S.static = F; S.beams = beams();
   }
+  // the artwork without its navy: alpha from brightness, colours un-mixed from the background (made once)
+  let dayCache = null;
+  function dayArt() {
+    if (dayCache) return dayCache;
+    const c = mk(IW, IH), x = c.getContext('2d'); x.drawImage(img, 0, 0); const d = x.getImageData(0, 0, IW, IH), p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      const r = p[i], gg = p[i + 1], b = p[i + 2], m = Math.max(r, gg, b); let a = (m - 72) / 150; a = a <= 0 ? 0 : a >= 1 ? 1 : a * a * (3 - 2 * a);
+      if (a < .01) { p[i + 3] = 0; continue; }
+      const un = (v, bg) => Math.max(0, Math.min(255, ((v - (1 - a) * bg) / a) * .9));
+      p[i] = un(r, 0); p[i + 1] = un(gg, 18); p[i + 2] = un(b, 47); p[i + 3] = a * 255;
+    }
+    x.putImageData(d, 0, 0); return (dayCache = c);
+  }
+  // sunlight: soft shafts of light falling from the sun across the tree
+  function beams() {
+    const { sun } = S, q = 12, c = mk(W / q, H / q), x = c.getContext('2d'), L = Math.hypot(W, H); x.scale(1 / q, 1 / q); // drawn small and scaled up = soft edges
+    [[2.25, .07, .9], [2.45, .05, .7], [2.62, .08, 1], [2.85, .05, .6], [3.05, .06, .75], [2.05, .04, .5]].forEach(([a, w, k]) => {
+      const gr = x.createLinearGradient(sun.x, sun.y, sun.x + Math.cos(a) * L, sun.y + Math.sin(a) * L);
+      gr.addColorStop(0, `rgba(255,232,170,${.2 * k})`); gr.addColorStop(.45, `rgba(255,226,160,${.06 * k})`); gr.addColorStop(1, 'rgba(255,226,160,0)');
+      x.fillStyle = gr; x.beginPath(); x.moveTo(sun.x, sun.y); x.lineTo(sun.x + Math.cos(a - w) * L, sun.y + Math.sin(a - w) * L); x.lineTo(sun.x + Math.cos(a + w) * L, sun.y + Math.sin(a + w) * L); x.closePath(); x.fill();
+    });
+    return c;
+  }
+  // the sun itself: crisp white core, warm bloom, slowly turning rays
+  const SUN = (() => {
+    const b = mk(256, 256), x = b.getContext('2d'), gr = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.12, 'rgba(255,253,240,1)'); gr.addColorStop(.17, 'rgba(255,224,140,.9)'); gr.addColorStop(.32, 'rgba(255,190,90,.38)'); gr.addColorStop(.6, 'rgba(255,170,70,.1)'); gr.addColorStop(1, 'rgba(255,170,70,0)');
+    x.fillStyle = gr; x.fillRect(0, 0, 256, 256);
+    const r = mk(512, 512), y = r.getContext('2d'); y.translate(256, 256);
+    for (let i = 0; i < 28; i++) { const a = i / 28 * TAU, len = 256 * (i % 2 ? .55 : .98), wd = i % 2 ? 2.2 : 3.6, g2 = y.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len);
+      g2.addColorStop(0, 'rgba(255,228,150,.55)'); g2.addColorStop(1, 'rgba(255,214,130,0)'); y.fillStyle = g2; y.beginPath();
+      y.moveTo(Math.cos(a + 1.5708) * wd, Math.sin(a + 1.5708) * wd); y.lineTo(Math.cos(a) * len, Math.sin(a) * len); y.lineTo(Math.cos(a - 1.5708) * wd, Math.sin(a - 1.5708) * wd); y.closePath(); y.fill(); }
+    return { bloom: b, rays: r };
+  })();
   function draw(t) {
     const age = Math.max(0, (t - born) / 1000), a0 = RM.matches ? 1 : Math.min(1, age / 1.6), { sc } = S;
     g.setTransform(DPR, 0, 0, DPR, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = a0; g.drawImage(S.static, 0, 0, W, H);
+    const sun = S.sun, br = RM.matches ? 1 : 1 + Math.sin(t / 2000) * .035, sa = RM.matches ? 1 : Math.min(1, age / 2.2);
+    g.globalCompositeOperation = S.day ? 'screen' : 'lighter';
+    g.globalAlpha = sa * (RM.matches ? .8 : .7 + .3 * Math.sin(t / 3700)); g.drawImage(S.beams, 0, 0, W, H);
+    g.save(); g.translate(sun.x, sun.y); g.rotate(RM.matches ? 0 : t * .00003); g.globalAlpha = sa * (S.day ? .75 : .65); g.drawImage(SUN.rays, -sun.r * 9, -sun.r * 9, sun.r * 18, sun.r * 18); g.restore();
+    g.globalAlpha = sa; g.drawImage(SUN.bloom, sun.x - sun.r * 6 * br, sun.y - sun.r * 6 * br, sun.r * 12 * br, sun.r * 12 * br);
+    g.globalCompositeOperation = 'source-over';
     if (RM.matches) return;
     const dot = (im, x, y, sz, a) => { if (a <= .01) return; g.globalAlpha = Math.min(1, a) * a0; g.drawImage(im, x - sz / 2, y - sz / 2, sz, sz); };
-    g.globalCompositeOperation = 'lighter';
+    g.globalCompositeOperation = S.day ? 'source-over' : 'lighter';
     // waves of golden energy rising through roots, trunk and branches
     for (let k = 0; k < 2; k++) { const wy = 1.02 - (((t / 5200) + k * .5) % 1) * 1.05;
       for (const p of S.gold) { const d = Math.abs(p.v - wy); if (d < .035) dot(SPR.gold, p.x, p.y, (7 + p.j * 6) * sc, (1 - d / .035) * .5); } }
@@ -1308,6 +1359,7 @@ const TechTree = (() => {
     if (!live) return;
     raf = requestAnimationFrame(loop);
     if (!S || document.hidden || document.body.dataset.anim !== 'tree') return;
+    if ((document.body.dataset.theme === 'treeday') !== S.day) layout();
     draw(t);
   }
   function size() { DPR = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); if (img && img.complete && img.naturalWidth) layout(); }
@@ -1390,7 +1442,7 @@ let accRGB = '0,174,239', acc2RGB = '111,211,255';
 // Vision Tree · Auto: morning look from 7am to 7pm, night look otherwise (viewer's own clock)
 // personal Light / Dark / Auto switch (saved on this device); Auto follows the portal setting (time of day for Vision Tree · Auto)
 const getMode = () => { try { return localStorage.getItem('cctl-mode') || 'auto'; } catch { return 'auto'; } };
-const effTheme = t => { if (!t || !t.startsWith('tree')) return t; if (document.body.dataset.tree === 'fiber') return 'tree'; const m = getMode(); if (m === 'day') return 'treeday'; if (m === 'night') return 'tree';
+const effTheme = t => { if (!t || !t.startsWith('tree')) return t; const m = getMode(); if (m === 'day') return 'treeday'; if (m === 'night') return 'tree';
   return t === 'treeauto' ? ((h => h >= 7 && h < 19)(new Date().getHours()) ? 'treeday' : 'tree') : t; };
 function setMode(m) { try { localStorage.setItem('cctl-mode', m); } catch {} applyLook(look, false); paintMode(); }
 function paintMode() { document.querySelectorAll('#modeSw button').forEach(b => { const on = b.dataset.m === getMode(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
